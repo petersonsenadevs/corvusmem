@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
 // El núcleo portable: motor + base + host + hooks de cerebro. Nada de método Senzu (guards, router, reminders…).
-const NUCLEO = ['facts', 'host', 'lib', 'messages', 'session-end',
+const NUCLEO = ['facts', 'host', 'import', 'lib', 'messages', 'session-end',
     'live-recall', 'session-start', 'session-state', 'live-memory', 'file-memory', 'facts-guard'];
 
 let casos = 0, fallos = 0;

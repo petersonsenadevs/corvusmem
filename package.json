@@ -9,6 +9,7 @@
   "files": [
     "src/",
     "cli/",
+    "commands/",
     "cortex/",
     "install.mjs",
     "docs.md",
@@ -16,8 +17,8 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "test": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-cortex-visual.mjs",
-    "test:core": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs",
+    "test": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-cortex-visual.mjs",
+    "test:core": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs",
     "bench:tokens": "node tools/eval-tokens.mjs",
     "preversion": "npm run test:core",
     "prepublishOnly": "npm run test:core"

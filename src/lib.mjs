@@ -88,13 +88,22 @@ function ejecutarPorArchivo(entradas) {
 // conventions.md/json, ui-verify y el marcador senzu.json. Proyectos antiguos sin migrar (devlog/ y
 // .dev-standards.json en la raíz) siguen funcionando: cada ruta se busca primero donde corresponde al
 // proyecto y después en la otra ubicación. /instalar migra con git mv.
-export const CARPETA = 'senzu';
+export const CARPETA = 'senzu';                 // Senzu's folder name (coupled mode)
+export const CARPETA_CORVUS = '.corvusmem';     // Corvus's own folder (standalone, no Senzu)
 export function esLegado(root) {
     return !fs.existsSync(path.join(root, CARPETA)) && (fs.existsSync(path.join(root, '.dev-standards.json')) || fs.existsSync(path.join(root, 'devlog')));
 }
+// Base folder for this project's memory & config. Couple to Senzu when the project uses it
+// (senzu/ dir or legacy marker); otherwise Corvus lives standalone in its own .corvusmem/.
+export function carpetaBase(root) {
+    if (fs.existsSync(path.join(root, CARPETA))) return CARPETA;                 // Senzu present -> couple (expected)
+    if (fs.existsSync(path.join(root, CARPETA_CORVUS))) return CARPETA_CORVUS;   // Corvus dir already here -> keep it
+    if (esLegado(root)) return CARPETA;                                          // legacy Senzu project (root devlog / .dev-standards.json)
+    return CARPETA_CORVUS;                                                       // brand-new, no Senzu -> Corvus owns its dir
+}
 const VIEJA = { 'ui-verify': '.ui-verify', 'senzu.json': '.dev-standards.json', auditoria: 'docs/auditoria', entrega: 'docs/entrega', 'mapa.md': 'docs/MAPA.md' };
 export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json'
-    const nueva = path.join(root, CARPETA, nombre);
+    const nueva = path.join(root, carpetaBase(root), nombre);
     const vieja = path.join(root, VIEJA[nombre] || nombre);
     const [primera, segunda] = esLegado(root) ? [vieja, nueva] : [nueva, vieja];
     if (fs.existsSync(primera)) return primera;
@@ -643,7 +652,7 @@ export function pad3(n) { return String(n).padStart(3, '0'); }
 
 // ¿Archivos de código en la raíz o un nivel por debajo? (sin node_modules, .git, senzu, .claude, .agents…)
 const EXT_CODIGO = /\.(php|ts|tsx|js|jsx|mjs|cjs|py|go|rs|rb|java|kt|cs|vue|svelte|astro|ps1|sh)$/i;
-const NO_MIRAR = new Set(['node_modules', '.git', 'senzu', '.claude', '.agents', 'vendor', 'dist', 'build', '.venv', 'venv', '__pycache__']);
+const NO_MIRAR = new Set(['node_modules', '.git', 'senzu', '.corvusmem', '.claude', '.agents', 'vendor', 'dist', 'build', '.venv', 'venv', '__pycache__']);
 function hayCodigoSuelto(root) {
     const mira = (dir, nivel) => {
         let ents = []; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }

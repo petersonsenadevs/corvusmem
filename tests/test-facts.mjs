@@ -644,6 +644,35 @@ ok(r.accion === 'sustituye' && r.sustituidos.some(h => h.valor === 'Next'), 'imp
 c = cli(L, '--save', '--dimension', 'preferencia.shell', '--value', 'zsh', '--author', 'carol@x');
 ok(c.status === 0 && /· de carol@x/.test(c.stdout), 'CLI: --author guarda y muestra el autor', c.stdout + c.stderr);
 
+// === base folder: Corvus standalone uses .corvusmem/, coupled to Senzu uses senzu/ (F15-T1) ===
+const mk = n => { const d = path.join(base, 'cb-' + n); fs.mkdirSync(d, { recursive: true }); return d; };
+
+// 1. No Senzu -> Corvus owns its own .corvusmem/ dir
+const CB1 = mk('nosenzu');
+ok(m.carpetaBase(CB1) === '.corvusmem', 'no senzu -> base is .corvusmem', m.carpetaBase(CB1));
+m.guardarHecho(CB1, { dimension: 'proyecto.stack', valor: 'Astro', claves: ['stack'] }, { ahora: T(CB1, 0) });
+ok(fs.existsSync(path.join(CB1, '.corvusmem', 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB1, 'senzu')), 'standalone: writes to .corvusmem/memoria and does NOT create senzu/');
+
+// 2. Senzu present -> coupled to senzu/ (expected)
+const CB2 = mk('consenzu'); fs.mkdirSync(path.join(CB2, 'senzu'), { recursive: true });
+ok(m.carpetaBase(CB2) === 'senzu', 'senzu/ present -> base is senzu');
+m.guardarHecho(CB2, { dimension: 'proyecto.stack', valor: 'Next', claves: ['stack'] }, { ahora: T(CB2, 0) });
+ok(fs.existsSync(path.join(CB2, 'senzu', 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB2, '.corvusmem')), 'coupled: writes to senzu/ and does NOT create .corvusmem');
+
+// 3. Both present -> senzu wins (coupling takes precedence)
+const CB3 = mk('both'); fs.mkdirSync(path.join(CB3, 'senzu'), { recursive: true }); fs.mkdirSync(path.join(CB3, '.corvusmem'), { recursive: true });
+ok(m.carpetaBase(CB3) === 'senzu', 'senzu + .corvusmem -> senzu wins');
+
+// 4. .corvusmem/ already here, no senzu -> stays on .corvusmem
+const CB4 = mk('onlycorvus'); fs.mkdirSync(path.join(CB4, '.corvusmem'), { recursive: true });
+ok(m.carpetaBase(CB4) === '.corvusmem', '.corvusmem already created -> kept');
+
+// 5. Legacy Senzu (root devlog/, no senzu/) -> stays at root, never hijacked into .corvusmem
+const CB5 = mk('legacy'); fs.mkdirSync(path.join(CB5, 'devlog'), { recursive: true });
+ok(m.carpetaBase(CB5) === 'senzu', 'legacy -> logical base senzu (ruta prefers the root path)');
+m.guardarHecho(CB5, { dimension: 'proyecto.stack', valor: 'Laravel', claves: ['stack'] }, { ahora: T(CB5, 0) });
+ok(fs.existsSync(path.join(CB5, 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB5, '.corvusmem')), 'legacy: keeps writing to root/memoria, not .corvusmem');
+
 fs.rmSync(base, { recursive: true, force: true });
 process.stdout.write(`Casos: ${casos}  Fallos: ${fallos}\n`);
 process.exit(fallos ? 1 : 0);

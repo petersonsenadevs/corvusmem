@@ -17,7 +17,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { ruta, rutaMemoriaUsuario, rutaEstado, localeUI } from './lib.mjs';
-export { rutaNativa, localeUI } from './lib.mjs';   // memory.mjs: --path (C:\, C:/, /c/ de Git Bash → el mismo almacén) e idioma de UI
+export { rutaNativa, localeUI, carpetaBase } from './lib.mjs';   // memory.mjs: --path (C:\, C:/, /c/ de Git Bash → el mismo almacén), idioma de UI y carpeta base (senzu/ vs .corvusmem/)
 
 export const FAMILIAS_VARIOS = /^(objetivo|pendiente|nota|hecho|enlace|aprendizaje)(\.|$)/;
 // Multiusuario (F14): familias PERSONALES (de la persona, no del proyecto). En memoria de proyecto COMPARTIDA, su

@@ -40,6 +40,7 @@ const tiene = (s, ev, file) => cmds(s, ev).some(c => c.includes('corvusmem/hooks
     ok(fs.existsSync(path.join(P, '.corvusmem', 'hooks', 'session-start.mjs')) && fs.existsSync(path.join(P, '.corvusmem', 'hooks', 'facts.mjs')), 'copia DURABLE de los hooks y sus deps a .corvusmem/hooks/');
     ok(cmds(s, 'SessionStart').some(c => c.includes('${CLAUDE_PROJECT_DIR}/.corvusmem/hooks/session-start.mjs')), 'proyecto: comando PORTABLE con ${CLAUDE_PROJECT_DIR} (no ruta de maquina)');
     ok(!cmds(s, 'SessionStart').some(c => c.includes('/src/') || c.includes('_npx')), 'proyecto: NO apunta a src/ del paquete ni a la cache efimera de npx');
+    ok(fs.existsSync(path.join(P, '.claude', 'commands', 'corvus-absorb.md')), 'instala el comando /corvus-absorb en .claude/commands/');
 }
 
 // ---- reinstalación idempotente ------------------------------------------------------------------------
@@ -62,6 +63,7 @@ const tiene = (s, ev, file) => cmds(s, ev).some(c => c.includes('corvusmem/hooks
     ok(!fs.existsSync(path.join(P, '.corvusmem', 'hooks.json')), 'desinstalar: quita el manifiesto');
     ok(!fs.existsSync(path.join(P, '.corvusmem', 'hooks')), 'desinstalar: quita la copia durable de hooks');
     ok(fs.existsSync(path.join(P, '.corvusmem')), 'desinstalar: NO borra la memoria del proyecto (son datos del usuario)');
+    ok(!fs.existsSync(path.join(P, '.claude', 'commands', 'corvus-absorb.md')), 'desinstalar: quita el comando /corvus-absorb');
 }
 
 // ---- no pisar lo que el usuario ya tenía --------------------------------------------------------------
@@ -98,10 +100,12 @@ const tiene = (s, ev, file) => cmds(s, ev).some(c => c.includes('corvusmem/hooks
     ok(tiene(leer(path.join(H, '.claude', 'settings.json')), 'SessionStart', 'session-start.mjs'), '--global: registra en ~/.claude/settings.json');
     ok(fs.existsSync(path.join(H, '.config', 'corvusmem', 'hooks', 'session-start.mjs')), '--global: copia durable en ~/.config/corvusmem/hooks/');
     ok(!fs.existsSync(settingsProy(P)), '--global: no toca el settings del proyecto');
+    ok(fs.existsSync(path.join(H, '.claude', 'commands', 'corvus-absorb.md')), '--global: instala el comando en ~/.claude/commands/');
 
     const P2 = nuevoProyecto(), H2 = nuevoHome();
     const r = run(P2, H2, '--dry-run');
     ok(r.status === 0 && !fs.existsSync(settingsProy(P2)) && !fs.existsSync(path.join(P2, '.corvusmem')), '--dry-run: no escribe nada');
+    ok(!fs.existsSync(path.join(P2, '.claude', 'commands')), '--dry-run: no instala el comando');
 }
 
 fs.rmSync(base, { recursive: true, force: true });

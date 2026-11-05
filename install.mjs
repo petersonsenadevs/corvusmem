@@ -22,6 +22,7 @@ import { fileURLToPath } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(AQUI, 'src');                       // donde viven los hooks del núcleo (ruta absoluta)
+const CMDS_SRC = path.join(AQUI, 'commands');             // slash-command templates (/corvus-absorb)
 const args = process.argv.slice(2);
 const opt = n => { const i = args.indexOf(n); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true) : null; };
 const has = n => args.includes(n);
@@ -66,6 +67,23 @@ function copiarHooks(dir) {
     return n;
 }
 
+// Slash commands (e.g. /corvus-absorb) go to .claude/commands/ — per project, or the HOME with --global.
+function instalarComandos(quitar) {
+    let files = [];
+    try { files = fs.readdirSync(CMDS_SRC).filter(f => f.endsWith('.md')); } catch { return; }
+    if (!files.length) return;
+    const destDir = path.join(GLOBAL ? HOME : PROYECTO, '.claude', 'commands');
+    if (quitar) {
+        if (!DRY) for (const f of files) { try { fs.rmSync(path.join(destDir, f), { force: true }); } catch {} }
+        log(`  [commands] removed ${files.length} command(s) from ${destDir.replace(/\\/g, '/')}`);
+        return;
+    }
+    if (DRY) { log(`  [dry-run] would copy ${files.length} command(s) to ${destDir}`); return; }
+    fs.mkdirSync(destDir, { recursive: true });
+    for (const f of files) fs.copyFileSync(path.join(CMDS_SRC, f), path.join(destDir, f));
+    log(`  [commands] ${files.length} command(s) copied to ${destDir.replace(/\\/g, '/')}`);
+}
+
 // Para EMPAQUETAR como plugin (Claude/Codex): el comando apunta al propio plugin, no a una ruta de la maquina.
 const cmdPlugin = file => `node "\${CLAUDE_PLUGIN_ROOT}/hooks/${file}"`;
 function gruposPlugin(ev) {
@@ -94,10 +112,16 @@ function empaquetarPlugin(destino) {
     // 2) los .mjs del nucleo (hooks + dependencias de mismo directorio: autocontenido, cero imports externos)
     let n = 0;
     for (const f of fs.readdirSync(SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(SRC, f), path.join(hooksDir, f)); n++; }
-    // 3) plugin.json
+    // 3) slash commands (/corvus-absorb) in the plugin's commands/ dir
+    let nc = 0;
+    try {
+        const cmds = fs.readdirSync(CMDS_SRC).filter(f => f.endsWith('.md'));
+        if (cmds.length) { fs.mkdirSync(path.join(dir, 'commands'), { recursive: true }); for (const f of cmds) { fs.copyFileSync(path.join(CMDS_SRC, f), path.join(dir, 'commands', f)); nc++; } }
+    } catch { /* no commands/ */ }
+    // 4) plugin.json
     const plugin = { name: 'corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena' }, license: 'SEE LICENSE IN LICENSE' };
     fs.writeFileSync(path.join(dir, '.claude-plugin', 'plugin.json'), JSON.stringify(plugin, null, 2) + '\n');
-    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs`);
+    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs${nc ? ` + ${nc} command(s)` : ''}`);
     log('  Publish it to a Codex marketplace (like Senzu\'s); install it and approve the hooks in the app.');
 }
 
@@ -172,6 +196,9 @@ function run() {
     catch { log(`  [claude] WARNING: ${settingsFile} is not valid JSON; leaving it untouched (fix it and retry).`); process.exit(2); }
     escribir(settingsFile, fusionar(settings, { quitar }));
     log(`  [claude] ${quitar ? 'Corvusmem hooks removed from' : 'hooks registered in'} ${settingsFile}`);
+
+    // 1b) Claude slash commands (/corvus-absorb)
+    instalarComandos(quitar);
 
     // 2) Manifiesto portable de hooks (lo consume el plugin para Claude/Codex, F10-T4)
     const manifest = path.join(PROYECTO, '.corvusmem', 'hooks.json');

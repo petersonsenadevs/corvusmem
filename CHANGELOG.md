@@ -4,6 +4,8 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.3.0] — 2026-11-05
 ### Added
 - **Standalone project folder.** In a project without Senzu, Corvus now keeps its memory in its own
   `.corvusmem/` directory (facts + `MEMORIA.md`) instead of `senzu/`. With Senzu present it still couples to

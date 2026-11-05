@@ -4,6 +4,8 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.2.2] — 2026-11-05
 ### Fixed
 - **Portable, durable hook paths.** `install` now copies the hook files into a stable location (`.corvusmem/hooks/`
   per project, `~/.config/corvusmem/hooks/` for a global install) and references them with `${CLAUDE_PROJECT_DIR}`

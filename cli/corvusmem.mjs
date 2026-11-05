@@ -2,6 +2,7 @@
 // Despachador del CLI `corvusmem`: el subcomando decide a quién llama.
 //   corvusmem install [--claude|--codex|--global|--plugin <dir>...]   -> install.mjs (instalar/empaquetar)
 //   corvusmem uninstall [...]                                          -> install.mjs --uninstall
+//   corvusmem import [--json]                                          -> cli/import.mjs (find existing memory docs)
 //   corvusmem <lo que sea>                                            -> cli/memory.mjs (la CLI de memoria)
 // Asi `npx corvusmem install --claude` funciona una vez publicado (npm) o con el repo publico (npx github:...).
 import { spawnSync } from 'node:child_process';
@@ -16,6 +17,7 @@ const sub = argv[0];
 let destino, args;
 if (sub === 'install') { destino = path.join(ROOT, 'install.mjs'); args = argv.slice(1); }
 else if (sub === 'uninstall') { destino = path.join(ROOT, 'install.mjs'); args = ['--uninstall', ...argv.slice(1)]; }
+else if (sub === 'import') { destino = path.join(ROOT, 'cli', 'import.mjs'); args = argv.slice(1); }
 else { destino = path.join(ROOT, 'cli', 'memory.mjs'); args = argv; }
 
 const r = spawnSync(process.execPath, [destino, ...args], { stdio: 'inherit' });

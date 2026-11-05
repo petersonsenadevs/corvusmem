@@ -4,6 +4,19 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Standalone project folder.** In a project without Senzu, Corvus now keeps its memory in its own
+  `.corvusmem/` directory (facts + `MEMORIA.md`) instead of `senzu/`. With Senzu present it still couples to
+  `senzu/` (expected); an existing `.corvusmem/` is kept, and legacy Senzu layouts are untouched.
+- **`corvusmem import`.** Deterministic, offline, read-only discovery of the memory documents already in a project,
+  in two tiers: `agent` — known agent-memory files (`CLAUDE.md`/`CLAUDE.local.md` incl. nested, `AGENTS.md`, `GEMINI.md`,
+  `.github/copilot-instructions.md`, Cursor rules, a Senzu `MEMORIA.md`) — and `doc` — any other markdown in subfolders
+  that may hold memory (e.g. `docs/architecture.md`, `notes/decisions.md`), minus boilerplate (README, CHANGELOG, LICENSE…).
+  `--json` prints the machine contract.
+- **`/corvus-absorb` command.** Installed into `.claude/commands/` (and bundled in the Codex/Claude plugin). It reads
+  the documents `import` finds, judges what is durable memory, **asks the user when a `doc`-tier file or a fact's family
+  is unclear**, and saves the rest with `corvusmem --save` — so teammates keep what they already wrote instead of
+  starting over. The engine stays deterministic; the judgment is the agent's.
 
 ## [0.2.2] — 2026-11-05
 ### Fixed

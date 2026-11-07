@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.3.4] — 2026-11-07
+### Changed
+- **`/corvus-absorb` is now exhaustive by design.** The command states its real goal up front — *after it runs, the
+  agent should be able to work without re-reading the markdown docs* — and instructs the agent to open and read
+  **every** doc-tier file (not a sample), expect **many facts** (dozens, often 100+ for a rich repo; one or more per
+  feature/node spec), and **check coverage** at the end (every substantial doc must contribute at least one fact). It
+  also corrects the misconception that fewer facts is better: the per-message cap is on *injection*, not *storage*, so
+  more good atomic facts make memory richer, never noisier. Still skips noise (how-tos, API dumps, boilerplate).
+
 ## [0.3.3] — 2026-11-07
 ### Fixed
 - **A stray `senzu/` folder no longer hijacks Corvus's standalone memory.** Corvus coupled to Senzu whenever a

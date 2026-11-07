@@ -101,9 +101,37 @@ export function carpetaBase(root) {
     if (esLegado(root)) return CARPETA;                                          // legacy Senzu project (root devlog / .dev-standards.json)
     return CARPETA_CORVUS;                                                       // brand-new, no Senzu -> Corvus owns its dir
 }
+// Facts storage names. Standalone (Corvus's own .corvusmem/) uses English names; coupled to Senzu (or a legacy
+// layout) keeps Senzu's Spanish names, because the file is SHARED with Senzu and must stay compatible.
+export const MEM_DIR_ES = 'memoria', MEM_FACTS_ES = 'hechos.jsonl', MEM_CORRUPT_ES = 'hechos.danado.jsonl';
+export const MEM_DIR_EN = 'memory',  MEM_FACTS_EN = 'facts.jsonl',  MEM_CORRUPT_EN = 'facts.corrupt.jsonl';
+export function nombresMemoria(root) {
+    return carpetaBase(root) === CARPETA_CORVUS
+        ? { dir: MEM_DIR_EN, facts: MEM_FACTS_EN, corrupt: MEM_CORRUPT_EN }
+        : { dir: MEM_DIR_ES, facts: MEM_FACTS_ES, corrupt: MEM_CORRUPT_ES };
+}
+// One-time, idempotent migration: older standalone installs kept facts in .corvusmem/memoria/hechos.jsonl.
+// Rename that to .corvusmem/memory/facts.jsonl (and the corrupted-lines file) so a standalone Corvus reads English.
+// NEVER touches a Senzu-coupled or legacy project (base must be .corvusmem). Safe under races: best-effort, swallowed.
+export function migrarMemoriaCorvus(root) {
+    if (carpetaBase(root) !== CARPETA_CORVUS) return;
+    const base = path.join(root, CARPETA_CORVUS), viejoDir = path.join(base, MEM_DIR_ES), nuevoDir = path.join(base, MEM_DIR_EN);
+    try {
+        if (!fs.existsSync(path.join(viejoDir, MEM_FACTS_ES)) || fs.existsSync(path.join(nuevoDir, MEM_FACTS_EN))) return;
+        fs.mkdirSync(nuevoDir, { recursive: true });
+        for (const [de, a] of [[MEM_FACTS_ES, MEM_FACTS_EN], [MEM_CORRUPT_ES, MEM_CORRUPT_EN]]) {
+            const o = path.join(viejoDir, de), n = path.join(nuevoDir, a);
+            if (fs.existsSync(o) && !fs.existsSync(n)) { try { fs.renameSync(o, n); } catch { try { fs.copyFileSync(o, n); fs.rmSync(o, { force: true }); } catch { } } }
+        }
+        try { if (!fs.readdirSync(viejoDir).length) fs.rmdirSync(viejoDir); } catch { }   // si queda vacía, se va
+    } catch { /* best-effort: si no se puede migrar, se sigue leyendo el viejo via ruta() */ }
+}
 const VIEJA = { 'ui-verify': '.ui-verify', 'senzu.json': '.dev-standards.json', auditoria: 'docs/auditoria', entrega: 'docs/entrega', 'mapa.md': 'docs/MAPA.md' };
-export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json'
-    const nueva = path.join(root, carpetaBase(root), nombre);
+export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json' | 'memoria'
+    const base = carpetaBase(root);
+    // 'memoria' es la carpeta de hechos: en standalone (.corvusmem) se llama 'memory' (inglés); acoplado/legacy sigue 'memoria'
+    const nombreReal = nombre === 'memoria' && base === CARPETA_CORVUS ? MEM_DIR_EN : nombre;
+    const nueva = path.join(root, base, nombreReal);
     const vieja = path.join(root, VIEJA[nombre] || nombre);
     const [primera, segunda] = esLegado(root) ? [vieja, nueva] : [nueva, vieja];
     if (fs.existsSync(primera)) return primera;

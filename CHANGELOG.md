@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-11-07
+### Fixed
+- **Standalone memory folder is now English.** When Corvus runs on its own (no Senzu), project facts live in
+  `.corvusmem/memory/facts.jsonl` (and corrupted lines in `facts.corrupt.jsonl`) instead of the Spanish
+  `memoria/hechos.jsonl` — consistent with the English-first product. **Coupled to Senzu it is unchanged**
+  (`senzu/memoria/hechos.jsonl`, shared with Senzu), and the user-global memory is unchanged too. Existing
+  standalone installs are **migrated automatically and idempotently** on first read or write: the old
+  `.corvusmem/memoria/` is renamed to `.corvusmem/memory/` with the facts intact, so nothing is lost.
+
 ## [0.3.0] — 2026-11-05
 ### Added
 - **Standalone project folder.** In a project without Senzu, Corvus now keeps its memory in its own

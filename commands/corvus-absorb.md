@@ -21,18 +21,20 @@ It returns the memory documents already in the repo in two tiers (`{ agent, docs
 If the list is empty, say so and stop. If `truncated` is true, mention that more markdown exists than was shown.
 
 ## 2. Read and judge (this is YOUR job, not the tool's)
-Read every **`agent`**-tier file. For **`doc`**-tier files, open the ones whose name or location suggests memory (architecture, decisions, conventions, ADRs, domain notes); **when it is unclear whether a `doc` file is worth absorbing, ask the user** — list the file(s) and ask which to include, rather than guessing or dumping everything.
+Read **every `agent`-tier file** in full.
 
-From whatever you read, keep **only durable memory** — what should still be true next week:
+For the **`doc`-tier**, **actually open and read** the files that usually carry durable memory — anything under `architecture/`, `decisions/`, `adr/`, `devlog/` or `notes/`, and design or feature specs (`features/…`, `*-design.md`, `*-spec.md`, `roadmap*`). **Judge by the content inside, not the filename**: do not skip a file just because it is not called `decisions.md`, and a large `docs/` tree is normal, not a reason to stop. **Prefer reading over skipping, and reading over asking.** Only **ask the user** when a file's relevance is genuinely ambiguous, or when there are so many candidates that reading them all is impractical — then list them and ask which to include. Asking is the exception.
 
-- decisions, with the reason behind them
+From everything you read, keep **only durable memory** — what should still be true next week:
+
+- decisions, with the reason behind them (one fact per distinct decision)
 - rules and conventions the team must follow
 - user / team preferences
 - project facts (stack, architecture, domains, external services, environments)
 - constraints, known gotchas, "what didn't work"
 - open goals or pending tasks
 
-Ignore the noise: install/run steps, generic boilerplate, tool tutorials, anything obvious from the code, and anything transient.
+Be **thorough**: a rich project may yield dozens of facts across its architecture, feature and devlog docs — capture each distinct decision, rule and gotcha, not just the ones in `CLAUDE.md`. But do **not** mirror the docs: skip install/run steps, step-by-step how-tos, API/parameter dumps, tool tutorials, generic boilerplate, anything obvious from the code, anything transient, and anything already covered by a fact you saved.
 
 ## 3. Save each item (deterministic sink)
 For every item worth keeping, run one command:

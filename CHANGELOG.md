@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-11-07
+### Changed
+- **`/corvus-absorb` now mines the whole doc tier, not just `CLAUDE.md`.** The command was too conservative with
+  `doc`-tier files (it judged by filename and asked/skipped by default), so a repo with a rich `docs/` tree —
+  architecture notes, ADRs, a devlog, per-feature specs — yielded only the handful of facts in `CLAUDE.md`. It now
+  **reads** the architecture/decisions/devlog/feature docs and extracts every distinct durable decision, rule and
+  gotcha (dozens for a rich project), asking the user only as an exception — while still skipping tutorials,
+  how-tos, API dumps and boilerplate. No engine change; the judgment stays the agent's.
+
 ## [0.3.1] — 2026-11-07
 ### Fixed
 - **Standalone memory folder is now English.** When Corvus runs on its own (no Senzu), project facts live in

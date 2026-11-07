@@ -93,13 +93,21 @@ export const CARPETA_CORVUS = '.corvusmem';     // Corvus's own folder (standalo
 export function esLegado(root) {
     return !fs.existsSync(path.join(root, CARPETA)) && (fs.existsSync(path.join(root, '.dev-standards.json')) || fs.existsSync(path.join(root, 'devlog')));
 }
-// Base folder for this project's memory & config. Couple to Senzu when the project uses it
-// (senzu/ dir or legacy marker); otherwise Corvus lives standalone in its own .corvusmem/.
+// A REAL Senzu install carries its marker (senzu.json, or legacy .dev-standards.json). A bare senzu/ folder does NOT
+// mean the project uses Senzu: a globally-installed Senzu writes senzu/memoria/ into ANY project its hooks touch, and
+// that stray folder must not hijack Corvus's standalone .corvusmem/. So we couple on the MARKER, never on the folder.
+export function esSenzu(root) {
+    return fs.existsSync(path.join(root, CARPETA, 'senzu.json'))
+        || fs.existsSync(path.join(root, CARPETA, '.dev-standards.json'))
+        || fs.existsSync(path.join(root, '.dev-standards.json'));
+}
+// Base folder for this project's memory & config. Couple to Senzu only when the project REALLY uses it (its marker,
+// or a legacy layout); otherwise Corvus lives standalone in its own .corvusmem/ — even if a stray senzu/ folder exists.
 export function carpetaBase(root) {
-    if (fs.existsSync(path.join(root, CARPETA))) return CARPETA;                 // Senzu present -> couple (expected)
+    if (esSenzu(root)) return CARPETA;                                           // real Senzu install (marker) -> couple (expected)
     if (fs.existsSync(path.join(root, CARPETA_CORVUS))) return CARPETA_CORVUS;   // Corvus dir already here -> keep it
     if (esLegado(root)) return CARPETA;                                          // legacy Senzu project (root devlog / .dev-standards.json)
-    return CARPETA_CORVUS;                                                       // brand-new, no Senzu -> Corvus owns its dir
+    return CARPETA_CORVUS;                                                       // no real Senzu (even a stray senzu/) -> Corvus owns its dir
 }
 // Facts storage names. Standalone (Corvus's own .corvusmem/) uses English names; coupled to Senzu (or a legacy
 // layout) keeps Senzu's Spanish names, because the file is SHARED with Senzu and must stay compatible.

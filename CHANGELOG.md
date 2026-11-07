@@ -5,6 +5,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.3.3] — 2026-11-07
+### Fixed
+- **A stray `senzu/` folder no longer hijacks Corvus's standalone memory.** Corvus coupled to Senzu whenever a
+  `senzu/` directory existed — but a **globally-installed Senzu** writes `senzu/memoria/` into *any* project its
+  hooks touch, so in a Corvus-only project the memory got split between `senzu/` and `.corvusmem/` and never
+  migrated to English. Corvus now couples only to a **real Senzu install** (its `senzu.json` marker, or a legacy
+  `.dev-standards.json`/root `devlog` layout); a bare `senzu/` folder is ignored and Corvus keeps its own
+  `.corvusmem/memory/`.
+
 ## [0.3.2] — 2026-11-07
 ### Changed
 - **`/corvus-absorb` now mines the whole doc tier, not just `CLAUDE.md`.** The command was too conservative with

@@ -656,15 +656,25 @@ ok(fs.existsSync(path.join(CB1, '.corvusmem', 'memory', 'facts.jsonl'))
     'standalone: writes English .corvusmem/memory/facts.jsonl (no memoria/, no senzu/)');
 ok(m.leerHechos(m.rutaHechos(CB1)).some(h => h.valor === 'Astro'), 'standalone: recall reads the English facts file');
 
-// 2. Senzu present -> coupled to senzu/ (expected)
-const CB2 = mk('consenzu'); fs.mkdirSync(path.join(CB2, 'senzu'), { recursive: true });
-ok(m.carpetaBase(CB2) === 'senzu', 'senzu/ present -> base is senzu');
+// 2. REAL Senzu install (senzu/ + marker senzu.json) -> coupled to senzu/ (expected)
+const CB2 = mk('consenzu'); fs.mkdirSync(path.join(CB2, 'senzu'), { recursive: true }); fs.writeFileSync(path.join(CB2, 'senzu', 'senzu.json'), '{}');
+ok(m.carpetaBase(CB2) === 'senzu', 'real Senzu (senzu.json) -> base is senzu');
 m.guardarHecho(CB2, { dimension: 'proyecto.stack', valor: 'Next', claves: ['stack'] }, { ahora: T(CB2, 0) });
 ok(fs.existsSync(path.join(CB2, 'senzu', 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB2, '.corvusmem')), 'coupled: writes to senzu/ and does NOT create .corvusmem');
 
-// 3. Both present -> senzu wins (coupling takes precedence)
-const CB3 = mk('both'); fs.mkdirSync(path.join(CB3, 'senzu'), { recursive: true }); fs.mkdirSync(path.join(CB3, '.corvusmem'), { recursive: true });
-ok(m.carpetaBase(CB3) === 'senzu', 'senzu + .corvusmem -> senzu wins');
+// 3. Both present (real Senzu marker + .corvusmem) -> senzu wins (coupling takes precedence)
+const CB3 = mk('both'); fs.mkdirSync(path.join(CB3, 'senzu'), { recursive: true }); fs.writeFileSync(path.join(CB3, 'senzu', 'senzu.json'), '{}'); fs.mkdirSync(path.join(CB3, '.corvusmem'), { recursive: true });
+ok(m.carpetaBase(CB3) === 'senzu', 'real Senzu + .corvusmem -> senzu wins');
+
+// 3b. STRAY senzu/ folder WITHOUT marker (a global Senzu dropped it) -> Corvus ignores it and keeps its own dir
+const CB3b = mk('stray-senzu'); fs.mkdirSync(path.join(CB3b, 'senzu', 'memoria'), { recursive: true }); fs.mkdirSync(path.join(CB3b, '.corvusmem'), { recursive: true });
+ok(m.carpetaBase(CB3b) === '.corvusmem', 'stray senzu/ (no senzu.json) + .corvusmem -> Corvus, not hijacked', m.carpetaBase(CB3b));
+m.guardarHecho(CB3b, { dimension: 'proyecto.stack', valor: 'Remix', claves: ['stack'] }, { ahora: T(CB3b, 0) });
+ok(fs.existsSync(path.join(CB3b, '.corvusmem', 'memory', 'facts.jsonl')) && !fs.existsSync(path.join(CB3b, 'senzu', 'memoria', 'hechos.jsonl')), 'stray senzu/: Corvus writes to .corvusmem/memory, not senzu/');
+
+// 3c. STRAY senzu/ folder WITHOUT marker and NO .corvusmem yet -> still Corvus (brand-new standalone)
+const CB3c = mk('stray-only'); fs.mkdirSync(path.join(CB3c, 'senzu', 'memoria'), { recursive: true });
+ok(m.carpetaBase(CB3c) === '.corvusmem', 'stray senzu/ only (no marker) -> Corvus owns its dir', m.carpetaBase(CB3c));
 
 // 4. .corvusmem/ already here, no senzu -> stays on .corvusmem
 const CB4 = mk('onlycorvus'); fs.mkdirSync(path.join(CB4, '.corvusmem'), { recursive: true });

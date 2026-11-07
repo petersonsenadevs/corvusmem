@@ -651,7 +651,10 @@ const mk = n => { const d = path.join(base, 'cb-' + n); fs.mkdirSync(d, { recurs
 const CB1 = mk('nosenzu');
 ok(m.carpetaBase(CB1) === '.corvusmem', 'no senzu -> base is .corvusmem', m.carpetaBase(CB1));
 m.guardarHecho(CB1, { dimension: 'proyecto.stack', valor: 'Astro', claves: ['stack'] }, { ahora: T(CB1, 0) });
-ok(fs.existsSync(path.join(CB1, '.corvusmem', 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB1, 'senzu')), 'standalone: writes to .corvusmem/memoria and does NOT create senzu/');
+ok(fs.existsSync(path.join(CB1, '.corvusmem', 'memory', 'facts.jsonl'))
+    && !fs.existsSync(path.join(CB1, '.corvusmem', 'memoria')) && !fs.existsSync(path.join(CB1, 'senzu')),
+    'standalone: writes English .corvusmem/memory/facts.jsonl (no memoria/, no senzu/)');
+ok(m.leerHechos(m.rutaHechos(CB1)).some(h => h.valor === 'Astro'), 'standalone: recall reads the English facts file');
 
 // 2. Senzu present -> coupled to senzu/ (expected)
 const CB2 = mk('consenzu'); fs.mkdirSync(path.join(CB2, 'senzu'), { recursive: true });
@@ -672,6 +675,20 @@ const CB5 = mk('legacy'); fs.mkdirSync(path.join(CB5, 'devlog'), { recursive: tr
 ok(m.carpetaBase(CB5) === 'senzu', 'legacy -> logical base senzu (ruta prefers the root path)');
 m.guardarHecho(CB5, { dimension: 'proyecto.stack', valor: 'Laravel', claves: ['stack'] }, { ahora: T(CB5, 0) });
 ok(fs.existsSync(path.join(CB5, 'memoria', 'hechos.jsonl')) && !fs.existsSync(path.join(CB5, '.corvusmem')), 'legacy: keeps writing to root/memoria, not .corvusmem');
+
+// 6. Migration: an OLDER standalone install (.corvusmem/memoria/hechos.jsonl) is renamed to memory/facts.jsonl, data intact
+const CB6 = mk('migrate');
+const oldDir = path.join(CB6, '.corvusmem', 'memoria'); fs.mkdirSync(oldDir, { recursive: true });
+fs.writeFileSync(path.join(oldDir, 'hechos.jsonl'), JSON.stringify({ id: 'h-old00001', dimension: 'proyecto.stack', valor: 'Vue', claves: ['stack'], estado: 'activo', creado: '2026-01-01' }) + '\n');
+fs.writeFileSync(path.join(oldDir, 'hechos.danado.jsonl'), 'linea-rota\n');
+const rh6 = m.rutaHechos(CB6);   // leer la ruta ya dispara la migración (idempotente)
+ok(rh6 === path.join(CB6, '.corvusmem', 'memory', 'facts.jsonl'), 'migrate: rutaHechos -> .corvusmem/memory/facts.jsonl', rh6);
+ok(fs.existsSync(rh6) && !fs.existsSync(path.join(oldDir, 'hechos.jsonl')), 'migrate: old hechos.jsonl moved to memory/facts.jsonl');
+ok(fs.existsSync(path.join(CB6, '.corvusmem', 'memory', 'facts.corrupt.jsonl')), 'migrate: hechos.danado.jsonl -> facts.corrupt.jsonl');
+ok(!fs.existsSync(oldDir), 'migrate: empty old memoria/ folder removed');
+ok(m.leerHechos(rh6).some(h => h.valor === 'Vue'), 'migrate: the pre-existing fact survived');
+m.rutaHechos(CB6);   // segunda vez: no debe romper ni volver a mover (idempotente)
+ok(m.leerHechos(m.rutaHechos(CB6)).some(h => h.valor === 'Vue'), 'migrate: idempotent (second call keeps the fact)');
 
 fs.rmSync(base, { recursive: true, force: true });
 process.stdout.write(`Casos: ${casos}  Fallos: ${fallos}\n`);

@@ -8,7 +8,8 @@
 //     VARIOS (objetivo, pendiente, nota…) acumulan.
 //   · búsqueda: palabras con Intl.Segmenter (también japonés, chino, árabe…), sin tildes ni mayúsculas, BM25,
 //     erratas por distancia de edición acotada y «claves» que el agente añade en otros idiomas para buscar entre idiomas.
-// Almacén: senzu/memoria/hechos.jsonl (proyecto) y, junto a la memoria del usuario, hechos.jsonl (todos sus proyectos).
+// Almacén (proyecto): acoplado a Senzu -> senzu/memoria/hechos.jsonl; standalone -> .corvusmem/memory/facts.jsonl.
+// Memoria del usuario (todos sus proyectos): hechos.jsonl junto a ella (compartida con Senzu, nombre en español).
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,7 +17,7 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { ruta, rutaMemoriaUsuario, rutaEstado, localeUI } from './lib.mjs';
+import { ruta, rutaMemoriaUsuario, rutaEstado, localeUI, nombresMemoria, migrarMemoriaCorvus } from './lib.mjs';
 export { rutaNativa, localeUI, carpetaBase } from './lib.mjs';   // memory.mjs: --path (C:\, C:/, /c/ de Git Bash → el mismo almacén), idioma de UI y carpeta base (senzu/ vs .corvusmem/)
 
 export const FAMILIAS_VARIOS = /^(objetivo|pendiente|nota|hecho|enlace|aprendizaje)(\.|$)/;
@@ -39,7 +40,9 @@ function autorActual(root, env = process.env) {
     return 'unknown';
 }
 export function rutaHechos(root, alcance = 'proyecto') {
-    return alcance === 'usuario' ? path.join(path.dirname(rutaMemoriaUsuario()), 'hechos.jsonl') : path.join(ruta(root, 'memoria'), 'hechos.jsonl');
+    if (alcance === 'usuario') return path.join(path.dirname(rutaMemoriaUsuario()), 'hechos.jsonl');   // compartida con Senzu: nombre en español
+    migrarMemoriaCorvus(root);   // instalaciones viejas: .corvusmem/memoria/hechos.jsonl -> .corvusmem/memory/facts.jsonl (idempotente)
+    return path.join(ruta(root, 'memoria'), nombresMemoria(root).facts);   // standalone: memory/facts.jsonl · acoplado/legacy: memoria/hechos.jsonl
 }
 
 // ---------------------------------------------------------------- texto: normalizar y partir en palabras
@@ -226,7 +229,7 @@ function conCerrojo(file, fn, espera = 8000) {
 function escribirHechos(file, lista, ilegibles = []) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     if (ilegibles.length) {   // lo ilegible no se pierde: se aparta para recuperarlo a mano
-        const danado = path.join(path.dirname(file), 'hechos.danado.jsonl');
+        const danado = path.join(path.dirname(file), path.basename(file) === 'facts.jsonl' ? 'facts.corrupt.jsonl' : 'hechos.danado.jsonl');
         let ya = ''; try { ya = fs.readFileSync(danado, 'utf8'); } catch { }
         const nuevas = ilegibles.filter(l => !ya.includes(l));
         if (nuevas.length) fs.appendFileSync(danado, nuevas.map(l => l.replace(/\r/g, '')).join('\n') + '\n');

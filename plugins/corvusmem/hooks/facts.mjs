@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Motor de HECHOS de Corvusmem: memoria determinista en CUALQUIER idioma, sin red ni modelos (devlog 098).
 // Dimensiones con sustitución, validez en el tiempo, deduplicación, cupos por familia y motivo de cada resultado,
 // sin Postgres, Redis ni embeddings.

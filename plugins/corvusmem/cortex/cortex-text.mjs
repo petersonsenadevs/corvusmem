@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Textos de la interfaz de Cortex, por idioma. Los DATOS (lo que recuerda la memoria) no se traducen: se enseñan
 // como se guardaron. Para añadir un idioma, copia el bloque `en` y tradúcelo; el que falte en uno cae al inglés y,
 // si tampoco está, al castellano. {x} se sustituye al pintar.
@@ -23,7 +24,7 @@ export const TEXTOS = {
         hoy: 'hoy', cerrado: 'cerrado', tipos: { sustituido: 'cambió', nuevo: 'nuevo', aprendido: 'aprendido', resuelto: 'resuelto', abandonado: 'abandonado', cerrado: 'cerrado' },
         abiertoHace: 'abierto hace {n} {d}', dia: 'día', dias: 'días', desdeHoy: 'desde hoy',
         cmdDecision: 'Se cambia en MEMORIA.md (o con /recordar): no la contradigas sin citarla.',
-        pie: 'Generado el {f} con Senzu.', pieDueno: 'Archivo local con datos privados: no lo publiques (para el cliente, --cortex --cliente).', pieCliente: 'Solo lectura.',
+        pie: 'Generado el {f} con Corvusmem · r3v3rs3.', pieDueno: 'Archivo local con datos privados: no lo publiques (para el cliente, --cortex --cliente).', pieCliente: 'Solo lectura.',
         aria3d: 'Cerebro en 3D: arrástralo o usa las flechas para girarlo; doble clic para volver de lado', ariaCerebro: 'Cerebro de la memoria: cada zona es un tipo de recuerdo', ariaZonas: 'Zonas de la memoria',
     },
     en: {
@@ -47,7 +48,7 @@ export const TEXTOS = {
         hoy: 'today', cerrado: 'closed', tipos: { sustituido: 'changed', nuevo: 'new', aprendido: 'learned', resuelto: 'solved', abandonado: 'dropped', cerrado: 'closed' },
         abiertoHace: 'open for {n} {d}', dia: 'day', dias: 'days', desdeHoy: 'since today',
         cmdDecision: 'Changed in MEMORIA.md (or with /recordar): do not contradict it without quoting it.',
-        pie: 'Generated on {f} with Senzu.', pieDueno: 'Local file with private data: do not publish it (for the client, --cortex --cliente).', pieCliente: 'Read only.',
+        pie: 'Generated on {f} with Corvusmem · r3v3rs3.', pieDueno: 'Local file with private data: do not publish it (for the client, --cortex --cliente).', pieCliente: 'Read only.',
         aria3d: '3D brain: drag it or use the arrow keys to turn it; double click for the side view', ariaCerebro: 'Memory brain: each zone is a kind of memory', ariaZonas: 'Memory zones',
     },
     pt: {
@@ -71,7 +72,7 @@ export const TEXTOS = {
         hoy: 'hoje', cerrado: 'fechado', tipos: { sustituido: 'mudou', nuevo: 'novo', aprendido: 'aprendido', resuelto: 'resolvido', abandonado: 'abandonado', cerrado: 'fechado' },
         abiertoHace: 'aberto há {n} {d}', dia: 'dia', dias: 'dias', desdeHoy: 'desde hoje',
         cmdDecision: 'Muda-se no MEMORIA.md (ou com /recordar): não a contradigas sem a citar.',
-        pie: 'Gerado em {f} com Senzu.', pieDueno: 'Ficheiro local com dados privados: não o publiques (para o cliente, --cortex --cliente).', pieCliente: 'Só leitura.',
+        pie: 'Gerado em {f} com Corvusmem · r3v3rs3.', pieDueno: 'Ficheiro local com dados privados: não o publiques (para o cliente, --cortex --cliente).', pieCliente: 'Só leitura.',
         aria3d: 'Cérebro em 3D: arrasta-o ou usa as setas para o rodar; duplo clique para o ver de lado', ariaCerebro: 'Cérebro da memória: cada zona é um tipo de memória', ariaZonas: 'Zonas da memória',
     },
     fr: {
@@ -95,7 +96,7 @@ export const TEXTOS = {
         hoy: 'aujourd’hui', cerrado: 'fermé', tipos: { sustituido: 'a changé', nuevo: 'nouveau', aprendido: 'appris', resuelto: 'résolu', abandonado: 'abandonné', cerrado: 'fermé' },
         abiertoHace: 'ouvert depuis {n} {d}', dia: 'jour', dias: 'jours', desdeHoy: 'depuis aujourd’hui',
         cmdDecision: 'Se change dans MEMORIA.md (ou avec /recordar) : ne la contredis pas sans la citer.',
-        pie: 'Généré le {f} avec Senzu.', pieDueno: 'Fichier local avec des données privées : ne le publie pas (pour le client, --cortex --cliente).', pieCliente: 'Lecture seule.',
+        pie: 'Généré le {f} avec Corvusmem · r3v3rs3.', pieDueno: 'Fichier local avec des données privées : ne le publie pas (pour le client, --cortex --cliente).', pieCliente: 'Lecture seule.',
         aria3d: 'Cerveau en 3D : fais-le glisser ou utilise les flèches pour le tourner ; double clic pour la vue de profil', ariaCerebro: 'Cerveau de la mémoire : chaque zone est un type de souvenir', ariaZonas: 'Zones de la mémoire',
     },
     de: {
@@ -119,7 +120,7 @@ export const TEXTOS = {
         hoy: 'heute', cerrado: 'geschlossen', tipos: { sustituido: 'geändert', nuevo: 'neu', aprendido: 'gelernt', resuelto: 'erledigt', abandonado: 'verworfen', cerrado: 'geschlossen' },
         abiertoHace: 'seit {n} {d} offen', dia: 'Tag', dias: 'Tagen', desdeHoy: 'seit heute',
         cmdDecision: 'Wird in MEMORIA.md geändert (oder mit /recordar): nicht widersprechen, ohne sie zu zitieren.',
-        pie: 'Erstellt am {f} mit Senzu.', pieDueno: 'Lokale Datei mit privaten Daten: nicht veröffentlichen (für den Kunden: --cortex --cliente).', pieCliente: 'Nur lesen.',
+        pie: 'Erstellt am {f} mit Corvusmem · r3v3rs3.', pieDueno: 'Lokale Datei mit privaten Daten: nicht veröffentlichen (für den Kunden: --cortex --cliente).', pieCliente: 'Nur lesen.',
         aria3d: '3D-Gehirn: ziehen oder Pfeiltasten zum Drehen; Doppelklick für die Seitenansicht', ariaCerebro: 'Gehirn des Gedächtnisses: jede Zone ist eine Art Erinnerung', ariaZonas: 'Zonen des Gedächtnisses',
     },
     it: {
@@ -143,7 +144,7 @@ export const TEXTOS = {
         hoy: 'oggi', cerrado: 'chiuso', tipos: { sustituido: 'cambiato', nuevo: 'nuovo', aprendido: 'imparato', resuelto: 'risolto', abandonado: 'abbandonato', cerrado: 'chiuso' },
         abiertoHace: 'aperto da {n} {d}', dia: 'giorno', dias: 'giorni', desdeHoy: 'da oggi',
         cmdDecision: 'Si cambia in MEMORIA.md (o con /recordar): non contraddirla senza citarla.',
-        pie: 'Generato il {f} con Senzu.', pieDueno: 'File locale con dati privati: non pubblicarlo (per il cliente, --cortex --cliente).', pieCliente: 'Sola lettura.',
+        pie: 'Generato il {f} con Corvusmem · r3v3rs3.', pieDueno: 'File locale con dati privati: non pubblicarlo (per il cliente, --cortex --cliente).', pieCliente: 'Sola lettura.',
         aria3d: 'Cervello in 3D: trascinalo o usa le frecce per girarlo; doppio clic per la vista laterale', ariaCerebro: 'Cervello della memoria: ogni zona è un tipo di ricordo', ariaZonas: 'Zone della memoria',
     },
 };

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Memoria de HECHOS (determinista, en cualquier idioma, sin red): lo que el usuario afirma de forma estable.
 // El agente entiende la frase (en el idioma que sea) y la guarda estructurada; el motor la sustituye, la fecha y la
 // recupera siempre igual. Para buscar entre idiomas, añade --claves en otros idiomas (p. ej. en inglés y en el del usuario).

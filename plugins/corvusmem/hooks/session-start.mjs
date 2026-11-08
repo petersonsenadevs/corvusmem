@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook SessionStart (Corvusmem): inyecta SOLO la memoria del proyecto y del usuario — hechos vigentes, objetivos y
 // pendientes abiertos, avisos de contradicción/obsolescencia, el mapa de la memoria y la continuidad de la sesión
 // anterior. Por defecto en inglés (localeUI → catálogo messages.mjs). No bloquea.

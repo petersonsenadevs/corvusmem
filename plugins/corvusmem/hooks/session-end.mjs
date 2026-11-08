@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook SessionEnd: limpia los marcadores de sesión de Senzu en el temp (prefijo interno dev-standards-) (rápido: presupuesto de 1,5 s).
 
 import fs from 'node:fs';

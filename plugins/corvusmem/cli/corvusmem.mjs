@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Despachador del CLI `corvusmem`: el subcomando decide a quién llama.
 //   corvusmem install [--claude|--codex|--global|--plugin <dir>...]   -> install.mjs (instalar/empaquetar)
 //   corvusmem uninstall [...]                                          -> install.mjs --uninstall

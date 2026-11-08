@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook Stop y PreCompact: guarda EN QUÉ ESTÁBAMOS para la siguiente sesión (/retomar), y al cerrar comprueba que
 // las reglas y correcciones del usuario de esta sesión (las detecta memoria-viva) quedaron apuntadas.
 // El estado va a senzu/.estado/ultima-sesion.json (ignorado por git): las últimas peticiones, los archivos que

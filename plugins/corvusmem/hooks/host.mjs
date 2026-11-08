@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // host.mjs — Detección de anfitrión del núcleo de memoria (carve-out Corvusmem, F9-T2).
 // El MISMO núcleo corre bajo varios anfitriones; aquí se resuelve, por señales del entorno, determinista y sin red:
 //   · agente:   'claude' | 'codex' | 'obsidian' | 'standalone'  — el runtime que ejecuta el núcleo

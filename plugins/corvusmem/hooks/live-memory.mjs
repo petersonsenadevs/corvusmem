@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook UserPromptSubmit: la memoria se alimenta de lo que dice el usuario, no de que el agente se acuerde.
 // 1. Guarda las últimas peticiones de la sesión (las lee estado-sesion para /retomar).
 // 2. Si la petición trae una REGLA o una CORRECCIÓN clara («no vuelvas a…», «te dije…», «a partir de ahora…»,

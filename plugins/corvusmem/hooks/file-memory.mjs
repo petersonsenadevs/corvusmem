@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook PreToolUse (Edit|Write|MultiEdit; en Codex, apply_patch traducido por lib.mjs): memoria POR ARCHIVO.
 // La primera vez que la sesión va a tocar un archivo, le pasa al agente lo que la memoria y el devlog dicen de
 // ese archivo (por su ruta o su nombre): decisiones vigentes, lo que no funcionó, por qué se hizo así.

@@ -77,6 +77,21 @@ for (const f of ['corvusmem.mjs', 'memory.mjs', 'search.mjs', 'import.mjs', 'mem
 // el comando /corvus-cortex va empaquetado (abrir el Cortex como comando, no npx)
 ok(fs.existsSync(path.join(dir, 'commands', 'corvus-cortex.md')), 'el plugin trae el comando /corvus-cortex');
 
+// --- /corvus-install: install.mjs viaja en el plugin e instala en un proyecto DESDE el plugin, sin npx ---
+ok(fs.existsSync(path.join(dir, 'install.mjs')), 'el plugin trae install.mjs (para /corvus-install sin npx)');
+ok(fs.existsSync(path.join(dir, 'commands', 'corvus-install.md')), 'el plugin trae el comando /corvus-install');
+{
+    const proj = path.join(base, 'proj-install'); fs.mkdirSync(proj, { recursive: true });
+    const env = { ...process.env, SENZU_SIN_RED: '1' };
+    const s = spawnSync(process.execPath, [path.join(dir, 'cli', 'corvusmem.mjs'), 'install', '--project', proj], { encoding: 'utf8', env });
+    ok(s.status === 0, 'plugin: corvusmem install --project corre sin error (núcleo desde hooks/, sin npx)', (s.stdout || s.stderr || '').slice(0, 120));
+    ok(fs.existsSync(path.join(proj, '.corvusmem', 'hooks', 'session-start.mjs')), 'plugin install: copia los hooks a .corvusmem/hooks');
+    ok(fs.existsSync(path.join(proj, '.corvusmem', 'cli', 'corvusmem.mjs')), 'plugin install: copia el CLI a .corvusmem/cli');
+    const stf = path.join(proj, '.claude', 'settings.json');
+    ok(fs.existsSync(stf), 'plugin install: registra los hooks en .claude/settings.json');
+    ok(fs.existsSync(stf) && fs.readFileSync(stf, 'utf8').includes('CLAUDE_PROJECT_DIR'), 'plugin install: settings.json portable (${CLAUDE_PROJECT_DIR})');
+}
+
 // --- marketplace committeado en el repo (el repo ES el marketplace de Claude Code) ---
 {
     const mkt = path.join(ROOT, '.claude-plugin', 'marketplace.json');

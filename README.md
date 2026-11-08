@@ -80,15 +80,16 @@ manifest). The bare `npx corvusmem --save/--recall` still works for an agent wit
 project (`--global`, in your home). It does **not** change where memory lives: project facts always land in that repo's
 `.corvusmem/`, your personal facts in `~/.config/corvusmem/`.
 
-**Sharing with a team**: commit `.corvusmem/` (the shared project memory) and, for a per-project install,
-`.claude/settings.json` so teammates get the hooks the moment they clone. Never commit `~/.config/corvusmem/` — that is
-your private memory.
+**Sharing with a team**: run **`/corvus-install`** (or `npx corvusmem install`) to bake the hooks into the current
+project, then commit `.corvusmem/` (the shared project memory) and `.claude/settings.json` — teammates get Corvus firing
+the moment they clone, with nothing to install. Never commit `~/.config/corvusmem/` — that is your private memory.
 
 ## Usage
 Once installed, the agent captures and recalls memory on its own — you don't do a thing. Two slash commands come with
 it (native — no `npx`):
 - **`/corvus-cortex`** — open the Cortex: your whole memory as a local HTML "brain" (offline).
 - **`/corvus-absorb`** — pull the knowledge already in the repo (CLAUDE.md, docs…) into memory, once.
+- **`/corvus-install`** — bake Corvus into the current project (per-project), so you can commit it and share it.
 
 To look at or steer memory from the **terminal** (handy for any agent, or no agent at all):
 ```

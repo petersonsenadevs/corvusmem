@@ -5,6 +5,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-11-08
+### Added
+- **`/corvus-install` — bake Corvusmem into a project, as a command.** A new slash command (bundled in the plugin and
+  in `.claude/commands/`) installs the hooks into the **current** project so it carries its own memory. Commit
+  `.corvusmem/` and `.claude/settings.json` and a teammate who receives the project gets Corvus firing in Claude Code
+  or Codex **with nothing to install**. `install.mjs` now ships inside the plugin and runs from it (the core is resolved
+  from `hooks/` when there is no `src/`), so the command works natively — `npx corvusmem install` stays as the fallback.
+
 ## [0.5.1] — 2026-11-08
 ### Changed
 - **The Cortex gets a header with the crow.** The full Cortex (`/corvus-cortex`) now shows the Corvusmem crow in its

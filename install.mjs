@@ -19,11 +19,13 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { esSenzu } from './src/lib.mjs';   // para el aviso de proyecto con Senzu
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
-const SRC = path.join(AQUI, 'src');                       // donde viven los hooks del núcleo (ruta absoluta)
+// El núcleo vive en src/ (repo) o en hooks/ (cuando install.mjs viaja DENTRO del plugin): así `/corvus-install`
+// puede instalar en un proyecto desde el plugin, sin npx.
+const SRC = fs.existsSync(path.join(AQUI, 'src')) ? path.join(AQUI, 'src') : path.join(AQUI, 'hooks');
+const { esSenzu } = await import(pathToFileURL(path.join(SRC, 'lib.mjs')).href);   // para el aviso de proyecto con Senzu
 const CMDS_SRC = path.join(AQUI, 'commands');             // slash-command templates (/corvus-absorb)
 const CLI_SRC = path.join(AQUI, 'cli');                   // el CLI de la memoria (corvusmem.mjs + subcomandos): se empaqueta para el guardado RÁPIDO (sin npx)
 const CORTEX_SRC = path.join(AQUI, 'cortex');             // el render del Cortex (cortex.mjs + cortex-text.mjs): se empaqueta para que --cortex funcione en local (sin npx)
@@ -141,6 +143,9 @@ function empaquetarPlugin(destino) {
     const ncli = copiarCli(dir);
     // 2c) el render del Cortex en <plugin>/cortex/: para que /corvus-cortex dibuje el cerebro en local, sin npx
     const ncx = copiarCortex(dir);
+    // 2d) el propio install.mjs en la raíz del plugin: para que /corvus-install instale en un proyecto desde el plugin
+    //     (sin npx). Corre con el núcleo del propio plugin (hooks/) gracias a la resolución src/ || hooks/ de arriba.
+    fs.copyFileSync(path.join(AQUI, 'install.mjs'), path.join(dir, 'install.mjs'));
     // 3) slash commands (/corvus-absorb) in the plugin's commands/ dir
     let nc = 0;
     try {

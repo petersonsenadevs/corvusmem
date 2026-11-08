@@ -90,6 +90,9 @@ ok(fs.existsSync(path.join(dir, 'commands', 'corvus-install.md')), 'el plugin tr
     const stf = path.join(proj, '.claude', 'settings.json');
     ok(fs.existsSync(stf), 'plugin install: registra los hooks en .claude/settings.json');
     ok(fs.existsSync(stf) && fs.readFileSync(stf, 'utf8').includes('CLAUDE_PROJECT_DIR'), 'plugin install: settings.json portable (${CLAUDE_PROJECT_DIR})');
+    // import: /corvus-absorb desde el plugin NO se rompe (el motor se resuelve en hooks/, no en src/)
+    const im = spawnSync(process.execPath, [path.join(dir, 'cli', 'corvusmem.mjs'), 'import', '--json'], { encoding: 'utf8', cwd: proj });
+    ok(im.status === 0 && /"files"/.test(im.stdout), 'plugin: corvusmem import --json corre (motor desde hooks/, para /corvus-absorb)', (im.stdout || im.stderr || '').slice(0, 120));
 }
 
 // --- marketplace committeado en el repo (el repo ES el marketplace de Claude Code) ---

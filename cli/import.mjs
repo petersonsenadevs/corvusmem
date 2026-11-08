@@ -3,7 +3,14 @@
 // `corvusmem import` — list the memory documents already in this project, in two tiers, so the agent
 // (via /corvus-absorb) can read them and save what matters. Deterministic, offline, READ-ONLY: it writes
 // nothing to memory. `--json` prints the machine-readable contract the command consumes.
-import { escanearMemoria } from '../src/import.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+// El motor vive en ../src (repo) o ../hooks (dentro del plugin): resuelve el que exista, así `corvusmem import`
+// (y /corvus-absorb) funciona también instalado como plugin, no solo desde el repo.
+const AQUI = path.dirname(fileURLToPath(import.meta.url));
+const motor = [path.join(AQUI, '..', 'src', 'import.mjs'), path.join(AQUI, '..', 'hooks', 'import.mjs')].find(f => fs.existsSync(f));
+const { escanearMemoria } = await import(pathToFileURL(motor).href);
 
 const argv = process.argv.slice(2);
 const json = argv.includes('--json');

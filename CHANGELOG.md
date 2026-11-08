@@ -12,6 +12,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   `.corvusmem/` and `.claude/settings.json` and a teammate who receives the project gets Corvus firing in Claude Code
   or Codex **with nothing to install**. `install.mjs` now ships inside the plugin and runs from it (the core is resolved
   from `hooks/` when there is no `src/`), so the command works natively — `npx corvusmem install` stays as the fallback.
+- **Collapsible Cortex side panel.** The Cortex's right panel now has a header and a collapse button; hide it and the
+  brain fills the width, with a floating button to bring it back (remembered per viewer). The panel also got a lighter
+  touch: a search icon, section dividers and a cleaner header.
+### Fixed
+- **`corvusmem import` ran only from the repo, not the plugin** — `cli/import.mjs` imported the engine from `../src/`,
+  which does not exist inside the plugin (the core is in `hooks/`), so `/corvus-absorb` crashed when Corvus was
+  installed as a plugin. It now resolves the engine from `src/` or `hooks/`, whichever is present.
+- **The Cortex was written to a loose `cortex/` folder at the project root.** It now always renders inside
+  `.corvusmem/cortex/`, next to the memory it draws — never a stray folder in the root (or in `senzu/`).
 
 ## [0.5.1] — 2026-11-08
 ### Changed

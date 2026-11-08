@@ -175,6 +175,9 @@ export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 
     // MEMORY is ALWAYS Corvus's own, in English, and never flips with Senzu's presence: .corvusmem/memory/. The store
     // never moves when Senzu is added or removed; Corvus is the memory owner and Senzu defers to it (Senzu-side hayCorvus).
     if (nombre === 'memoria') return path.join(root, CARPETA_CORVUS, MEM_DIR_EN);
+    // El Cortex es salida PROPIA de Corvus: vive SIEMPRE dentro de .corvusmem/cortex, nunca suelto en la raíz del
+    // proyecto (ni en senzu/), esté o no Senzu. Así no ensucia la raíz con una carpeta cortex/ aparte.
+    if (nombre === 'cortex') return path.join(root, CARPETA_CORVUS, 'cortex');
     const base = carpetaBase(root);
     const nombreReal = nombre;
     const nueva = path.join(root, base, nombreReal);

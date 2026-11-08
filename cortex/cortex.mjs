@@ -186,6 +186,26 @@ h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .16em; color: v
   .mandos select, .busca input { font-size: 16px; }
   .panel { position: static; max-height: none; border-left: 0; border-top: 1px solid var(--linea); padding: 18px 16px 40px; }
 }
+/* --- Panel: cabecera, colapso y pulido --------------------------------------------------------------- */
+.panel { border-top-left-radius: 20px; box-shadow: inset 1px 1px 0 color-mix(in srgb, #fff 4%, transparent); }
+[data-theme="light"] .panel { box-shadow: none; }
+.panel-cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 2px; }
+.panel-tit { display: inline-flex; align-items: center; gap: 9px; font: 700 12px/1 var(--fuente-titulos); letter-spacing: .2em; text-transform: uppercase; color: var(--suave); }
+.panel-tit::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--foco); box-shadow: 0 0 10px color-mix(in srgb, var(--foco) 70%, transparent); }
+.panel-cerrar, .panel-abrir { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; min-width: 40px; border: 1px solid var(--borde); background: var(--papel-alto); border-radius: 12px; color: var(--suave); transition: background .2s, color .2s, border-color .2s, transform .2s; }
+.panel-cerrar:hover, .panel-abrir:hover { color: var(--texto); border-color: var(--linea); background: var(--papel); }
+.panel-cerrar svg, .panel-abrir svg { width: 17px; height: 17px; }
+.panel > section { padding-top: 20px; border-top: 1px solid color-mix(in srgb, var(--linea) 55%, transparent); }
+.busca { position: relative; display: block; }
+.busca .lupa { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 17px; height: 17px; color: var(--suave); pointer-events: none; }
+.busca input { padding-left: 44px; }
+/* botón flotante para reabrir (solo visible cuando el panel está colapsado) */
+.panel-abrir { position: fixed; top: 20px; right: 20px; z-index: 6; display: none; box-shadow: 0 10px 26px -14px rgba(0,0,0,.55); }
+.panel-abrir:hover { transform: translateY(-1px); }
+[data-panel="off"] .escena { grid-template-columns: minmax(0, 1fr); }
+[data-panel="off"] .panel { display: none; }
+[data-panel="off"] .panel-abrir { display: inline-flex; }
+html[data-solo] .panel-abrir { display: none !important; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 `;
 
@@ -434,6 +454,15 @@ const APP = String.raw`
     cli.setAttribute('aria-pressed', String(previa)); $('#detalle').hidden = true; todo();
   });
   var pb = $('#piensa'); if (pb) pb.addEventListener('click', pensar);
+
+  // ---------------- Panel lateral colapsable (se recuerda por visor, sin tocar la memoria)
+  try { if (localStorage.getItem('cortex-panel') === 'off') raiz.setAttribute('data-panel', 'off'); } catch (e) {}
+  function panel(off) {
+    if (off) raiz.setAttribute('data-panel', 'off'); else raiz.removeAttribute('data-panel');
+    try { localStorage.setItem('cortex-panel', off ? 'off' : 'on'); } catch (e) {}
+  }
+  var ptog = $('#panel-toggle'); if (ptog) ptog.addEventListener('click', function () { panel(true); });
+  var pabr = $('#panel-abrir'); if (pabr) pabr.addEventListener('click', function () { panel(false); });
 
   // ---------------- 3D: un cerebro de verdad hecho de puntos, con neuronas que se encienden
   // Cada hemisferio es la UNIÓN de elipsoides (cuerpo, polo frontal, polo occipital, lóbulo temporal y cerebelo); de
@@ -757,7 +786,11 @@ export function htmlCortex(datos, { cli = null, idioma = null, soloCerebro = fal
     </div>
   </section>
   <aside class="panel">
-    <label class="busca"><span class="sr" data-t="buscarL">${es.buscarL}</span><input id="buscar" type="search" data-t-ph="buscar" placeholder="${es.buscar}" autocomplete="off"></label>
+    <div class="panel-cab">
+      <span class="panel-tit" data-t="panelTitulo">${es.panelTitulo}</span>
+      <button type="button" class="panel-cerrar" id="panel-toggle" data-t-aria="panelOcultar" data-t-title="panelOcultar" aria-label="${es.panelOcultar}" title="${es.panelOcultar}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <label class="busca"><span class="sr" data-t="buscarL">${es.buscarL}</span><svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="buscar" type="search" data-t-ph="buscar" placeholder="${es.buscar}" autocomplete="off"></label>
     <section><h2 data-t="semana">${es.semana}</h2><ul class="cambios" id="cambios-l"></ul><p class="vacio" id="cambios-v" data-t="nadaSemana">${es.nadaSemana}</p></section>
     <section id="abiertos-s"><h2 data-t="sigueAbierto">${es.sigueAbierto}</h2><ul class="abiertos" id="abiertos-l"></ul></section>
     <section>
@@ -779,6 +812,7 @@ export function htmlCortex(datos, { cli = null, idioma = null, soloCerebro = fal
     </article>
     <p class="pie" id="pie"></p>
   </aside>
+  <button type="button" class="panel-abrir" id="panel-abrir" data-t-aria="panelVer" data-t-title="panelVer" aria-label="${es.panelVer}" title="${es.panelVer}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
 </div>
 <script type="application/json" id="datos-cortex">${json(D)}</script>
 <script type="application/json" id="textos-cortex">${json(TEXTOS)}</script>

@@ -108,6 +108,21 @@ const tiene = (s, ev, file) => cmds(s, ev).some(c => c.includes('corvusmem/hooks
     ok(!fs.existsSync(path.join(P2, '.claude', 'commands')), '--dry-run: no instala el comando');
 }
 
+// ---- proyecto con Senzu: avisa de la cesión y aun así registra los hooks (se auto-ceden en runtime) -----
+{
+    const P = nuevoProyecto(), H = nuevoHome();
+    fs.mkdirSync(path.join(P, 'senzu'), { recursive: true });
+    fs.writeFileSync(path.join(P, 'senzu', 'senzu.json'), '{}');
+    const r = run(P, H);
+    ok(r.status === 0 && /\[senzu\]/.test(r.stdout) && /stand its memory hooks down/.test(r.stdout), 'proyecto con Senzu: avisa de que Corvus cede sus hooks', r.stdout);
+    ok(tiene(leer(settingsProy(P)), 'SessionStart', 'session-start.mjs'), 'proyecto con Senzu: aun así registra los hooks (se auto-ceden en runtime, y reviven si quitas Senzu)');
+    // En --global NO se avisa (no se sabe en qué proyectos correrá)
+    const PG = nuevoProyecto(), HG = nuevoHome();
+    fs.mkdirSync(path.join(PG, 'senzu'), { recursive: true });
+    fs.writeFileSync(path.join(PG, 'senzu', 'senzu.json'), '{}');
+    ok(!/\[senzu\]/.test(run(PG, HG, '--global').stdout), '--global: no da el aviso de Senzu (no sabe los proyectos)');
+}
+
 fs.rmSync(base, { recursive: true, force: true });
 process.stdout.write(`Casos: ${casos}  Fallos: ${fallos}\n`);
 process.exit(fallos ? 1 : 0);

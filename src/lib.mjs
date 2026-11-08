@@ -101,6 +101,12 @@ export function esSenzu(root) {
         || fs.existsSync(path.join(root, CARPETA, '.dev-standards.json'))
         || fs.existsSync(path.join(root, '.dev-standards.json'));
 }
+// Should Corvus stand down in this project? When a REAL Senzu install is present it runs the very same memory engine,
+// so Corvus must NOT inject or capture in parallel — that would double the memory block on every message and split the
+// facts across two stores. Deterministic by design: Corvus always yields to Senzu (its hooks exit early; its own
+// .corvusmem/ store is kept untouched, so if Senzu is later removed Corvus wakes up with its memory intact). A bare
+// senzu/ folder without a marker does NOT count (see esSenzu): a global Senzu must not silence a standalone Corvus.
+export function cederASenzu(root) { return esSenzu(root); }
 // Base folder for this project's memory & config. Couple to Senzu only when the project REALLY uses it (its marker,
 // or a legacy layout); otherwise Corvus lives standalone in its own .corvusmem/ — even if a stray senzu/ folder exists.
 export function carpetaBase(root) {
@@ -109,20 +115,21 @@ export function carpetaBase(root) {
     if (esLegado(root)) return CARPETA;                                          // legacy Senzu project (root devlog / .dev-standards.json)
     return CARPETA_CORVUS;                                                       // no real Senzu (even a stray senzu/) -> Corvus owns its dir
 }
-// Facts storage names. Standalone (Corvus's own .corvusmem/) uses English names; coupled to Senzu (or a legacy
-// layout) keeps Senzu's Spanish names, because the file is SHARED with Senzu and must stay compatible.
+// Facts storage names. Corvus's store is ALWAYS its own .corvusmem/memory/facts.jsonl with English names — it never
+// writes into Senzu's senzu/memoria/hechos.jsonl any more. When a real Senzu install is present, Corvus stands its
+// hooks down (cederASenzu) instead of sharing Senzu's file, so there is no coupled/Spanish variant to keep.
+// MEM_*_ES remain only for the one-time migration of pre-0.4 standalone installs (.corvusmem/memoria/ -> memory/).
 export const MEM_DIR_ES = 'memoria', MEM_FACTS_ES = 'hechos.jsonl', MEM_CORRUPT_ES = 'hechos.danado.jsonl';
 export const MEM_DIR_EN = 'memory',  MEM_FACTS_EN = 'facts.jsonl',  MEM_CORRUPT_EN = 'facts.corrupt.jsonl';
-export function nombresMemoria(root) {
-    return carpetaBase(root) === CARPETA_CORVUS
-        ? { dir: MEM_DIR_EN, facts: MEM_FACTS_EN, corrupt: MEM_CORRUPT_EN }
-        : { dir: MEM_DIR_ES, facts: MEM_FACTS_ES, corrupt: MEM_CORRUPT_ES };
+export function nombresMemoria(_root) {
+    return { dir: MEM_DIR_EN, facts: MEM_FACTS_EN, corrupt: MEM_CORRUPT_EN };
 }
 // One-time, idempotent migration: older standalone installs kept facts in .corvusmem/memoria/hechos.jsonl.
 // Rename that to .corvusmem/memory/facts.jsonl (and the corrupted-lines file) so a standalone Corvus reads English.
 // NEVER touches a Senzu-coupled or legacy project (base must be .corvusmem). Safe under races: best-effort, swallowed.
 export function migrarMemoriaCorvus(root) {
-    if (carpetaBase(root) !== CARPETA_CORVUS) return;
+    // Runs regardless of Senzu: Corvus's store is always .corvusmem/, so always try to lift an old .corvusmem/memoria/
+    // into .corvusmem/memory/. It only ever touches Corvus's own dir and is idempotent, so it is safe everywhere.
     const base = path.join(root, CARPETA_CORVUS), viejoDir = path.join(base, MEM_DIR_ES), nuevoDir = path.join(base, MEM_DIR_EN);
     try {
         if (!fs.existsSync(path.join(viejoDir, MEM_FACTS_ES)) || fs.existsSync(path.join(nuevoDir, MEM_FACTS_EN))) return;
@@ -136,9 +143,13 @@ export function migrarMemoriaCorvus(root) {
 }
 const VIEJA = { 'ui-verify': '.ui-verify', 'senzu.json': '.dev-standards.json', auditoria: 'docs/auditoria', entrega: 'docs/entrega', 'mapa.md': 'docs/MAPA.md' };
 export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json' | 'memoria'
+    // MEMORY is ALWAYS Corvus's own, in English, and never flips with Senzu's presence: .corvusmem/memory/.
+    // Coupling the store into senzu/memoria/ made its location jump when Senzu arrived or left — orphaning facts on
+    // every transition. Corvus now owns one stable store; when a real Senzu is present, the hooks stand down instead
+    // (see cederASenzu), so there is one owner, not a shared/moving file.
+    if (nombre === 'memoria') return path.join(root, CARPETA_CORVUS, MEM_DIR_EN);
     const base = carpetaBase(root);
-    // 'memoria' es la carpeta de hechos: en standalone (.corvusmem) se llama 'memory' (inglés); acoplado/legacy sigue 'memoria'
-    const nombreReal = nombre === 'memoria' && base === CARPETA_CORVUS ? MEM_DIR_EN : nombre;
+    const nombreReal = nombre;
     const nueva = path.join(root, base, nombreReal);
     const vieja = path.join(root, VIEJA[nombre] || nombre);
     const [primera, segunda] = esLegado(root) ? [vieja, nueva] : [nueva, vieja];

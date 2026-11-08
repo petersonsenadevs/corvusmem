@@ -5,6 +5,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-11-08
+### Changed
+- **Corvus now owns one stable memory store, and never fights Senzu.** Project facts always live in Corvus's own
+  `.corvusmem/memory/facts.jsonl` (English, visible) — Corvus no longer writes into Senzu's `senzu/memoria/hechos.jsonl`
+  when Senzu is present. Before, the store location *flipped* with Senzu's presence, so memory jumped folders (and was
+  orphaned) whenever Senzu was added to or removed from a project. The store is now fixed: add Senzu, remove Senzu —
+  the facts stay put in `.corvusmem/` and are never lost.
+- **No double hooks, no split memory — deterministic.** When a **real** Senzu install is present (its `senzu.json`
+  marker, or a legacy `.dev-standards.json`), Corvus's memory hooks **stand down** (session-start, live-recall,
+  live-memory, file-memory, facts-guard, session-state): Senzu runs the very same engine, so it becomes the single
+  injector. No more racing hand-off where either layer might win and inject a second memory block. A **stray** `senzu/`
+  folder without a marker does not trigger this — a globally-installed Senzu can't silence a standalone Corvus. Corvus
+  keeps its own `.corvusmem/` store the whole time, so if Senzu is ever removed, Corvus wakes up with its memory intact.
+- **The installer says so.** Installing into a project that already uses Senzu now prints a note that Corvus will stand
+  its hooks down there (and take over automatically if Senzu is removed). The hooks are still registered so nothing
+  breaks on that transition. (`--global` does not warn — it can't know which projects will have Senzu.)
+
 ## [0.3.4] — 2026-11-07
 ### Changed
 - **`/corvus-absorb` is now exhaustive by design.** The command states its real goal up front — *after it runs, the

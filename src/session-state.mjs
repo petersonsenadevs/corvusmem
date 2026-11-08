@@ -9,12 +9,13 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
     readHookInput, projectRoot, sessionFlag, testOnce, editadosSesion, gitCambios, gitBranch, planStatus,
-    devlogEntradas, readText, rutaEstado, memoriaProyecto, rutaMemoriaUsuario, ruta, rutaRel,
+    devlogEntradas, readText, rutaEstado, memoriaProyecto, rutaMemoriaUsuario, ruta, rutaRel, cederASenzu,
 } from './lib.mjs';
 import { todosLosHechos, marcarUsoSesion, textosDelAgente, rutaBuscador, rutaUso, rutaHechos } from './facts.mjs';   // la de facts.mjs: ruta REAL junto al hook
 
 const p = readHookInput() || {};
 const root = projectRoot();
+if (cederASenzu(root)) process.exit(0);   // Senzu presente: su session-end/estado lleva la continuidad (ver lib.cederASenzu)
 const sid = p.session_id ? String(p.session_id) : 'default';
 const evento = p.hook_event_name || 'Stop';
 

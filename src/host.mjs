@@ -47,9 +47,10 @@ export function resolverHost({ input = {}, env = process.env, root } = {}) {
     const agente = detectarAgente(env, input);
     const senzu = existeMarcadorSenzu(raiz);
     const inyeccion = agente === 'obsidian' ? 'plugin-api' : agente === 'standalone' ? 'stdout' : 'hook-stdout';
-    const proyecto = senzu ? path.dirname(rutaMarcador(raiz))
-        : agente === 'obsidian' ? (env.CORVUS_VAULT || null)
-            : path.join(raiz, '.corvusmem');
+    // Corvus's project store is ALWAYS its own .corvusmem/ — it never resolves into senzu/ any more. The `senzu` flag
+    // above still drives the hand-off: when Senzu is present Corvus's hooks stand down (lib.cederASenzu), they do not
+    // share Senzu's file. Obsidian keeps its vault.
+    const proyecto = agente === 'obsidian' ? (env.CORVUS_VAULT || null) : path.join(raiz, '.corvusmem');
     return {
         agente,
         senzu,

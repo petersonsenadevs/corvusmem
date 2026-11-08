@@ -5,7 +5,7 @@
 
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { readHookInput, projectRoot, testOnce, decisionesDeArchivo, outHookJson, rutaRel } from './lib.mjs';
+import { readHookInput, projectRoot, testOnce, decisionesDeArchivo, outHookJson, rutaRel, cederASenzu } from './lib.mjs';
 import { buscarHechos, anotarUso, apuntarInyeccion } from './facts.mjs';
 
 const p = readHookInput();
@@ -13,6 +13,7 @@ if (!p || !['Edit', 'Write', 'MultiEdit'].includes(p.tool_name)) process.exit(0)
 const file = p.tool_input && p.tool_input.file_path ? String(p.tool_input.file_path) : '';
 if (!file) process.exit(0);
 const root = projectRoot();
+if (cederASenzu(root)) process.exit(0);   // Senzu presente: Corvus cede (ver lib.cederASenzu)
 const rel = path.relative(path.resolve(root), path.resolve(root, file)).replace(/\\/g, '/');
 if (!rel || rel.startsWith('..')) process.exit(0);
 // la propia memoria (devlog, plan, hechos) no se comenta a sí misma

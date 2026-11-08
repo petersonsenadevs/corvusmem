@@ -69,7 +69,13 @@ for (const f of ['corvusmem.mjs', 'memory.mjs', 'search.mjs', 'import.mjs', 'mem
     ok(fs.existsSync(path.join(proj, '.corvusmem', 'memory', 'facts.jsonl')), 'plugin: el guardado escribe en .corvusmem/memory/facts.jsonl');
     const rc = spawnSync(process.execPath, [path.join(dir, 'cli', 'corvusmem.mjs'), '--path', proj, '--recordar', 'stack'], { encoding: 'utf8', env });
     ok(/Astro/.test(rc.stdout), 'plugin: --recordar recupera el hecho', rc.stdout.slice(0, 80));
+    // el Cortex (ui studio) también corre en local, sin npx
+    for (const f of ['cortex.mjs', 'cortex-text.mjs']) ok(fs.existsSync(path.join(dir, 'cortex', f)), `copiado cortex/${f}`);
+    const cx = spawnSync(process.execPath, [path.join(dir, 'cli', 'corvusmem.mjs'), '--path', proj, '--cortex'], { encoding: 'utf8', env });
+    ok(cx.status === 0 && fs.existsSync(path.join(proj, '.corvusmem', 'cortex', 'index.html')), 'plugin: --cortex dibuja el cerebro HTML en local (sin npx)', (cx.stdout || cx.stderr || '').slice(0, 100));
 }
+// el comando /corvus-cortex va empaquetado (abrir el Cortex como comando, no npx)
+ok(fs.existsSync(path.join(dir, 'commands', 'corvus-cortex.md')), 'el plugin trae el comando /corvus-cortex');
 
 // --- marketplace committeado en el repo (el repo ES el marketplace de Claude Code) ---
 {

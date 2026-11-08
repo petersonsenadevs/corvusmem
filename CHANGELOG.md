@@ -18,6 +18,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   **same** plugin (`hooks/hooks.json` uses `${CLAUDE_PLUGIN_ROOT}`; edits arrive as `apply_patch`). `npx corvusmem install`
   stays as the path for agents without plugin support, or a quick trial. Generate/refresh both with
   `node install.mjs --marketplace` (the release flow runs it so the plugin always carries the current version and hooks).
+- **`/corvus-cortex` — open the Cortex as a command, not an `npx` call.** A new slash command (bundled in the plugin
+  and in `.claude/commands/`) opens your memory as a local HTML "brain" via the local CLI, falling back to `npx` only
+  when nothing is installed. The Cortex renderer (`cortex/`) now ships with the plugin and the install, so `--cortex`
+  runs locally without `npx`.
 - **Fast save/recall — no more `npx` cold start.** The memory CLI now ships *next to* the hooks — in the plugin
   (`$CLAUDE_PLUGIN_ROOT/cli/`), in a per-project install (`.corvusmem/cli/`) and in a global one
   (`~/.config/corvusmem/cli/`). The hooks pick the fastest available invocation (`node ".../cli/corvusmem.mjs"`) and

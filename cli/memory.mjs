@@ -42,7 +42,7 @@ const out = s => process.stdout.write(s + '\n');
 
 async function motor() {   // facts.mjs de los hooks: junto a la skill (plugin o .claude), o en el paquete de Senzu
     const marcador = (() => { try { return JSON.parse(fs.readFileSync(path.join(root, 'senzu', 'senzu.json'), 'utf8')); } catch { return {}; } })();
-    const c = [path.join(AQUI, '..', 'src', 'facts.mjs'), path.join(AQUI, '..', '..', '..', 'hooks', 'facts.mjs'), path.join(root, '.claude', 'hooks', 'facts.mjs'),
+    const c = [path.join(AQUI, '..', 'src', 'facts.mjs'), path.join(AQUI, '..', 'hooks', 'facts.mjs'), path.join(AQUI, '..', '..', '..', 'hooks', 'facts.mjs'), path.join(root, '.claude', 'hooks', 'facts.mjs'),
         marcador.standardsRoot && path.join(marcador.standardsRoot, 'core', 'hooks', 'facts.mjs'), process.env.SENZU_HOME && path.join(process.env.SENZU_HOME, 'core', 'hooks', 'facts.mjs')].filter(Boolean);
     for (const f of c) if (fs.existsSync(f)) return import(pathToFileURL(f).href);
     out('No encuentro el motor de hechos (hooks/facts.mjs). ¿Está instalado? Ejecuta: npx corvusmem install');

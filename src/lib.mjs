@@ -152,12 +152,27 @@ export function adoptarMemoriaSenzu(root) {
         if (fs.existsSync(senzuBad) && !fs.existsSync(corvusBad)) { try { fs.copyFileSync(senzuBad, corvusBad); } catch { } }
     } catch { /* best-effort: si no se puede adoptar, Corvus arranca con su memoria vacía */ }
 }
+// Cómo debe GUARDAR/RECORDAR el agente, lo más rápido disponible (sin el arranque en frío de npx):
+//   1) Plugin (Claude/Codex): el hook corre con CLAUDE_PLUGIN_ROOT y el CLI va empaquetado en <plugin>/cli/. Se emite
+//      la ruta ABSOLUTA porque el Bash del agente no tiene esa variable.
+//   2) Proyecto (install): el CLI está en .corvusmem/cli/ y ${CLAUDE_PROJECT_DIR} sí lo tiene el agente (portable).
+//   3) Global (install --global): CLI en ~/.config/corvusmem/cli/ (ruta absoluta al HOME).
+//   4) Fallback para agentes SIN estos estándares (ni plugin ni install): `npx corvusmem` (lento pero siempre funciona).
+export function rutaCliMemoria(root) {
+    const node = f => `node "${String(f).replace(/\\/g, '/')}"`;
+    try {
+        const pr = process.env.CLAUDE_PLUGIN_ROOT;
+        if (pr && fs.existsSync(path.join(pr, 'cli', 'corvusmem.mjs'))) return node(path.join(pr, 'cli', 'corvusmem.mjs'));
+        if (fs.existsSync(path.join(root, CARPETA_CORVUS, 'cli', 'corvusmem.mjs'))) return 'node "${CLAUDE_PROJECT_DIR}/.corvusmem/cli/corvusmem.mjs"';
+        const g = path.join(os.homedir(), '.config', 'corvusmem', 'cli', 'corvusmem.mjs');
+        if (fs.existsSync(g)) return node(g);
+    } catch { }
+    return 'npx corvusmem';
+}
 const VIEJA = { 'ui-verify': '.ui-verify', 'senzu.json': '.dev-standards.json', auditoria: 'docs/auditoria', entrega: 'docs/entrega', 'mapa.md': 'docs/MAPA.md' };
 export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json' | 'memoria'
-    // MEMORY is ALWAYS Corvus's own, in English, and never flips with Senzu's presence: .corvusmem/memory/.
-    // Coupling the store into senzu/memoria/ made its location jump when Senzu arrived or left — orphaning facts on
-    // every transition. Corvus now owns one stable store; when a real Senzu is present, the hooks stand down instead
-    // (see cederASenzu), so there is one owner, not a shared/moving file.
+    // MEMORY is ALWAYS Corvus's own, in English, and never flips with Senzu's presence: .corvusmem/memory/. The store
+    // never moves when Senzu is added or removed; Corvus is the memory owner and Senzu defers to it (Senzu-side hayCorvus).
     if (nombre === 'memoria') return path.join(root, CARPETA_CORVUS, MEM_DIR_EN);
     const base = carpetaBase(root);
     const nombreReal = nombre;

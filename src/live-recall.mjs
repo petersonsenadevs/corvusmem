@@ -6,7 +6,7 @@
 
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { readHookInput, projectRoot, sessionFlag, outHookJson, esMensajeDelUsuario, localeUI, msg } from './lib.mjs';
+import { readHookInput, projectRoot, sessionFlag, outHookJson, esMensajeDelUsuario, localeUI, msg, rutaCliMemoria } from './lib.mjs';
 import { reclamarInyeccion } from './host.mjs';
 import { recuerdo, palabras, palabraConPeso, UMBRAL_RECUERDO, anotarUso, apuntarInyeccion, mapaMemoria, textoMapa, intencionTemporal } from './facts.mjs';
 
@@ -47,7 +47,7 @@ const elegidos = todos
 if (elegidos.length || !todos.some(x => (x.fuente === 'hecho' ? x.puntuacion >= UMBRAL_HECHO : x.puntuacion > 0))) apuntarInyeccion(root, { sid, origen: 'mensaje', consulta, items: elegidos });
 // X-T9: el agente no sabe qué hay si nadie se lo dice. Sin nada que coincida, con un mensaje con contenido (2+ palabras
 // con peso), una línea: lo que tiene la memoria y cómo consultarla (es un índice, no datos inventados)
-const cli = 'npx corvusmem';
+const cli = rutaCliMemoria(root);   // plugin/proyecto/global → node directo (rápido); npx como fallback
 if (!elegidos.length) {
     // (solo si de verdad no coincide NADA: si coincidía algo ya dicho en la sesión, decir «no hay nada» sería falso)
     const nada = !todos.some(x => (x.fuente === 'hecho' ? x.puntuacion >= UMBRAL_HECHO : x.puntuacion > 0));

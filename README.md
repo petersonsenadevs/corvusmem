@@ -44,27 +44,43 @@ Same input, same result. The whole memory is a file you own.
 - `tests/` — deterministic, LLM-free suites: `test-boundary` (clean core), `test-facts` (engine), `test-hard-recall`.
 
 ## Install
-```
-npx corvusmem install --claude     # register the hooks in the current project's .claude/settings.json
-npx corvusmem install --global     # for every project (~/.claude/settings.json)
-npx corvusmem uninstall            # remove Corvusmem's hooks (leaves everything else intact)
-npx corvusmem install --dry-run    # show what it would do, without writing
-```
-Merge-safe (it never overwrites your hooks or permissions) and idempotent. It creates `.corvusmem/` (project
-memory) and `~/.config/corvusmem/` (global memory), and writes `.corvusmem/hooks.json` (a portable manifest).
 
-**Per-project vs global only decides *where the hooks turn on*** — for one repo (`--claude`, config in that repo) or
-for every project (`--global`, in your home). It does **not** change where memory lives: project facts always land in
-that repo's `.corvusmem/`, your personal facts in `~/.config/corvusmem/`. You never need a per-project install just to
-keep memory in the repo — that happens either way.
+Two ways. **Install it as a plugin** if your agent supports plugins (Claude Code, Codex) — it is native, there is
+nothing to wire into a project, and the memory CLI runs locally (no `npx` cold start). **Use the `npx` install** for
+any agent that does not do plugins, or for a quick trial.
+
+### As a plugin — Claude Code (recommended)
+```
+/plugin marketplace add petersonsenadevs/corvusmem
+/plugin install corvusmem@corvusmem
+```
+The hooks fire natively (the same mechanism Claude uses for any plugin), everywhere, and saving/recalling runs as
+`node "$CLAUDE_PLUGIN_ROOT/cli/corvusmem.mjs"` — no `npx`. Update later with `/plugin update corvusmem@corvusmem`.
+
+### As a plugin — Codex
+Add the same marketplace in the Codex app and approve the hooks (they live in `~/.codex/config.toml`). Codex consumes
+the **same** plugin — `hooks/hooks.json` uses `${CLAUDE_PLUGIN_ROOT}`, and edits arrive as `apply_patch`, which the
+hooks already understand.
+
+### As an npx install (any agent, or a quick trial)
+```
+npx corvusmem install            # register the hooks in the current project's .claude/settings.json
+npx corvusmem install --global   # for every project (~/.claude/settings.json)
+npx corvusmem uninstall          # remove Corvusmem's hooks (leaves memory intact)
+npx corvusmem install --dry-run  # show what it would do, without writing
+```
+Merge-safe (it never overwrites your hooks or permissions) and idempotent. It copies the hooks **and** the memory CLI
+to a durable spot (`.corvusmem/hooks/` + `.corvusmem/cli/`, or `~/.config/corvusmem/` for `--global`), so the hooks and
+the save/recall commands run via `node` — not `npx` — from then on. It also writes `.corvusmem/hooks.json` (a portable
+manifest). The bare `npx corvusmem --save/--recall` still works for an agent with none of this set up (just slower).
+
+**Per-project vs global only decides *where the hooks turn on*** — for one repo (config in that repo) or for every
+project (`--global`, in your home). It does **not** change where memory lives: project facts always land in that repo's
+`.corvusmem/`, your personal facts in `~/.config/corvusmem/`.
 
 **Sharing with a team**: commit `.corvusmem/` (the shared project memory) and, for a per-project install,
 `.claude/settings.json` so teammates get the hooks the moment they clone. Never commit `~/.config/corvusmem/` — that is
 your private memory.
-
-**Codex**: the hooks run through the plugin path (a marketplace in `~/.codex/config.toml`), not the project
-`settings.json`. Publish it to a Codex marketplace, install it and approve the hooks in the app. On Claude Code they
-are active right away.
 
 ## Usage
 Once installed, the agent captures and recalls memory on its own — you don't do a thing. To look at it or steer it:

@@ -24,6 +24,7 @@ import { esSenzu } from './src/lib.mjs';   // para el aviso de proyecto con Senz
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(AQUI, 'src');                       // donde viven los hooks del núcleo (ruta absoluta)
 const CMDS_SRC = path.join(AQUI, 'commands');             // slash-command templates (/corvus-absorb)
+const CLI_SRC = path.join(AQUI, 'cli');                   // el CLI de la memoria (corvusmem.mjs + subcomandos): se empaqueta para el guardado RÁPIDO (sin npx)
 const args = process.argv.slice(2);
 const opt = n => { const i = args.indexOf(n); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true) : null; };
 const has = n => args.includes(n);
@@ -65,6 +66,17 @@ function copiarHooks(dir) {
     fs.mkdirSync(dir, { recursive: true });
     let n = 0;
     for (const f of fs.readdirSync(SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(SRC, f), path.join(dir, f)); n++; }
+    return n;
+}
+// Copia el CLI de memoria (corvusmem.mjs + subcomandos) a <baseDir>/cli/, HERMANO de hooks/. Así el agente guarda y
+// recuerda con `node "<baseDir>/cli/corvusmem.mjs" --save …` — rápido y nativo, SIN el arranque en frío de npx. cli/memory.mjs
+// resuelve el motor en ../hooks/facts.mjs (ver su `motor()`). El `npx corvusmem` sigue valiendo como fallback.
+function copiarCli(baseDir) {
+    if (DRY) { log(`  [dry-run] would copy the memory CLI to ${path.join(baseDir, 'cli')}`); return 0; }
+    const dir = path.join(baseDir, 'cli');
+    fs.mkdirSync(dir, { recursive: true });
+    let n = 0;
+    for (const f of fs.readdirSync(CLI_SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(CLI_SRC, f), path.join(dir, f)); n++; }
     return n;
 }
 
@@ -113,6 +125,8 @@ function empaquetarPlugin(destino) {
     // 2) los .mjs del nucleo (hooks + dependencias de mismo directorio: autocontenido, cero imports externos)
     let n = 0;
     for (const f of fs.readdirSync(SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(SRC, f), path.join(hooksDir, f)); n++; }
+    // 2b) el CLI de memoria en <plugin>/cli/ (hermano de hooks/): para que el agente guarde/recuerde con node, sin npx
+    const ncli = copiarCli(dir);
     // 3) slash commands (/corvus-absorb) in the plugin's commands/ dir
     let nc = 0;
     try {
@@ -120,10 +134,33 @@ function empaquetarPlugin(destino) {
         if (cmds.length) { fs.mkdirSync(path.join(dir, 'commands'), { recursive: true }); for (const f of cmds) { fs.copyFileSync(path.join(CMDS_SRC, f), path.join(dir, 'commands', f)); nc++; } }
     } catch { /* no commands/ */ }
     // 4) plugin.json
-    const plugin = { name: 'corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena' }, license: 'SEE LICENSE IN LICENSE' };
+    const plugin = { name: 'corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena' }, homepage: pkg.homepage || 'https://corvusmem.vercel.app', repository: (pkg.repository && pkg.repository.url) || 'https://github.com/petersonsenadevs/corvusmem', license: 'SEE LICENSE IN LICENSE' };
     fs.writeFileSync(path.join(dir, '.claude-plugin', 'plugin.json'), JSON.stringify(plugin, null, 2) + '\n');
-    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs${nc ? ` + ${nc} command(s)` : ''}`);
-    log('  Publish it to a Codex marketplace (like Senzu\'s); install it and approve the hooks in the app.');
+    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs + ${ncli} cli${nc ? ` + ${nc} command(s)` : ''}`);
+}
+
+// Genera, DENTRO del repo, el plugin committeable `plugins/corvusmem/` y el `.claude-plugin/marketplace.json` de la
+// raíz: el propio repo ES el marketplace de Claude Code (igual que Senzu). Tras esto:
+//   Claude Code: /plugin marketplace add petersonsenadevs/corvusmem  ·  /plugin install corvusmem@corvusmem
+//   Codex:       consume el MISMO plugin (hooks.json con ${CLAUDE_PLUGIN_ROOT}); se aprueban los hooks en la app.
+// Se vuelve a ejecutar en cada release (lo hace el flujo de versión) para que el plugin lleve la versión y los hooks al día.
+function generarMarketplace() {
+    let pkg = {}; try { pkg = JSON.parse(fs.readFileSync(path.join(AQUI, 'package.json'), 'utf8')); } catch { }
+    const pluginDir = path.join(AQUI, 'plugins', 'corvusmem');
+    if (!DRY) fs.rmSync(pluginDir, { recursive: true, force: true });   // regenerar limpio
+    empaquetarPlugin(pluginDir);
+    const desc = pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA (Claude Code, Codex).';
+    const mkt = {
+        name: 'corvusmem',
+        owner: { name: 'Peterson Sena' },
+        metadata: { version: pkg.version || '0.0.0', description: 'Marketplace de Corvusmem: memoria determinista, offline y sin dependencias para agentes de IA.' },
+        plugins: [{
+            name: 'corvusmem', source: './plugins/corvusmem', description: desc, version: pkg.version || '0.0.0',
+            category: 'development', keywords: ['memory', 'memoria', 'hooks', 'offline', 'deterministic', 'facts', 'recall', 'claude', 'codex'],
+        }],
+    };
+    if (!DRY) { fs.mkdirSync(path.join(AQUI, '.claude-plugin'), { recursive: true }); fs.writeFileSync(path.join(AQUI, '.claude-plugin', 'marketplace.json'), JSON.stringify(mkt, null, 2) + '\n'); }
+    log(`  [marketplace] .claude-plugin/marketplace.json -> plugins/corvusmem (v${pkg.version || '0.0.0'})`);
 }
 
 // Construye los grupos de hooks de un evento en el formato de settings.json de Claude.
@@ -178,16 +215,26 @@ function run() {
         return;
     }
 
+    // Modo marketplace: genera plugins/corvusmem/ + .claude-plugin/marketplace.json EN EL REPO (el repo es el marketplace).
+    if (has('--marketplace')) {
+        log(`Corvusmem · generate marketplace + committed plugin${DRY ? ' (dry-run)' : ''}`);
+        generarMarketplace();
+        log('Done.');
+        return;
+    }
+
     const quitar = has('--uninstall');
     log(`Corvusmem · ${quitar ? 'uninstall' : 'install'}${GLOBAL ? ' (global)' : ''}${DRY ? ' (dry-run)' : ''}`);
 
     // 0) Copias DURABLES de los hooks (o quitarlas). La MEMORIA (.corvusmem/memoria, ~/.config/corvusmem) no se toca.
+    const cliBase = path.dirname(hooksDir);   // .corvusmem/ (proyecto) o ~/.config/corvusmem/ (global); el cli va junto a hooks
     if (quitar) {
-        if (!DRY) { try { fs.rmSync(hooksDir, { recursive: true, force: true }); } catch {} }
+        if (!DRY) { try { fs.rmSync(hooksDir, { recursive: true, force: true }); } catch {} try { fs.rmSync(path.join(cliBase, 'cli'), { recursive: true, force: true }); } catch {} }
         log(`  [hooks] removed ${hooksDir}`);
     } else {
         const n = copiarHooks(hooksDir);
-        log(`  [hooks] ${n} core file(s) copied to ${hooksDir.replace(/\\/g, '/')}`);
+        const ncli = copiarCli(cliBase);
+        log(`  [hooks] ${n} core file(s) + ${ncli} CLI file(s) copied to ${cliBase.replace(/\\/g, '/')} (fast save, no npx)`);
     }
 
     // 1) Claude: hooks en settings.json (proyecto o HOME)

@@ -5,6 +5,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-08
+### Added
+- **Install Corvus as a native plugin — Claude Code and Codex.** The repo is now a Claude Code **marketplace**
+  (`.claude-plugin/marketplace.json` + a committed `plugins/corvusmem/`), so you install it the way you install any
+  plugin instead of wiring hooks into a project:
+  ```
+  /plugin marketplace add petersonsenadevs/corvusmem
+  /plugin install corvusmem@corvusmem
+  ```
+  The hooks fire natively (the host's own plugin mechanism), everywhere, with nothing to maintain. Codex consumes the
+  **same** plugin (`hooks/hooks.json` uses `${CLAUDE_PLUGIN_ROOT}`; edits arrive as `apply_patch`). `npx corvusmem install`
+  stays as the path for agents without plugin support, or a quick trial. Generate/refresh both with
+  `node install.mjs --marketplace` (the release flow runs it so the plugin always carries the current version and hooks).
+- **Fast save/recall — no more `npx` cold start.** The memory CLI now ships *next to* the hooks — in the plugin
+  (`$CLAUDE_PLUGIN_ROOT/cli/`), in a per-project install (`.corvusmem/cli/`) and in a global one
+  (`~/.config/corvusmem/cli/`). The hooks pick the fastest available invocation (`node ".../cli/corvusmem.mjs"`) and
+  fall back to `npx corvusmem` only for an agent that has none of it installed. So once Corvus is installed, the agent
+  saving a fact no longer pays npm's resolve-and-spawn cost on every call.
+
 ## [0.4.0] — 2026-11-08
 ### Changed
 - **Corvus is the memory owner — its hooks are the ones that fire, Senzu defers to it.** When Corvus is installed

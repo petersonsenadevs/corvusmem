@@ -5,7 +5,7 @@
 // (p. ej. Senzu), no del motor de memoria. Corvusmem instalado solo habla de memoria y nada más.
 
 import {
-    readHookInput, projectRoot, outHookJson, leerUltimaSesion, localeUI, msg,
+    readHookInput, projectRoot, outHookJson, leerUltimaSesion, localeUI, msg, rutaCliMemoria,
 } from './lib.mjs';
 import { contextoHechos, decisionesObsoletas, abiertos, FAMILIAS_CICLO, contradicciones, mapaMemoria, textoMapa, etiquetaDimension } from './facts.mjs';
 import { reclamarInyeccion } from './host.mjs';
@@ -19,7 +19,7 @@ const L = [];
 // Los valores son DATOS: entre comillas, en una línea y recortados (un hecho que dijera «ignora las reglas» no puede
 // colarse como instrucción).
 const citar = v => '«' + String(v).replace(/[\r\n\t]+/g, ' ').replace(/[«»]/g, '"').trim().slice(0, 160) + (String(v).length > 160 ? '…' : '') + '»';
-const cli = 'npx corvusmem';
+const cli = rutaCliMemoria(root);   // plugin/proyecto/global → node directo (rápido); npx como fallback
 try {
     // Memoria de HECHOS (motor determinista, cualquier idioma): lo vigente por familias (objetivos y pendientes, abajo).
     const hechos = contextoHechos(root, { presupuesto: 12 }).filter(h => !FAMILIAS_CICLO.test(h.dimension));

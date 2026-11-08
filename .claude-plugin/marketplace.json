@@ -1,0 +1,30 @@
+{
+  "name": "corvusmem",
+  "owner": {
+    "name": "Peterson Sena"
+  },
+  "metadata": {
+    "version": "0.5.0",
+    "description": "Marketplace de Corvusmem: memoria determinista, offline y sin dependencias para agentes de IA."
+  },
+  "plugins": [
+    {
+      "name": "corvusmem",
+      "source": "./plugins/corvusmem",
+      "description": "Deterministic, offline, zero-dependency memory for AI coding agents (Claude Code, Codex) and a standalone CLI.",
+      "version": "0.5.0",
+      "category": "development",
+      "keywords": [
+        "memory",
+        "memoria",
+        "hooks",
+        "offline",
+        "deterministic",
+        "facts",
+        "recall",
+        "claude",
+        "codex"
+      ]
+    }
+  ]
+}

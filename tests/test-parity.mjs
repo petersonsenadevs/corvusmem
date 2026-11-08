@@ -26,8 +26,9 @@ const T = s => new Date(Date.UTC(2026, 9, 7, 9, 0, s)).toISOString();
 // Siembra idéntica en un proyecto propio por anfitrión (así no se pisan los contadores de uso entre corridas)
 function seembra(nombre) {
     const d = path.join(base, nombre);
-    fs.mkdirSync(path.join(d, 'senzu', 'devlog'), { recursive: true });
-    fs.writeFileSync(path.join(d, 'senzu', 'senzu.json'), JSON.stringify({ stack: 'laravel' }));
+    // Standalone Corvus project (no Senzu marker): the hooks run and inject. With a real senzu.json they would stand
+    // down (cederASenzu) — that case is covered in test-facts; here we check Corvus's OWN hook output is host-agnostic.
+    fs.mkdirSync(d, { recursive: true });
     m.guardarHecho(d, { dimension: 'identidad.ubicacion', valor: 'Valencia', texto: 'vivo en Valencia',
         claves: ['valencia', 'ciudad', 'city', 'cidade', 'ville', 'stadt', 'citta', 'vivo', 'live', 'moro', 'vis', 'wohne'] }, { ahora: T(0) });
     m.guardarHecho(d, { dimension: 'proyecto.stack', valor: 'Laravel', texto: 'el stack es Laravel',
@@ -78,6 +79,26 @@ for (const [lang, prompt] of Object.entries(CONSULTAS)) {
     const ref = outs[0][1];
     ok(ref.includes('FACTS you already know') && ref.includes('Valencia'), 'arranque: inyecta el bloque de memoria (EN por defecto)', ref.slice(0, 80));
     for (const [a, o] of outs.slice(1)) ok(o === ref, `arranque: ${a} idéntico a ${outs[0][0]}`, `len ${o.length} vs ${ref.length}`);
+}
+
+// --- cesión end-to-end: con un marcador de Senzu REAL, los hooks de Corvus no emiten NADA (ni recall ni arranque):
+//     Senzu es el único inyector, así no hay doble bloque de memoria. Sin marcador, Corvus sí inyecta (control). -----
+{
+    const run = (hook, P, inp) => spawnSync(process.execPath, [path.join(HOOKS, hook)],
+        { input: JSON.stringify(inp), encoding: 'utf8', cwd: P, env: { ...process.env, CLAUDE_PROJECT_DIR: P, SENZU_SIN_RED: '1' } });
+    const sed = (nombre, conSenzu) => {
+        const d = path.join(base, nombre); fs.mkdirSync(d, { recursive: true });
+        if (conSenzu) { fs.mkdirSync(path.join(d, 'senzu'), { recursive: true }); fs.writeFileSync(path.join(d, 'senzu', 'senzu.json'), '{}'); }
+        m.guardarHecho(d, { dimension: 'proyecto.stack', valor: 'Deno', claves: ['stack', 'deno'] }, { ahora: T(0) });
+        return d;
+    };
+    const conSenzu = sed('cede-con-senzu', true), sinSenzu = sed('cede-sin-senzu', false);
+    const rr = run('live-recall.mjs', conSenzu, { session_id: `cd-${RUN}-r`, hook_event_name: 'UserPromptSubmit', prompt: 'what stack deno' });
+    ok(rr.stdout.trim() === '', 'cesión: con Senzu, live-recall no emite nada (sin doble inyección)', rr.stdout.slice(0, 80));
+    const rs = run('session-start.mjs', conSenzu, { session_id: `cd-${RUN}-s`, hook_event_name: 'SessionStart' });
+    ok(rs.stdout.trim() === '', 'cesión: con Senzu, session-start no emite nada', rs.stdout.slice(0, 80));
+    const cr = run('live-recall.mjs', sinSenzu, { session_id: `cd-${RUN}-r2`, hook_event_name: 'UserPromptSubmit', prompt: 'what stack deno' });
+    ok(contexto(cr).includes('Deno'), 'control: sin Senzu, live-recall SÍ recupera el hecho', contexto(cr).slice(0, 80));
 }
 
 // --- el standalone por el MOTOR coincide con lo que inyecta el hook (engine ≡ hook) --------------------

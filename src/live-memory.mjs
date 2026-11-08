@@ -6,14 +6,11 @@
 // Solo señales fuertes: «siempre» o «nunca» sueltos no cuentan (salen en cualquier frase).
 
 import fs from 'node:fs';
-import { readHookInput, sessionFlag, outHookJson, rutaMemoriaUsuario, projectRoot, rutaRel, esMensajeDelUsuario, cederASenzu } from './lib.mjs';
+import { readHookInput, sessionFlag, outHookJson, rutaMemoriaUsuario, projectRoot, rutaRel, esMensajeDelUsuario } from './lib.mjs';
 
 const p = readHookInput();
 const texto = p && typeof p.prompt === 'string' ? p.prompt.trim() : '';
 if (!texto || !esMensajeDelUsuario(texto)) process.exit(0);   // lo de un subagente no es una corrección del usuario
-const root = projectRoot();
-// Senzu presente: cede del todo (ni rastrea peticiones ni avisa de reglas; Senzu ya lo hace). Ver lib.cederASenzu.
-if (cederASenzu(root)) process.exit(0);
 const sid = p.session_id ? String(p.session_id) : 'default';
 const corto = texto.replace(/\s+/g, ' ').slice(0, 200);
 
@@ -36,6 +33,7 @@ const REGLA = new RegExp([
 const m = REGLA.exec(texto);
 if (!m) process.exit(0);
 try { fs.writeFileSync(sessionFlag(sid, 'memoria-pendiente'), corto); } catch {}
+const root = projectRoot();
 outHookJson('UserPromptSubmit', {
     additionalContext: `[senzu] Esto parece una regla o una corrección del usuario («${m[0]}…»). Si es duradera, apúntala ANTES de seguir: `
         + `de este proyecto → ${rutaRel(root, 'devlog')}/MEMORIA.md («Reglas del cliente y del proyecto» o «Lo que no funcionó»); `

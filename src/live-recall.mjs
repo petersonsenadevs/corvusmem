@@ -6,7 +6,7 @@
 
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { readHookInput, projectRoot, sessionFlag, outHookJson, esMensajeDelUsuario, localeUI, msg, cederASenzu } from './lib.mjs';
+import { readHookInput, projectRoot, sessionFlag, outHookJson, esMensajeDelUsuario, localeUI, msg } from './lib.mjs';
 import { reclamarInyeccion } from './host.mjs';
 import { recuerdo, palabras, palabraConPeso, UMBRAL_RECUERDO, anotarUso, apuntarInyeccion, mapaMemoria, textoMapa, intencionTemporal } from './facts.mjs';
 
@@ -24,8 +24,6 @@ const consulta = texto.replace(/^\/[\w:-]+\s*/, '');   // «/plan pagos con stri
 if (!palabras(consulta).some(palabraConPeso)) process.exit(0);
 
 const root = projectRoot();
-// Senzu presente: cede del todo (Senzu ya inyecta el mismo recuerdo). Determinista, sin carrera (ver lib.cederASenzu).
-if (cederASenzu(root)) process.exit(0);
 // Apretón de manos (F9-T3): si otra capa (núcleo/anfitrión) ya reclamó la inyección de este evento+turno, cedo.
 if (!reclamarInyeccion('UserPromptSubmit', { input: p, root }).inyectar) process.exit(0);
 const lang = localeUI(root);

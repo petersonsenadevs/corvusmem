@@ -8,7 +8,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { readHookInput, projectRoot, sessionFlag, sinTextoCitado, relDelProyecto, rutaNativa, ruta, rutaRel, rutaMemoriaUsuario, testOnce, rutaBuscador, editadosSesion, cederASenzu } from './lib.mjs';
+import { readHookInput, projectRoot, sessionFlag, sinTextoCitado, relDelProyecto, rutaNativa, ruta, rutaRel, rutaMemoriaUsuario, testOnce, rutaBuscador, editadosSesion } from './lib.mjs';
 import { palabras, palabraConPeso, todosLosHechos } from './facts.mjs';
 
 const p = readHookInput() || {};
@@ -26,7 +26,6 @@ const marcar = (extra = {}) => {
 
 if (evento === 'PostToolUse') {
     const root = projectRoot();
-    if (cederASenzu(root)) process.exit(0);   // Senzu presente: su hechos-guard ya cuida la memoria (ver lib.cederASenzu)
     if (['Bash', 'PowerShell'].includes(p.tool_name)) {
         const cmd = sinTextoCitado(String((p.tool_input && p.tool_input.command) || ''));
         const m = /\bmemoria\.mjs\b[^|;&\n]*?--(guardar|olvidar|nada|resolver|abandonar|en-curso)\b/.exec(cmd);
@@ -50,7 +49,6 @@ if (evento === 'PostToolUse') {
 
 // ---------------- Stop: dos comprobaciones, cada una UNA vez por sesión, en un solo mensaje
 const root = projectRoot();
-if (cederASenzu(root)) process.exit(0);   // Senzu presente: Corvus cede (ver lib.cederASenzu)
 const rev = leerRevision(flag);
 const cli = rutaBuscador(root).replace(/buscar\.mjs$/, 'memory.mjs');
 const motivos = [];

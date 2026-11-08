@@ -5,16 +5,13 @@
 // (p. ej. Senzu), no del motor de memoria. Corvusmem instalado solo habla de memoria y nada más.
 
 import {
-    readHookInput, projectRoot, outHookJson, leerUltimaSesion, localeUI, msg, cederASenzu,
+    readHookInput, projectRoot, outHookJson, leerUltimaSesion, localeUI, msg,
 } from './lib.mjs';
 import { contextoHechos, decisionesObsoletas, abiertos, FAMILIAS_CICLO, contradicciones, mapaMemoria, textoMapa, etiquetaDimension } from './facts.mjs';
 import { reclamarInyeccion } from './host.mjs';
 
 const p = readHookInput() || {};
 const root = projectRoot();
-// Senzu presente: corre el mismo motor de memoria, así que Corvus cede del todo (ni inyecta ni captura) para no
-// duplicar el bloque ni partir la memoria. Determinista: siempre gana Senzu (ver lib.cederASenzu).
-if (cederASenzu(root)) process.exit(0);
 // Apretón de manos (F9-T3): si otra capa (núcleo/anfitrión) ya reclamó el arranque de esta sesión, cedo.
 if (!reclamarInyeccion('SessionStart', { input: p, root }).inyectar) process.exit(0);
 const lang = localeUI(root);

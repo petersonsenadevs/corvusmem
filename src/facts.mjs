@@ -17,8 +17,8 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { ruta, rutaMemoriaUsuario, rutaEstado, localeUI, nombresMemoria, migrarMemoriaCorvus } from './lib.mjs';
-export { rutaNativa, localeUI, carpetaBase, esSenzu, cederASenzu } from './lib.mjs';   // memory.mjs: --path (C:\, C:/, /c/ de Git Bash → el mismo almacén), idioma de UI, carpeta base (senzu/ vs .corvusmem/) y si Corvus cede a Senzu
+import { ruta, rutaMemoriaUsuario, rutaEstado, localeUI, nombresMemoria, migrarMemoriaCorvus, adoptarMemoriaSenzu } from './lib.mjs';
+export { rutaNativa, localeUI, carpetaBase, esSenzu, adoptarMemoriaSenzu } from './lib.mjs';   // memory.mjs: --path (C:\, C:/, /c/ de Git Bash → el mismo almacén), idioma de UI, carpeta base y adopción de la memoria de Senzu
 
 export const FAMILIAS_VARIOS = /^(objetivo|pendiente|nota|hecho|enlace|aprendizaje)(\.|$)/;
 // Multiusuario (F14): familias PERSONALES (de la persona, no del proyecto). En memoria de proyecto COMPARTIDA, su
@@ -41,8 +41,9 @@ function autorActual(root, env = process.env) {
 }
 export function rutaHechos(root, alcance = 'proyecto') {
     if (alcance === 'usuario') return path.join(path.dirname(rutaMemoriaUsuario()), 'hechos.jsonl');   // compartida con Senzu: nombre en español
+    adoptarMemoriaSenzu(root);   // proyecto que ya usaba Senzu: hereda senzu/memoria/hechos.jsonl una vez (copia)
     migrarMemoriaCorvus(root);   // instalaciones viejas: .corvusmem/memoria/hechos.jsonl -> .corvusmem/memory/facts.jsonl (idempotente)
-    return path.join(ruta(root, 'memoria'), nombresMemoria(root).facts);   // SIEMPRE .corvusmem/memory/facts.jsonl (nunca senzu/); con Senzu, los hooks ceden (cederASenzu)
+    return path.join(ruta(root, 'memoria'), nombresMemoria(root).facts);   // SIEMPRE .corvusmem/memory/facts.jsonl; Corvus es el dueño, Senzu le cede la memoria
 }
 
 // ---------------------------------------------------------------- texto: normalizar y partir en palabras

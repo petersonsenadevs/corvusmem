@@ -644,66 +644,71 @@ ok(r.accion === 'sustituye' && r.sustituidos.some(h => h.valor === 'Next'), 'imp
 c = cli(L, '--save', '--dimension', 'preferencia.shell', '--value', 'zsh', '--author', 'carol@x');
 ok(c.status === 0 && /· de carol@x/.test(c.stdout), 'CLI: --author guarda y muestra el autor', c.stdout + c.stderr);
 
-// === memory store: Corvus ALWAYS owns .corvusmem/memory/, and stands its hooks down when a real Senzu is present
-// (v0.4.0: one stable store, no double hook, no split memory — cederASenzu) ===
+// === memory store: Corvus ALWAYS owns .corvusmem/memory/ and is the MEMORY owner. It never writes into senzu/, its
+// store never flips with Senzu's presence, and when it lands on a project that already used Senzu it ADOPTS those
+// facts (senzu/memoria/hechos.jsonl -> .corvusmem/memory/facts.jsonl). Senzu defers its memory hooks to Corvus. ===
 const mk = n => { const d = path.join(base, 'cb-' + n); fs.mkdirSync(d, { recursive: true }); return d; };
 const senzuMarker = d => { fs.mkdirSync(path.join(d, 'senzu'), { recursive: true }); fs.writeFileSync(path.join(d, 'senzu', 'senzu.json'), '{}'); };
+const sembrarSenzu = (d, hecho) => { const f = path.join(d, 'senzu', 'memoria', 'hechos.jsonl'); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, JSON.stringify(hecho) + '\n'); return f; };
 
-// 1. No Senzu -> Corvus owns its own .corvusmem/ dir, active
+// 1. No Senzu -> Corvus owns its own .corvusmem/ dir
 const CB1 = mk('nosenzu');
 ok(m.carpetaBase(CB1) === '.corvusmem', 'no senzu -> base is .corvusmem', m.carpetaBase(CB1));
-ok(m.cederASenzu(CB1) === false, 'no senzu -> Corvus does NOT stand down (active)');
 m.guardarHecho(CB1, { dimension: 'proyecto.stack', valor: 'Astro', claves: ['stack'] }, { ahora: T(CB1, 0) });
 ok(fs.existsSync(path.join(CB1, '.corvusmem', 'memory', 'facts.jsonl'))
     && !fs.existsSync(path.join(CB1, '.corvusmem', 'memoria')) && !fs.existsSync(path.join(CB1, 'senzu')),
     'standalone: writes English .corvusmem/memory/facts.jsonl (no memoria/, no senzu/)');
 ok(m.leerHechos(m.rutaHechos(CB1)).some(h => h.valor === 'Astro'), 'standalone: recall reads the English facts file');
 
-// 2. REAL Senzu install (marker senzu.json): memory STILL lives in Corvus's own .corvusmem/memory/ (never senzu/),
-//    and Corvus stands its hooks down so Senzu is the single injector (no double hook, no shared/split file).
+// 2. REAL Senzu install (marker senzu.json): Corvus is the memory owner -> writes its OWN .corvusmem/memory/ (never
+//    senzu/), and ADOPTS the facts Senzu already had so nothing is lost.
 const CB2 = mk('consenzu'); senzuMarker(CB2);
-ok(m.cederASenzu(CB2) === true, 'real Senzu (senzu.json) -> Corvus stands down (cederASenzu)');
+sembrarSenzu(CB2, { id: 'h-senzu001', dimension: 'proyecto.legado', valor: 'FactFromSenzu', claves: ['legado'], estado: 'activo', creado: '2026-01-01' });
+ok(m.rutaHechos(CB2) === path.join(CB2, '.corvusmem', 'memory', 'facts.jsonl'), 'with Senzu: store is .corvusmem/memory/facts.jsonl (not senzu/)', m.rutaHechos(CB2));
+ok(m.leerHechos(m.rutaHechos(CB2)).some(h => h.valor === 'FactFromSenzu'), 'with Senzu: Corvus ADOPTS the facts Senzu already had (nothing lost)');
 m.guardarHecho(CB2, { dimension: 'proyecto.stack', valor: 'Next', claves: ['stack'] }, { ahora: T(CB2, 0) });
-ok(m.rutaHechos(CB2) === path.join(CB2, '.corvusmem', 'memory', 'facts.jsonl'), 'with Senzu: store is STILL .corvusmem/memory/facts.jsonl', m.rutaHechos(CB2));
-ok(fs.existsSync(path.join(CB2, '.corvusmem', 'memory', 'facts.jsonl')) && !fs.existsSync(path.join(CB2, 'senzu', 'memoria', 'hechos.jsonl')),
-    'with Senzu: Corvus never writes into senzu/memoria/ (no split memory)');
+ok(fs.existsSync(path.join(CB2, '.corvusmem', 'memory', 'facts.jsonl')), 'with Senzu: new facts go to Corvus\'s own store');
 
-// 3. Both marker + .corvusmem -> Corvus stands down, store still its own
+// 2b. Adoption is idempotent and never clobbers Corvus's own facts: if .corvusmem already has memory, senzu/ is ignored
+const CB2b = mk('adopt-noclobber'); senzuMarker(CB2b);
+m.guardarHecho(CB2b, { dimension: 'proyecto.stack', valor: 'Qwik', claves: ['stack'] }, { ahora: T(CB2b, 0) });   // Corvus store exists first
+sembrarSenzu(CB2b, { id: 'h-senzu002', dimension: 'proyecto.legado', valor: 'ShouldNotAppear', claves: ['x'], estado: 'activo', creado: '2026-01-01' });
+ok(m.leerHechos(m.rutaHechos(CB2b)).some(h => h.valor === 'Qwik') && !m.leerHechos(m.rutaHechos(CB2b)).some(h => h.valor === 'ShouldNotAppear'),
+    'adoption only seeds an EMPTY Corvus store; it never clobbers facts Corvus already has');
+
+// 3. Both marker + .corvusmem -> store still Corvus's own
 const CB3 = mk('both'); senzuMarker(CB3); fs.mkdirSync(path.join(CB3, '.corvusmem'), { recursive: true });
-ok(m.cederASenzu(CB3) === true && m.rutaHechos(CB3) === path.join(CB3, '.corvusmem', 'memory', 'facts.jsonl'), 'real Senzu + .corvusmem -> Corvus yields, store stays .corvusmem');
+ok(m.rutaHechos(CB3) === path.join(CB3, '.corvusmem', 'memory', 'facts.jsonl'), 'real Senzu + .corvusmem -> store stays .corvusmem');
 
-// 3b. STRAY senzu/ folder WITHOUT marker (a global Senzu dropped it) -> Corvus does NOT yield, keeps its own dir
+// 3b. STRAY senzu/ folder WITHOUT marker (a global Senzu dropped it) -> Corvus keeps its own dir
 const CB3b = mk('stray-senzu'); fs.mkdirSync(path.join(CB3b, 'senzu', 'memoria'), { recursive: true }); fs.mkdirSync(path.join(CB3b, '.corvusmem'), { recursive: true });
-ok(m.carpetaBase(CB3b) === '.corvusmem' && m.cederASenzu(CB3b) === false, 'stray senzu/ (no senzu.json): Corvus stays active, not hijacked', m.carpetaBase(CB3b));
+ok(m.carpetaBase(CB3b) === '.corvusmem', 'stray senzu/ (no senzu.json): Corvus not hijacked', m.carpetaBase(CB3b));
 m.guardarHecho(CB3b, { dimension: 'proyecto.stack', valor: 'Remix', claves: ['stack'] }, { ahora: T(CB3b, 0) });
-ok(fs.existsSync(path.join(CB3b, '.corvusmem', 'memory', 'facts.jsonl')) && !fs.existsSync(path.join(CB3b, 'senzu', 'memoria', 'hechos.jsonl')), 'stray senzu/: Corvus writes to .corvusmem/memory, not senzu/');
+ok(fs.existsSync(path.join(CB3b, '.corvusmem', 'memory', 'facts.jsonl')), 'stray senzu/: Corvus writes to .corvusmem/memory');
 
-// 3c. STRAY senzu/ folder WITHOUT marker and NO .corvusmem yet -> still Corvus, still active
+// 3c. STRAY senzu/ folder WITHOUT marker and NO .corvusmem yet -> still Corvus
 const CB3c = mk('stray-only'); fs.mkdirSync(path.join(CB3c, 'senzu', 'memoria'), { recursive: true });
-ok(m.carpetaBase(CB3c) === '.corvusmem' && m.cederASenzu(CB3c) === false, 'stray senzu/ only (no marker) -> Corvus owns its dir and stays active', m.carpetaBase(CB3c));
+ok(m.carpetaBase(CB3c) === '.corvusmem', 'stray senzu/ only (no marker) -> Corvus owns its dir', m.carpetaBase(CB3c));
 
-// 4. .corvusmem/ already here, no senzu -> stays on .corvusmem, active
+// 4. .corvusmem/ already here, no senzu -> stays on .corvusmem
 const CB4 = mk('onlycorvus'); fs.mkdirSync(path.join(CB4, '.corvusmem'), { recursive: true });
-ok(m.carpetaBase(CB4) === '.corvusmem' && m.cederASenzu(CB4) === false, '.corvusmem already created -> kept, active');
+ok(m.carpetaBase(CB4) === '.corvusmem', '.corvusmem already created -> kept');
 
-// 5. Legacy Senzu marker at root (.dev-standards.json) -> Corvus yields; a bare devlog/ without a marker does not.
+// 5. Legacy Senzu marker at root (.dev-standards.json) -> memory store is still Corvus's own .corvusmem/memory
 const CB5 = mk('legacy'); fs.writeFileSync(path.join(CB5, '.dev-standards.json'), '{}');
-ok(m.cederASenzu(CB5) === true, 'legacy Senzu (root .dev-standards.json) -> Corvus stands down');
 ok(m.rutaHechos(CB5) === path.join(CB5, '.corvusmem', 'memory', 'facts.jsonl'), 'legacy: memory store is still Corvus\'s own .corvusmem/memory', m.rutaHechos(CB5));
-const CB5b = mk('bare-devlog'); fs.mkdirSync(path.join(CB5b, 'devlog'), { recursive: true });
-ok(m.cederASenzu(CB5b) === false, 'bare devlog/ without a marker is NOT a real Senzu -> Corvus stays active');
 
 // 7. LIFECYCLE: the store never flips and facts are never orphaned when Senzu comes or goes (the three scenarios).
 const LC = mk('lifecycle');
 m.guardarHecho(LC, { dimension: 'proyecto.stack', valor: 'SvelteKit', claves: ['stack'] }, { ahora: T(LC, 0) });   // Corvus first (no Senzu)
 const storeLC = path.join(LC, '.corvusmem', 'memory', 'facts.jsonl');
-ok(m.rutaHechos(LC) === storeLC && m.cederASenzu(LC) === false, 'lifecycle 1/3 (Corvus first): store .corvusmem, active');
+ok(m.rutaHechos(LC) === storeLC, 'lifecycle 1/3 (Corvus first): store .corvusmem');
 senzuMarker(LC);   // ...then Senzu is installed in the same project
-ok(m.rutaHechos(LC) === storeLC && m.cederASenzu(LC) === true && m.leerHechos(m.rutaHechos(LC)).some(h => h.valor === 'SvelteKit'),
-    'lifecycle 2/3 (Senzu arrives): store does NOT move, fact NOT orphaned, Corvus now yields');
+ok(m.rutaHechos(LC) === storeLC && m.leerHechos(m.rutaHechos(LC)).some(h => h.valor === 'SvelteKit'),
+    'lifecycle 2/3 (Senzu arrives): store does NOT move, fact NOT orphaned');
 fs.rmSync(path.join(LC, 'senzu'), { recursive: true, force: true });   // ...then Senzu is removed
-ok(m.rutaHechos(LC) === storeLC && m.cederASenzu(LC) === false && m.leerHechos(m.rutaHechos(LC)).some(h => h.valor === 'SvelteKit'),
-    'lifecycle 3/3 (Senzu removed): store still .corvusmem, fact intact, Corvus active again');
+ok(m.rutaHechos(LC) === storeLC && m.leerHechos(m.rutaHechos(LC)).some(h => h.valor === 'SvelteKit'),
+    'lifecycle 3/3 (Senzu removed): store still .corvusmem, fact intact');
 
 // 6. Migration: an OLDER standalone install (.corvusmem/memoria/hechos.jsonl) is renamed to memory/facts.jsonl, data intact
 const CB6 = mk('migrate');

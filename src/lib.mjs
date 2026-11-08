@@ -101,12 +101,6 @@ export function esSenzu(root) {
         || fs.existsSync(path.join(root, CARPETA, '.dev-standards.json'))
         || fs.existsSync(path.join(root, '.dev-standards.json'));
 }
-// Should Corvus stand down in this project? When a REAL Senzu install is present it runs the very same memory engine,
-// so Corvus must NOT inject or capture in parallel — that would double the memory block on every message and split the
-// facts across two stores. Deterministic by design: Corvus always yields to Senzu (its hooks exit early; its own
-// .corvusmem/ store is kept untouched, so if Senzu is later removed Corvus wakes up with its memory intact). A bare
-// senzu/ folder without a marker does NOT count (see esSenzu): a global Senzu must not silence a standalone Corvus.
-export function cederASenzu(root) { return esSenzu(root); }
 // Base folder for this project's memory & config. Couple to Senzu only when the project REALLY uses it (its marker,
 // or a legacy layout); otherwise Corvus lives standalone in its own .corvusmem/ — even if a stray senzu/ folder exists.
 export function carpetaBase(root) {
@@ -115,10 +109,10 @@ export function carpetaBase(root) {
     if (esLegado(root)) return CARPETA;                                          // legacy Senzu project (root devlog / .dev-standards.json)
     return CARPETA_CORVUS;                                                       // no real Senzu (even a stray senzu/) -> Corvus owns its dir
 }
-// Facts storage names. Corvus's store is ALWAYS its own .corvusmem/memory/facts.jsonl with English names — it never
-// writes into Senzu's senzu/memoria/hechos.jsonl any more. When a real Senzu install is present, Corvus stands its
-// hooks down (cederASenzu) instead of sharing Senzu's file, so there is no coupled/Spanish variant to keep.
-// MEM_*_ES remain only for the one-time migration of pre-0.4 standalone installs (.corvusmem/memoria/ -> memory/).
+// Facts storage names. Corvus's store is ALWAYS its own .corvusmem/memory/facts.jsonl with English names. Corvus is
+// the memory owner: when it is installed, Senzu defers its memory hooks to Corvus (Senzu-side), and Corvus ADOPTS the
+// facts Senzu had in senzu/memoria/hechos.jsonl into its own store (see adoptarMemoriaSenzu) so nothing is lost.
+// MEM_*_ES remain for that adoption and for the one-time migration of pre-0.4 installs (.corvusmem/memoria/ -> memory/).
 export const MEM_DIR_ES = 'memoria', MEM_FACTS_ES = 'hechos.jsonl', MEM_CORRUPT_ES = 'hechos.danado.jsonl';
 export const MEM_DIR_EN = 'memory',  MEM_FACTS_EN = 'facts.jsonl',  MEM_CORRUPT_EN = 'facts.corrupt.jsonl';
 export function nombresMemoria(_root) {
@@ -140,6 +134,23 @@ export function migrarMemoriaCorvus(root) {
         }
         try { if (!fs.readdirSync(viejoDir).length) fs.rmdirSync(viejoDir); } catch { }   // si queda vacía, se va
     } catch { /* best-effort: si no se puede migrar, se sigue leyendo el viejo via ruta() */ }
+}
+// One-time adoption: when Corvus takes over a project that already used Senzu, lift the facts Senzu kept in
+// senzu/memoria/hechos.jsonl into Corvus's own .corvusmem/memory/facts.jsonl (COPY, not move: Senzu's file is left
+// intact, so nothing breaks mid-migration and it is reversible). Runs only when Corvus's store does not exist yet, so
+// it seeds once and never clobbers Corvus's own facts. Best-effort and idempotent.
+export function adoptarMemoriaSenzu(root) {
+    try {
+        const corvus = path.join(root, CARPETA_CORVUS, MEM_DIR_EN, MEM_FACTS_EN);
+        if (fs.existsSync(corvus)) return;                                   // Corvus ya tiene su memoria: no se toca
+        const senzu = path.join(root, CARPETA, MEM_DIR_ES, MEM_FACTS_ES);    // senzu/memoria/hechos.jsonl
+        if (!fs.existsSync(senzu)) return;                                   // no hay memoria de Senzu que adoptar
+        fs.mkdirSync(path.dirname(corvus), { recursive: true });
+        fs.copyFileSync(senzu, corvus);                                      // hereda los hechos (copia, no mueve)
+        const senzuBad = path.join(root, CARPETA, MEM_DIR_ES, MEM_CORRUPT_ES);
+        const corvusBad = path.join(root, CARPETA_CORVUS, MEM_DIR_EN, MEM_CORRUPT_EN);
+        if (fs.existsSync(senzuBad) && !fs.existsSync(corvusBad)) { try { fs.copyFileSync(senzuBad, corvusBad); } catch { } }
+    } catch { /* best-effort: si no se puede adoptar, Corvus arranca con su memoria vacía */ }
 }
 const VIEJA = { 'ui-verify': '.ui-verify', 'senzu.json': '.dev-standards.json', auditoria: 'docs/auditoria', entrega: 'docs/entrega', 'mapa.md': 'docs/MAPA.md' };
 export function ruta(root, nombre) {   // 'devlog' | 'plan' | 'design-system' | 'conventions.md' | 'conventions.json' | 'ui-verify' | 'senzu.json' | 'memoria'

@@ -25,6 +25,7 @@ const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(AQUI, 'src');                       // donde viven los hooks del núcleo (ruta absoluta)
 const CMDS_SRC = path.join(AQUI, 'commands');             // slash-command templates (/corvus-absorb)
 const CLI_SRC = path.join(AQUI, 'cli');                   // el CLI de la memoria (corvusmem.mjs + subcomandos): se empaqueta para el guardado RÁPIDO (sin npx)
+const CORTEX_SRC = path.join(AQUI, 'cortex');             // el render del Cortex (cortex.mjs + cortex-text.mjs): se empaqueta para que --cortex funcione en local (sin npx)
 const args = process.argv.slice(2);
 const opt = n => { const i = args.indexOf(n); return i >= 0 ? (args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : true) : null; };
 const has = n => args.includes(n);
@@ -79,6 +80,16 @@ function copiarCli(baseDir) {
     for (const f of fs.readdirSync(CLI_SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(CLI_SRC, f), path.join(dir, f)); n++; }
     return n;
 }
+// El render del Cortex a <baseDir>/cortex/ (hermano de cli/): cli/memory.mjs lo carga en ../cortex/cortex.mjs, así
+// `/corvus-cortex` (o --cortex) dibuja el cerebro HTML con node LOCAL, sin npx.
+function copiarCortex(baseDir) {
+    if (DRY) { log(`  [dry-run] would copy the Cortex to ${path.join(baseDir, 'cortex')}`); return 0; }
+    const dir = path.join(baseDir, 'cortex');
+    fs.mkdirSync(dir, { recursive: true });
+    let n = 0;
+    try { for (const f of fs.readdirSync(CORTEX_SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(CORTEX_SRC, f), path.join(dir, f)); n++; } } catch { }
+    return n;
+}
 
 // Slash commands (e.g. /corvus-absorb) go to .claude/commands/ — per project, or the HOME with --global.
 function instalarComandos(quitar) {
@@ -127,6 +138,8 @@ function empaquetarPlugin(destino) {
     for (const f of fs.readdirSync(SRC)) if (f.endsWith('.mjs')) { fs.copyFileSync(path.join(SRC, f), path.join(hooksDir, f)); n++; }
     // 2b) el CLI de memoria en <plugin>/cli/ (hermano de hooks/): para que el agente guarde/recuerde con node, sin npx
     const ncli = copiarCli(dir);
+    // 2c) el render del Cortex en <plugin>/cortex/: para que /corvus-cortex dibuje el cerebro en local, sin npx
+    const ncx = copiarCortex(dir);
     // 3) slash commands (/corvus-absorb) in the plugin's commands/ dir
     let nc = 0;
     try {
@@ -136,7 +149,7 @@ function empaquetarPlugin(destino) {
     // 4) plugin.json
     const plugin = { name: 'corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena' }, homepage: pkg.homepage || 'https://corvusmem.vercel.app', repository: (pkg.repository && pkg.repository.url) || 'https://github.com/petersonsenadevs/corvusmem', license: 'SEE LICENSE IN LICENSE' };
     fs.writeFileSync(path.join(dir, '.claude-plugin', 'plugin.json'), JSON.stringify(plugin, null, 2) + '\n');
-    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs + ${ncli} cli${nc ? ` + ${nc} command(s)` : ''}`);
+    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs + ${ncli} cli + ${ncx} cortex${nc ? ` + ${nc} command(s)` : ''}`);
 }
 
 // Genera, DENTRO del repo, el plugin committeable `plugins/corvusmem/` y el `.claude-plugin/marketplace.json` de la
@@ -229,12 +242,13 @@ function run() {
     // 0) Copias DURABLES de los hooks (o quitarlas). La MEMORIA (.corvusmem/memoria, ~/.config/corvusmem) no se toca.
     const cliBase = path.dirname(hooksDir);   // .corvusmem/ (proyecto) o ~/.config/corvusmem/ (global); el cli va junto a hooks
     if (quitar) {
-        if (!DRY) { try { fs.rmSync(hooksDir, { recursive: true, force: true }); } catch {} try { fs.rmSync(path.join(cliBase, 'cli'), { recursive: true, force: true }); } catch {} }
+        if (!DRY) { try { fs.rmSync(hooksDir, { recursive: true, force: true }); } catch {} try { fs.rmSync(path.join(cliBase, 'cli'), { recursive: true, force: true }); } catch {} try { fs.rmSync(path.join(cliBase, 'cortex'), { recursive: true, force: true }); } catch {} }
         log(`  [hooks] removed ${hooksDir}`);
     } else {
         const n = copiarHooks(hooksDir);
         const ncli = copiarCli(cliBase);
-        log(`  [hooks] ${n} core file(s) + ${ncli} CLI file(s) copied to ${cliBase.replace(/\\/g, '/')} (fast save, no npx)`);
+        const ncx = copiarCortex(cliBase);
+        log(`  [hooks] ${n} core + ${ncli} CLI + ${ncx} Cortex file(s) copied to ${cliBase.replace(/\\/g, '/')} (fast save & cortex, no npx)`);
     }
 
     // 1) Claude: hooks en settings.json (proyecto o HOME)

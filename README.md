@@ -83,15 +83,21 @@ project (`--global`, in your home). It does **not** change where memory lives: p
 your private memory.
 
 ## Usage
-Once installed, the agent captures and recalls memory on its own — you don't do a thing. To look at it or steer it:
+Once installed, the agent captures and recalls memory on its own — you don't do a thing. Two slash commands come with
+it (native — no `npx`):
+- **`/corvus-cortex`** — open the Cortex: your whole memory as a local HTML "brain" (offline).
+- **`/corvus-absorb`** — pull the knowledge already in the repo (CLAUDE.md, docs…) into memory, once.
+
+To look at or steer memory from the **terminal** (handy for any agent, or no agent at all):
 ```
-npx corvusmem --cortex                     # your whole memory as a local HTML brain (offline)
-npx corvusmem --recall "stripe webhook"    # ask what it already knows, from the terminal
+npx corvusmem --cortex                     # the same Cortex, from the shell
+npx corvusmem --recall "stripe webhook"    # ask what it already knows
 npx corvusmem --list                       # list every fact
 npx corvusmem --save --dimension project.stack --value "Astro + Tailwind" --scope project
 npx corvusmem --forget <id>                # drop one fact
 ```
-The Cortex also takes `--client` (a shareable view with nothing private), `--output <dir>` and `--lang en|es|…`.
+The Cortex also takes `--client` (a shareable view with nothing private), `--output <dir>` and `--lang en|es|…`. Once
+Corvus is installed (plugin or `npx corvusmem install`), those commands run from the local copy — no `npx` cold start.
 Flags are English with Spanish aliases (`--save`/`--guardar`, `--recall`/`--recordar`); keys and values work in any
 language — the memory is language-agnostic.
 

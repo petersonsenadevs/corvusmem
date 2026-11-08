@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook UserPromptSubmit: el RECUERDO VIVO. Con cada mensaje del usuario, lo que la memoria ya sabe de eso —hechos
 // (en cualquier idioma), decisiones de MEMORIA.md y entradas del devlog— llega al agente antes de responder, con su
 // fuente y su motivo. Así no pregunta lo que ya se sabe ni contradice lo decidido (plan de Corvusmem, F2-T2).

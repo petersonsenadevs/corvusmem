@@ -18,6 +18,8 @@ and no servers. It plugs into where you already work: Claude Code / Codex (hooks
 
 🌐 [Website](https://corvusmem.vercel.app) · 📖 [Docs](https://corvusmem.vercel.app/docs) · 📊 [Benchmarks](https://corvusmem.vercel.app/benchmarks) · 📦 [npm](https://www.npmjs.com/package/corvusmem)
 
+<p align="center"><sub>Built by <b>Peterson Sena</b> (<a href="https://dev.to/r3v3rs3">r3v3rs3</a>) · the crow that remembers 🐦‍⬛</sub></p>
+
 > **Narrative docs (what it is, the message, the Cortex, FAQ):** [`docs.md`](./docs.md). This README is the quick
 > reference for structure and commands.
 

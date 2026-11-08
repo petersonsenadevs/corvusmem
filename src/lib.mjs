@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Funciones compartidas por los hooks de Senzu (Node >= 18, ESM).
 // Port agnóstico de _common.ps1: mismo comportamiento en Windows, macOS y Linux.
 // Los hooks leen stdin como UTF-8 directo (sin reparación de codepage OEM: eso era un problema de PowerShell).

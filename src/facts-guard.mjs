@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Hook de la memoria de hechos que OBLIGA a revisarla (plan de Corvusmem, F3), en cualquier idioma: no busca
 // frases (eso depende del idioma); comprueba si el agente revisó la memoria. Quien entiende si el usuario dijo algo
 // estable es el agente.

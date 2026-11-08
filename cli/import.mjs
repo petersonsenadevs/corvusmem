@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // `corvusmem import` — list the memory documents already in this project, in two tiers, so the agent
 // (via /corvus-absorb) can read them and save what matters. Deterministic, offline, READ-ONLY: it writes
 // nothing to memory. `--json` prints the machine-readable contract the command consumes.

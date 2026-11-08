@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Buscador del devlog: encuentra decisiones y entradas pasadas sin leer archivos enteros.
 // Ejecutar desde la RAÍZ del proyecto (cualquier agente, cualquier OS, sin dependencias):
 //   node <skills-dir>/devlog/scripts/search.mjs "pagos stripe" [--max 5] [--desde 2026-09] [--hasta 2026-10-15]

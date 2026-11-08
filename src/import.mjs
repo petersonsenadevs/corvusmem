@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Corvus memory import — DISCOVERY ONLY (deterministic, offline, zero-dependency).
 // Finds the memory documents already in a project so nothing a teammate wrote is lost, in two tiers:
 //   tier 'agent' — known agent-memory files (CLAUDE.md, AGENTS.md, Cursor/Copilot/Gemini rules, a Senzu

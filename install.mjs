@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Instalador de Corvusmem (F10-T2). Registra los hooks del núcleo y prepara las carpetas de memoria, sin
 // dependencias y sin red. Determinista, merge-safe (no pisa lo que el usuario ya tenga) e idempotente.
 //

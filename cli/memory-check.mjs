@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Revisa la memoria del proyecto (senzu/devlog/MEMORIA.md) y avisa de lo que la estropea con el tiempo:
 //   - más de 60 líneas (lo sustituido y lo cerrado va a MEMORIA-historico.md);
 //   - «ver NNN» que no existe en el devlog; D-xxx repetidos; huecos en la numeración (aviso suave);

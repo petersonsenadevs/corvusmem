@@ -1,3 +1,4 @@
+// Corvusmem · author: Peterson Sena (r3v3rs3) · https://github.com/petersonsenadevs/corvusmem
 // Catalogo de los mensajes de la UI que ve el usuario (muros, avisos), por idioma. El CONTENIDO de las skills
 // NO esta aqui: lo lee el agente, que responde en el idioma del usuario. Un id por mensaje; valor {en, es}.
 // - El idioma lo resuelve localeUI(root) en lib.mjs (por defecto 'en').

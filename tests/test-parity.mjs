@@ -101,6 +101,29 @@ for (const [lang, prompt] of Object.entries(CONSULTAS)) {
     ok(contexto(cr).includes('Deno'), 'sin Senzu, live-recall también recupera el hecho (control)', contexto(cr).slice(0, 80));
 }
 
+// --- DOS CAPAS a la vez (plugin GLOBAL + install de PROYECTO): comparten el apretón de manos, así que SOLO UNO
+//     inyecta por turno, pero el que gana trae SIEMPRE las dos tiendas (proyecto + personal/GLOBAL). La clave del
+//     apretón depende de la RAÍZ, no de qué instalación, y ambos corren el MISMO motor (todosLosHechos lee proyecto
+//     + usuario). Responde: ¿si no salta el hook global, se pierden los recuerdos globales? NO. -------------------
+{
+    const run = (hook, P, inp) => spawnSync(process.execPath, [path.join(HOOKS, hook)],
+        { input: JSON.stringify(inp), encoding: 'utf8', cwd: P, env: { ...process.env, CLAUDE_PROJECT_DIR: P, SENZU_SIN_RED: '1' } });
+    const P = path.join(base, 'dos-capas'); fs.mkdirSync(P, { recursive: true });
+    m.guardarHecho(P, { dimension: 'proyecto.stack', valor: 'Deno', claves: ['stack', 'deno'] }, { ahora: T(0) });
+    m.guardarHecho(P, { dimension: 'identidad.nombre', valor: 'Peterson', alcance: 'usuario', claves: ['nombre', 'name', 'peterson'] }, { ahora: T(1) });
+    const sid = `dos-${RUN}`;
+    const a = run('session-start.mjs', P, { session_id: sid, hook_event_name: 'SessionStart' });   // 1.ª capa (p.ej. el plugin global)
+    const b = run('session-start.mjs', P, { session_id: sid, hook_event_name: 'SessionStart' });   // 2.ª capa (install del proyecto), MISMA sesión
+    ok(a.stdout.includes('Deno') && a.stdout.includes('Peterson'),
+        'dos capas: el que GANA el apretón trae proyecto Y global (nada se pierde)', a.stdout.slice(0, 90));
+    ok(contexto(b) === '',
+        'dos capas: la 2.ª capa NO re-inyecta en el mismo turno (sin doble memoria)', contexto(b).slice(0, 60));
+    // Proyecto VACÍO de hechos: la memoria GLOBAL se inyecta igual (no depende de que "salte" ningún hook global)
+    const V = path.join(base, 'solo-global'); fs.mkdirSync(V, { recursive: true });
+    const g = run('session-start.mjs', V, { session_id: `solo-${RUN}`, hook_event_name: 'SessionStart' });
+    ok(g.stdout.includes('Peterson'), 'proyecto vacío: los recuerdos GLOBALES se inyectan igual', g.stdout.slice(0, 90));
+}
+
 // --- el standalone por el MOTOR coincide con lo que inyecta el hook (engine ≡ hook) --------------------
 {
     const P = PROY.standalone;

@@ -7,20 +7,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [0.4.0] — 2026-11-08
 ### Changed
-- **Corvus now owns one stable memory store, and never fights Senzu.** Project facts always live in Corvus's own
-  `.corvusmem/memory/facts.jsonl` (English, visible) — Corvus no longer writes into Senzu's `senzu/memoria/hechos.jsonl`
-  when Senzu is present. Before, the store location *flipped* with Senzu's presence, so memory jumped folders (and was
-  orphaned) whenever Senzu was added to or removed from a project. The store is now fixed: add Senzu, remove Senzu —
-  the facts stay put in `.corvusmem/` and are never lost.
-- **No double hooks, no split memory — deterministic.** When a **real** Senzu install is present (its `senzu.json`
-  marker, or a legacy `.dev-standards.json`), Corvus's memory hooks **stand down** (session-start, live-recall,
-  live-memory, file-memory, facts-guard, session-state): Senzu runs the very same engine, so it becomes the single
-  injector. No more racing hand-off where either layer might win and inject a second memory block. A **stray** `senzu/`
-  folder without a marker does not trigger this — a globally-installed Senzu can't silence a standalone Corvus. Corvus
-  keeps its own `.corvusmem/` store the whole time, so if Senzu is ever removed, Corvus wakes up with its memory intact.
-- **The installer says so.** Installing into a project that already uses Senzu now prints a note that Corvus will stand
-  its hooks down there (and take over automatically if Senzu is removed). The hooks are still registered so nothing
-  breaks on that transition. (`--global` does not warn — it can't know which projects will have Senzu.)
+- **Corvus is the memory owner — its hooks are the ones that fire, Senzu defers to it.** When Corvus is installed
+  (per-project or global), it OWNS the memory: its hooks inject and capture as normal, and Senzu steps back from memory
+  (its recall/capture/facts hooks yield to Corvus, and its session-start drops the facts block) while keeping everything
+  else — method, plan, devlog, guards. Before, both layers shared a first-wins handshake and Senzu (listed first) won,
+  so Corvus looked like it "did nothing". Now the split is deterministic and Corvus's memory is what you see.
+  *(Requires the matching Senzu release that defers to Corvus; update the Senzu plugin too.)*
+- **One stable store, and it adopts what Senzu had.** Project facts always live in Corvus's own
+  `.corvusmem/memory/facts.jsonl` (English, visible) — never in `senzu/memoria/hechos.jsonl`, and the location never
+  flips when Senzu is added or removed. When Corvus lands on a project that already used Senzu, it **adopts** the facts
+  from `senzu/memoria/hechos.jsonl` into its own store once (a copy, so nothing is lost and it is reversible), and never
+  clobbers facts it already has.
+- **The installer says so.** Installing into a project that already uses Senzu now prints that Corvus owns the memory
+  there (it adopts Senzu's facts and Senzu defers), and to update the Senzu plugin so it steps back.
 
 ## [0.3.4] — 2026-11-07
 ### Changed

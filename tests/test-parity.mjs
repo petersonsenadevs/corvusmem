@@ -81,8 +81,8 @@ for (const [lang, prompt] of Object.entries(CONSULTAS)) {
     for (const [a, o] of outs.slice(1)) ok(o === ref, `arranque: ${a} idéntico a ${outs[0][0]}`, `len ${o.length} vs ${ref.length}`);
 }
 
-// --- cesión end-to-end: con un marcador de Senzu REAL, los hooks de Corvus no emiten NADA (ni recall ni arranque):
-//     Senzu es el único inyector, así no hay doble bloque de memoria. Sin marcador, Corvus sí inyecta (control). -----
+// --- Corvus MANDA la memoria: sus hooks inyectan igual haya o no un marcador de Senzu (Corvus es el dueño; es Senzu
+//     quien le cede la memoria, en su propio lado). Antes cedía Corvus; ya no. -------------------------------------
 {
     const run = (hook, P, inp) => spawnSync(process.execPath, [path.join(HOOKS, hook)],
         { input: JSON.stringify(inp), encoding: 'utf8', cwd: P, env: { ...process.env, CLAUDE_PROJECT_DIR: P, SENZU_SIN_RED: '1' } });
@@ -92,13 +92,13 @@ for (const [lang, prompt] of Object.entries(CONSULTAS)) {
         m.guardarHecho(d, { dimension: 'proyecto.stack', valor: 'Deno', claves: ['stack', 'deno'] }, { ahora: T(0) });
         return d;
     };
-    const conSenzu = sed('cede-con-senzu', true), sinSenzu = sed('cede-sin-senzu', false);
+    const conSenzu = sed('corvus-con-senzu', true), sinSenzu = sed('corvus-sin-senzu', false);
     const rr = run('live-recall.mjs', conSenzu, { session_id: `cd-${RUN}-r`, hook_event_name: 'UserPromptSubmit', prompt: 'what stack deno' });
-    ok(rr.stdout.trim() === '', 'cesión: con Senzu, live-recall no emite nada (sin doble inyección)', rr.stdout.slice(0, 80));
+    ok(contexto(rr).includes('Deno'), 'con Senzu presente, live-recall de Corvus SÍ inyecta (Corvus manda la memoria)', contexto(rr).slice(0, 80));
     const rs = run('session-start.mjs', conSenzu, { session_id: `cd-${RUN}-s`, hook_event_name: 'SessionStart' });
-    ok(rs.stdout.trim() === '', 'cesión: con Senzu, session-start no emite nada', rs.stdout.slice(0, 80));
+    ok(rs.stdout.includes('Deno'), 'con Senzu presente, session-start de Corvus SÍ inyecta el bloque de memoria', rs.stdout.slice(0, 80));
     const cr = run('live-recall.mjs', sinSenzu, { session_id: `cd-${RUN}-r2`, hook_event_name: 'UserPromptSubmit', prompt: 'what stack deno' });
-    ok(contexto(cr).includes('Deno'), 'control: sin Senzu, live-recall SÍ recupera el hecho', contexto(cr).slice(0, 80));
+    ok(contexto(cr).includes('Deno'), 'sin Senzu, live-recall también recupera el hecho (control)', contexto(cr).slice(0, 80));
 }
 
 // --- el standalone por el MOTOR coincide con lo que inyecta el hook (engine ≡ hook) --------------------

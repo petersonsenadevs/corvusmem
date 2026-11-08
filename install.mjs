@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { esSenzu } from './src/lib.mjs';
+import { esSenzu } from './src/lib.mjs';   // para el aviso de proyecto con Senzu
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(AQUI, 'src');                       // donde viven los hooks del núcleo (ruta absoluta)
@@ -213,13 +213,13 @@ function run() {
         log('  [memory] .corvusmem/ (project) and ~/.config/corvusmem/ (global) ready');
     }
 
-    // Heads-up: in a project that already uses Senzu, Corvus's memory hooks stand down at runtime (Senzu runs the same
-    // engine), so there is no double injection and no split memory. Corvus keeps its own .corvusmem/ store for the day
-    // Senzu is removed. We still register the hooks (they self-yield) so nothing breaks if Senzu later goes away.
+    // Heads-up: in a project that already uses Senzu, Corvus becomes the MEMORY owner — it adopts the facts Senzu had
+    // in senzu/memoria/ into its own .corvusmem/memory/, and Senzu (updated to its latest) defers its memory hooks to
+    // Corvus. Senzu keeps everything else (method, plan, devlog, guards). Update the global Senzu plugin so it defers.
     if (!quitar && !GLOBAL && esSenzu(PROYECTO)) {
-        log('  [senzu] This project already uses Senzu, which runs the same memory engine.');
-        log('          Corvus will stand its memory hooks down here (no double hooks, no split memory) and keep its own');
-        log('          .corvusmem/ store; if you ever remove Senzu, Corvus takes over automatically.');
+        log('  [senzu] This project also uses Senzu. Corvus now OWNS the memory here: it adopts the facts from');
+        log('          senzu/memoria/ into .corvusmem/memory/ and Senzu defers its memory hooks to Corvus.');
+        log('          Update the Senzu plugin to its latest so it steps back from memory (it keeps method/devlog/guards).');
     }
 
     log('Done.' + (quitar ? '' : ' Codex: per-event hooks go through the plugin; in Claude they are already active.'));

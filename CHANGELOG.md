@@ -5,6 +5,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-11-08
+### Changed
+- **The Cortex gets a header with the crow.** The full Cortex (`/corvus-cortex`) now shows the Corvusmem crow in its
+  header beside the wordmark (with a soft amber glow), and the dark palette is lifted to a slightly warmer neutral —
+  subtle and un-saturated. The brain itself (2D and 3D) is unchanged. The footer now credits **Corvusmem** (it said
+  "Senzu") in all six languages.
+### Added
+- **Authorship across the codebase.** Author byline in every core source file (`src/`, `cli/`, `cortex/`, `install.mjs`),
+  `author` in `package.json`, a credit in the README, and an `author` meta tag plus a visible footer credit in the
+  generated Cortex HTML.
+
 ## [0.5.0] — 2026-11-08
 ### Added
 - **Install Corvus as a native plugin — Claude Code and Codex.** The repo is now a Claude Code **marketplace**

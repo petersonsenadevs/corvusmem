@@ -1,0 +1,69 @@
+{
+  "_nota": "Batería adversarial de memoria (F15-T1). Hechos conocidos + consultas etiquetadas. 'espera' = {dim[,val]} que debe salir en top-5; 'espera': null = TRAMPA (debe abstenerse: ningún hecho por encima del umbral). Determinista: sin red, sin LLM, fechas fijas. Las consultas 'dificiles' usan sinónimos/paráfrasis que NO están en las claves a propósito: son lo que F15-T5/T6 deben levantar.",
+  "recall": [
+    {
+      "nombre": "preferencias-dev",
+      "hechos": [
+        { "dimension": "preferencia.indentacion", "valor": "tabulaciones, no espacios", "texto": "indento con tabulaciones", "claves": ["indentación", "tabs", "indent"] },
+        { "dimension": "preferencia.gestor-paquetes", "valor": "pnpm", "texto": "usamos pnpm", "claves": ["gestor de paquetes", "package manager", "pnpm"] },
+        { "dimension": "proyecto.stack", "valor": "Astro con Vue", "texto": "el stack es Astro con Vue", "claves": ["stack", "framework", "astro", "vue"] }
+      ],
+      "consultas": [
+        { "q": "¿con qué sangro el código?", "cat": "parafrasis", "espera": { "dim": "preferencia.indentacion" } },
+        { "q": "which package manager do we use", "cat": "multiidioma", "espera": { "dim": "preferencia.gestor-paquetes" } },
+        { "q": "qué framework usamos en el proyecto", "cat": "sinonimos", "espera": { "dim": "proyecto.stack" } },
+        { "q": "a qué hora desayunamos hoy", "cat": "trampa", "espera": null }
+      ]
+    },
+    {
+      "nombre": "cliente-tarifa",
+      "hechos": [
+        { "dimension": "nota.cliente", "valor": "Marco Bianchi es el fotógrafo del proyecto", "claves": ["marco bianchi", "fotógrafo", "photographer"] },
+        { "dimension": "nota.tarifa", "valor": "Marco Bianchi cobra 600 € al mes", "claves": ["tarifa", "600", "cobra"] }
+      ],
+      "consultas": [
+        { "q": "cuánto paga el fotógrafo", "cat": "parafrasis", "espera": { "dim": "nota.tarifa" } },
+        { "q": "how much does the photographer charge", "cat": "multiidioma", "espera": { "dim": "nota.tarifa" } },
+        { "q": "quién es el presidente de Francia", "cat": "trampa", "espera": null }
+      ]
+    },
+    {
+      "nombre": "ubicacion-temporal",
+      "hechos": [
+        { "dimension": "identidad.ubicacion", "valor": "Madrid", "texto": "vivía en Madrid", "claves": ["ciudad", "city"], "tOffset": 0 },
+        { "dimension": "identidad.ubicacion", "valor": "Valencia", "texto": "ahora vivo en Valencia", "claves": ["ciudad", "city"], "tOffset": 100 }
+      ],
+      "consultas": [
+        { "q": "en qué ciudad vivo ahora", "cat": "temporal", "espera": { "dim": "identidad.ubicacion", "val": "Valencia" }, "ahoraOffset": 200 },
+        { "q": "dónde vivía antes", "cat": "temporal", "espera": { "dim": "identidad.ubicacion", "val": "Madrid" }, "historico": true, "ahoraOffset": 200 },
+        { "q": "am Morgen", "cat": "trampa", "espera": null, "ahoraOffset": 200 }
+      ]
+    },
+    {
+      "nombre": "oficina-sede",
+      "hechos": [
+        { "dimension": "proyecto.oficina", "valor": "la oficina está en Bilbao", "claves": ["oficina", "office", "bilbao"] }
+      ],
+      "consultas": [
+        { "q": "where is the office located", "cat": "multiidioma", "espera": { "dim": "proyecto.oficina" } },
+        { "q": "dónde está la sede de la empresa", "cat": "parafrasis", "espera": { "dim": "proyecto.oficina" } }
+      ]
+    },
+    {
+      "nombre": "despliegue-offline",
+      "hechos": [
+        { "dimension": "objetivo.deploy", "valor": "migrar el despliegue a Vercel antes de fin de mes", "claves": ["despliegue", "deploy", "vercel"] },
+        { "dimension": "restriccion.local", "valor": "todo debe funcionar offline, sin servicios externos", "claves": ["offline", "local", "sin red", "servicios externos"] }
+      ],
+      "consultas": [
+        { "q": "dónde vamos a publicar la web", "cat": "parafrasis", "espera": { "dim": "objetivo.deploy" } },
+        { "q": "puede el proyecto depender de una API externa", "cat": "parafrasis", "espera": { "dim": "restriccion.local" } },
+        { "q": "cuál es mi color favorito", "cat": "trampa", "espera": null }
+      ]
+    }
+  ],
+  "duplicados": [
+    { "nombre": "mismo-valor-mayusculas", "base": { "dimension": "preferencia.editor", "valor": "vim", "claves": ["editor"] }, "variante": { "dimension": "preferencia.editor", "valor": "VIM", "claves": ["editor"] } },
+    { "nombre": "matiz-ortografico-stack", "base": { "dimension": "proyecto.stack", "valor": "Astro con Vue", "claves": ["stack"] }, "variante": { "dimension": "proyecto.stack", "valor": "Astro + Vue", "claves": ["stack"] } }
+  ]
+}

@@ -1,0 +1,119 @@
+{
+  "fecha": "2026-11-09",
+  "umbral": 0.8,
+  "global": {
+    "consultas": 15,
+    "conRespuesta": 11,
+    "trampas": 4,
+    "hit5": 81.8,
+    "hit5_inyectado": 63.6,
+    "abstencion": 100,
+    "duplicados_ok": 100,
+    "ms_por_consulta": 1.99
+  },
+  "porCategoria": {
+    "parafrasis": {
+      "total": 5,
+      "hit5": 3,
+      "hitInj": 2,
+      "abst": 0,
+      "trampas": 0
+    },
+    "multiidioma": {
+      "total": 3,
+      "hit5": 3,
+      "hitInj": 2,
+      "abst": 0,
+      "trampas": 0
+    },
+    "sinonimos": {
+      "total": 1,
+      "hit5": 1,
+      "hitInj": 1,
+      "abst": 0,
+      "trampas": 0
+    },
+    "trampa": {
+      "total": 4,
+      "hit5": 0,
+      "hitInj": 0,
+      "abst": 4,
+      "trampas": 4
+    },
+    "temporal": {
+      "total": 2,
+      "hit5": 2,
+      "hitInj": 2,
+      "abst": 0,
+      "trampas": 0
+    }
+  },
+  "duplicados": [
+    {
+      "nombre": "mismo-valor-mayusculas",
+      "accion": "ya-estaba",
+      "vivos": 1,
+      "ok": true
+    },
+    {
+      "nombre": "matiz-ortografico-stack",
+      "accion": "sustituye",
+      "vivos": 1,
+      "ok": true
+    }
+  ],
+  "fallos": [
+    {
+      "escenario": "preferencias-dev",
+      "q": "¿con qué sangro el código?",
+      "cat": "parafrasis",
+      "trampa": false,
+      "maxPunt": 0,
+      "top": []
+    },
+    {
+      "escenario": "cliente-tarifa",
+      "q": "how much does the photographer charge",
+      "cat": "multiidioma",
+      "trampa": false,
+      "maxPunt": 1.028,
+      "top": [
+        {
+          "dim": "nota.cliente",
+          "val": "Marco Bianchi es el fotógrafo del proyecto",
+          "punt": 1.028,
+          "debil": true
+        },
+        {
+          "dim": "nota.tarifa",
+          "val": "Marco Bianchi cobra 600 € al mes",
+          "punt": 0.617,
+          "debil": false
+        }
+      ]
+    },
+    {
+      "escenario": "despliegue-offline",
+      "q": "dónde vamos a publicar la web",
+      "cat": "parafrasis",
+      "trampa": false,
+      "maxPunt": 0,
+      "top": []
+    },
+    {
+      "escenario": "despliegue-offline",
+      "q": "puede el proyecto depender de una API externa",
+      "cat": "parafrasis",
+      "trampa": false,
+      "maxPunt": 0.242,
+      "top": [
+        {
+          "dim": "restriccion.local",
+          "val": "todo debe funcionar offline, sin servicios externos",
+          "punt": 0.242,
+          "debil": true
+        }
+      ]
+    }
+  ]
+}

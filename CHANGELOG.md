@@ -4,6 +4,12 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Memory reliability battery (`tools/eval-memoria/`).** A deterministic, LLM-free adversarial eval of the recall
+  engine — paraphrase, synonyms, cross-language, temporal and trap queries — that reports **hit@5**, **injected hit@5**
+  (≥ threshold), **abstention precision**, **near-duplicate guard** and **ms/query**, and writes `resultados.json`.
+  This is the baseline and, later, the regression gate for the F15 "reliable memory" work. First baseline
+  (2026-11-09): hit@5 81.8 % · injected 63.6 % · abstention 100 % · dedup 100 % · ~2 ms/query.
 
 ## [0.5.3] — 2026-11-09
 ### Added

@@ -5,24 +5,24 @@
     "consultas": 15,
     "conRespuesta": 11,
     "trampas": 4,
-    "hit5": 81.8,
-    "hit5_inyectado": 63.6,
+    "hit5": 100,
+    "hit5_inyectado": 90.9,
     "abstencion": 100,
     "duplicados_ok": 100,
-    "ms_por_consulta": 1.99
+    "ms_por_consulta": 0.79
   },
   "porCategoria": {
     "parafrasis": {
       "total": 5,
-      "hit5": 3,
-      "hitInj": 2,
+      "hit5": 5,
+      "hitInj": 4,
       "abst": 0,
       "trampas": 0
     },
     "multiidioma": {
       "total": 3,
       "hit5": 3,
-      "hitInj": 2,
+      "hitInj": 3,
       "abst": 0,
       "trampas": 0
     },
@@ -63,43 +63,6 @@
     }
   ],
   "fallos": [
-    {
-      "escenario": "preferencias-dev",
-      "q": "¿con qué sangro el código?",
-      "cat": "parafrasis",
-      "trampa": false,
-      "maxPunt": 0,
-      "top": []
-    },
-    {
-      "escenario": "cliente-tarifa",
-      "q": "how much does the photographer charge",
-      "cat": "multiidioma",
-      "trampa": false,
-      "maxPunt": 1.028,
-      "top": [
-        {
-          "dim": "nota.cliente",
-          "val": "Marco Bianchi es el fotógrafo del proyecto",
-          "punt": 1.028,
-          "debil": true
-        },
-        {
-          "dim": "nota.tarifa",
-          "val": "Marco Bianchi cobra 600 € al mes",
-          "punt": 0.617,
-          "debil": false
-        }
-      ]
-    },
-    {
-      "escenario": "despliegue-offline",
-      "q": "dónde vamos a publicar la web",
-      "cat": "parafrasis",
-      "trampa": false,
-      "maxPunt": 0,
-      "top": []
-    },
     {
       "escenario": "despliegue-offline",
       "q": "puede el proyecto depender de una API externa",

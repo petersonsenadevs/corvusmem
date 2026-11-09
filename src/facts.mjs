@@ -1266,6 +1266,12 @@ export const LEXICO = {
     analitica: 'analytics analitica analytique statistiques analytik analisi analityka analitik аналитика аналітика αναλυτικά アナリティクス 分析 분석 تحليلات אנליטיקה एनालिटिक्स phan tich analys',
     lanzamiento: 'launch release lanzamiento llancament lancamento lancement markteinfuhrung lancio lancering premiera lansman запуск κυκλοφορία ローンチ 发布 출시 إطلاق השקה लॉन्च lansering',
     tests: 'tests testing pruebas proves testes essais testen testy testler тесты тести δοκιμές テスト 测试 테스트 اختبارات בדיקות परीक्षण tester',
+    // F15-T5: conceptos que faltaban (el baseline los perdía por paráfrasis sin vocabulario compartido). Formas en
+    // varios idiomas y conjugaciones frecuentes, para que la CONSULTA coincida con lo que el hecho ya dice.
+    indentacion: 'indentation indent indents indented indentar indentado indento indentas indenta sangria sangrado sangrar sangro sangras sangra tabs tab tabulacion tabulaciones tabulador espacios whitespace einruckung inspringen wciecie rientro indentazione',
+    oficina: 'office oficina officina sede seu bureau buro despacho workplace headquarters escritorio ufficio buero kantoor biuro',
+    deploy: 'deploy deployment deployed deploying despliegue desplegar desplegamos desplegado publicar publico publicamos publicado publicacion publish publishing published release releasing lanzar produccion bereitstellung implantacio implantar',
+    tarifa: 'rate fee fees charge charges charged charging cobra cobrar cobramos cobrado cobro paga pagar pago pricing bill billing honorarios tarifas tariff honoraire tariffa gebuhr',
 };
 const LEXICO_TOKENS = new Map(Object.entries(LEXICO).map(([t, s]) => [t, palabras(s)]));
 // Las palabras del léxico de un hecho (si su tema es de la convención); [] si no

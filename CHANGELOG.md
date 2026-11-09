@@ -4,6 +4,12 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+### Improved
+- **Recall understands more paraphrases, deterministically.** The concept lexicon that already powers cross-language
+  recall gained the missing concepts (`indentation`, `office`, `deploy`, `fee/charge`), so a query phrased differently
+  from the stored fact (`sangrar`≈indent, `publicar`≈deploy, `sede`≈office, `charge`≈cobra) now finds it — no
+  embeddings, no network. On the adversarial battery: injected hit@5 **63.6 % → 90.9 %** with **abstention held at
+  100 %** (never recall more by inventing more).
 ### Added
 - **Memory reliability battery (`tools/eval-memoria/`).** A deterministic, LLM-free adversarial eval of the recall
   engine — paraphrase, synonyms, cross-language, temporal and trap queries — that reports **hit@5**, **injected hit@5**

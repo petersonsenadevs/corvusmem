@@ -73,12 +73,16 @@
 - **Hecho cuando:** guardar dos variantes del mismo hecho deja **un** hecho, no dos.
 - **Verificar:** test dedup (2 variantes → 1); re-correr F15-T1 y comprobar que el ruido NO sube; `npm test` verde.
 
-### F15-T5 · Expansión determinista de consulta (recall)  [S] [todo]
+### F15-T5 · Expansión determinista de consulta (recall)  [S] [done]
 - **Skill:** code-quality §rendimiento.
-- `facts.mjs` (`recuerdo`/`palabras`): stemming ligero + mapa de sinónimos por idioma + apalancar las `--keys` (EN +
-  idioma nativo) que ya se guardan, para que «servidor»≈«host»≈«server» coincidan. Todo en tablas locales, sin red.
-- **Hecho cuando:** las consultas parafraseadas/multiidioma de la batería suben el hit@5.
-- **Verificar:** hit@5 sube vs. baseline de F15-T1 **y** la precisión de abstención se mantiene; `npm test` verde.
+- **En vez de abrir un camino nuevo, se extendió el mecanismo que ya existe:** `LEXICO` en `facts.mjs` (concepto →
+  formas en varios idiomas, que se añade a cada hecho cuyo tema coincide). Los fallos del baseline eran temas sin
+  entrada. Añadidos: `indentacion`, `oficina`, `deploy`, `tarifa` (ES/EN + conjugaciones frecuentes). Cero red, cero LLM.
+- **Hecho cuando:** las consultas parafraseadas/multiidioma de la batería suben el hit@5. ✅
+- **Verificar:** hit@5 sube y la abstención se mantiene; `npm run test:core` verde (227/227, 14/14). ✅
+- **Resultado (2026-11-09):** hit@5 **81,8 → 100 %** · hit@5 inyectado **63,6 → 90,9 %** · **abstención 100 %** (intacta,
+  la regla de oro) · ~0,8 ms. Queda 1 caso (`«API externa»`, `restriccion.local` a 0.242, débil): **no es de T5**
+  (forzarlo arriesgaría la abstención) → es el objetivo de **F15-T6**.
 
 ### F15-T6 · Coincidencia débil etiquetada (en vez de callar)  [S] [todo]
 - **Skill:** code-quality §hooks.

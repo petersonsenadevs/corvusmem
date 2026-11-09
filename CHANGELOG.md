@@ -5,6 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 ### Improved
+- **Clearer bar for what to save (less agent variance).** The save prompt is now one concrete, positive checklist
+  (`save.criterios`) — decision made, limit/constraint found, stable preference, external fact with a name/figure,
+  a gotcha and its cause, a goal/pending — with the test "would you need it next time and it's not in the code?".
+  The same bar is shown at session start and at the close nudge (it replaced the vague "did the user say anything
+  stable?" that invited a "no"), so different agents converge on saving the same things.
 - **Recall understands more paraphrases, deterministically.** The concept lexicon that already powers cross-language
   recall gained the missing concepts (`indentation`, `office`, `deploy`, `fee/charge`), so a query phrased differently
   from the stored fact (`sangrar`≈indent, `publicar`≈deploy, `sede`≈office, `charge`≈cobra) now finds it — no

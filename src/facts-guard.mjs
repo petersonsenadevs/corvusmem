@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { readHookInput, projectRoot, sessionFlag, sinTextoCitado, relDelProyecto, rutaNativa, ruta, rutaRel, rutaMemoriaUsuario, testOnce, rutaBuscador, editadosSesion } from './lib.mjs';
+import { readHookInput, projectRoot, sessionFlag, sinTextoCitado, relDelProyecto, rutaNativa, ruta, rutaRel, rutaMemoriaUsuario, testOnce, rutaBuscador, editadosSesion, localeUI, msg } from './lib.mjs';
 import { palabras, palabraConPeso, todosLosHechos } from './facts.mjs';
 
 const p = readHookInput() || {};
@@ -50,6 +50,7 @@ if (evento === 'PostToolUse') {
 
 // ---------------- Stop: dos comprobaciones, cada una UNA vez por sesión, en un solo mensaje
 const root = projectRoot();
+const lang = localeUI(root);
 const rev = leerRevision(flag);
 const cli = rutaBuscador(root).replace(/buscar\.mjs$/, 'memory.mjs');
 const motivos = [];
@@ -59,10 +60,9 @@ let peticiones = null;
 try { peticiones = JSON.parse(fs.readFileSync(sessionFlag(sid, 'peticiones'), 'utf8')); } catch { }
 const conversacion = Array.isArray(peticiones) && peticiones.filter(x => palabras(x && x.texto).filter(palabraConPeso).length >= 2).length >= 2;
 if (conversacion && !rev.revisada && testOnce(sid, 'hechos-guard')) {
-    motivos.push('Revisa la memoria (en el idioma en que haya hablado el usuario): ¿ha dicho en esta sesión algo ESTABLE de sí o '
-        + 'del proyecto (dónde vive, su stack, una preferencia, un límite, un cliente, un objetivo o un pendiente)? '
-        + `Si sí: node ${cli} --guardar --dimension familia.tema --valor "…" --claves "…" (familia: identidad, preferencia, proyecto, objetivo, pendiente, restriccion, nota o aprendizaje; tema en castellano, sea cual sea el idioma de la conversación; claves también en inglés y en su idioma; que se entienda solo: nombres y fechas absolutas, no «mañana» ni «él»; con «creo que…», --duda; lo que deduces tú y no dijo, --fuente agente). `
-        + `Si no: node ${cli} --nada. Las decisiones y reglas del proyecto van a MEMORIA.md (/recordar). No inventes hechos que el usuario no dijo.`);
+    motivos.push('Revisa la memoria (en el idioma en que haya hablado el usuario).' + msg('save.criterios', lang).replace(/\s+/g, ' ').trimEnd()
+        + ` Si va: node ${cli} --guardar --dimension familia.tema --valor "…" --claves "…" (familia: identidad, preferencia, proyecto, objetivo, pendiente, restriccion, nota o aprendizaje; tema en castellano, sea cual sea el idioma de la conversación; claves también en inglés y en su idioma; que se entienda solo: nombres y fechas absolutas, no «mañana» ni «él»; con «creo que…», --duda; lo que deduces tú y no dijo, --fuente agente). `
+        + `Si no hay nada que guardar: node ${cli} --nada. Las decisiones y reglas del proyecto van a MEMORIA.md (/recordar). No inventes hechos que el usuario no dijo.`);
 }
 // 2. Consolidar (F6-T3): si la sesión TRABAJÓ (3+ archivos tocados, sin contar la memoria ni el plan) y no guardó ningún
 //    aprendizaje.*, lo aprendido pasa a conocimiento duradero, enlazado solo con la entrada del devlog de hoy.

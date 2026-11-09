@@ -537,6 +537,12 @@ export const CAT = {
         en: '  SAVE what the user says that is stable (in any language): {cli} --save --dimension family.topic --value "…" --keys "term in English,in their language" (family: identity, preference, project, goal, pending, constraint, note, learning). Make it stand on its own: who or what by name and an absolute date («Marco Bianchi, the photographer, charges 600 €», not «charges 600 €»; «on 2026-10-15», not «tomorrow»). With «I think…», --doubt; what you infer yourself, --source agent.',
         es: '  GUARDA lo estable que diga el usuario (en el idioma que sea): {cli} --guardar --dimension familia.tema --valor "…" --claves "término en inglés,en su idioma" (familia: identidad, preferencia, proyecto, objetivo, pendiente, restriccion, nota, aprendizaje). Que se entienda solo: quién o qué con su nombre y fecha absoluta («Marco Bianchi, el fotógrafo, cobra 600 €», no «cobra 600 €»; «el 15-10», no «mañana»). Con «creo que…», --duda; lo que deduces tú, --fuente agente.',
     },
+    // F15-T2: la VARA de qué guardar, en una sola fuente (la usan el inicio de sesión y el aviso de cierre), para que
+    // agentes distintos guarden lo mismo. Concreta y en positivo: "guarda si…", no "¿dijo algo estable?".
+    'save.criterios': {
+        en: '  Save if something came up this session that will matter NEXT time (to you or a teammate): a decision made, a limit or constraint discovered, a stable user preference, an external fact with a name or figure (client, price, URL, path), a gotcha that cost time and its cause, or a goal or pending item. The bar: would you need it again and is it not already in the code? Then save it. Routine work and this-moment-only details are NOT saved.',
+        es: '  Guarda si en esta sesión salió algo que servirá la PRÓXIMA vez (a ti o a un compañero): una decisión tomada, un límite o restricción descubierto, una preferencia estable del usuario, un dato externo con nombre o cifra (cliente, precio, URL, ruta), un tropiezo que costó tiempo y su causa, o un objetivo o pendiente. La vara: ¿lo necesitarías otra vez y no está ya en el código? Entonces va. El trabajo rutinario y lo de este momento NO se guardan.',
+    },
     'start.prev': {
         en: '- Previous session ({when}): {parts}. If the user says «continue» or /resume, pick up from there; otherwise do not mention it.',
         es: '- Sesión anterior ({when}): {parts}. Si el usuario dice «sigue» o /retomar, continúa desde ahí; si no, no lo menciones.',

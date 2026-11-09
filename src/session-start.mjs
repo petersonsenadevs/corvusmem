@@ -51,6 +51,7 @@ try {
     L.push(msg('start.map.intro', lang));
     L.push(mapa.hechos ? textoMapa(mapa) : msg('start.map.empty', lang));
     L.push(msg('start.map.consult', lang, { cli }));
+    L.push(msg('save.criterios', lang));   // F15-T2: la vara (qué guardar), antes de la sintaxis del comando
     L.push(msg('start.map.save', lang, { cli }));
 } catch { }
 // En qué se quedó la sesión anterior (session-state): para seguir sin que el usuario tenga que contarlo.

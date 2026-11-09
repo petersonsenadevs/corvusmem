@@ -49,13 +49,16 @@
   (`sangrar`≈indentar, `publicar`≈desplegar, `API externa`≈servicios externos, y `charge` que trae la tarifa al top-5
   pero bajo umbral) → objetivo directo de **F15-T5/T6**. La abstención (100 %) es la línea que no se puede bajar.
 
-### F15-T2 · Criterios de guardado explícitos (baja la varianza del agente)  [S] [todo]
+### F15-T2 · Criterios de guardado explícitos (baja la varianza del agente)  [S] [done]
 - **Skill:** devlog / recordar (texto de la skill) + el texto de los nudges.
-- Fijar un checklist de "qué es un hecho duradero" (decisión tomada, límite descubierto, preferencia dicha, dato externo
-  con nombre, un *gotcha* que costó tiempo) y reflejarlo en el texto del nudge de `live-memory.mjs` y en la skill, para
-  que agentes distintos converjan en lo mismo.
-- **Hecho cuando:** el nudge y la skill enumeran los criterios; distintos agentes guardan lo mismo ante el mismo caso.
-- **Verificar:** test que comprueba que el texto del nudge incluye los criterios; `npm test` verde.
+- Nuevo mensaje canónico **`save.criterios`** (`messages.mjs`, ES+EN): la **vara** concreta y en positivo ("guarda si
+  salió una decisión, un límite, una preferencia, un dato externo con nombre/cifra, un *gotcha* con su causa, o un
+  objetivo/pendiente; ¿lo necesitarías la próxima vez y no está en el código? entonces va; el trabajo rutinario NO").
+- **Una sola fuente, usada en los dos sitios:** `session-start.mjs` (al empezar) y `facts-guard.mjs` (aviso de cierre)
+  ahora usan `save.criterios` en vez de una pregunta vaga ("¿dijo algo estable?") que invitaba a responder "no".
+- **Hecho cuando:** el criterio es explícito, concreto y el mismo al empezar y al cerrar. ✅
+- **Verificar:** `tests/test-save-criterios.mjs` (18/0): el criterio enumera los disparadores en ES+EN y lo usan
+  `session-start` y `facts-guard`. `npm run test:core` verde. ✅
 
 ### F15-T3 · Detectores "con forma de hecho" + nudge suave de cierre  [S] [todo]
 - **Skill:** code-quality §hooks.

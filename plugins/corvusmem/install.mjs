@@ -152,10 +152,15 @@ function empaquetarPlugin(destino) {
         const cmds = fs.readdirSync(CMDS_SRC).filter(f => f.endsWith('.md'));
         if (cmds.length) { fs.mkdirSync(path.join(dir, 'commands'), { recursive: true }); for (const f of cmds) { fs.copyFileSync(path.join(CMDS_SRC, f), path.join(dir, 'commands', f)); nc++; } }
     } catch { /* no commands/ */ }
-    // 4) plugin.json
-    const plugin = { name: 'corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena' }, homepage: pkg.homepage || 'https://corvusmem.vercel.app', repository: (pkg.repository && pkg.repository.url) || 'https://github.com/petersonsenadevs/corvusmem', license: 'SEE LICENSE IN LICENSE' };
+    // 4b) icono del listado (cuervo sobre fondo oscuro): el directorio de Anthropic lo pide (PNG cuadrado < 2 MB).
+    const iconoSrc = path.join(AQUI, 'assets', 'icon.png');
+    let iconoCampo = undefined;
+    if (fs.existsSync(iconoSrc)) { fs.copyFileSync(iconoSrc, path.join(dir, '.claude-plugin', 'icon.png')); iconoCampo = '.claude-plugin/icon.png'; }
+    // 4) plugin.json — repository en https:// PURO (el directorio descarta git+…/.git); displayName + icon para el listado.
+    const repo = String((pkg.repository && pkg.repository.url) || 'https://github.com/petersonsenadevs/corvusmem').replace(/^git\+/, '').replace(/\.git$/, '');
+    const plugin = { name: 'corvusmem', displayName: 'Corvusmem', description: pkg.description || 'Memoria determinista, offline y sin dependencias para agentes de IA.', version: pkg.version || '0.0.0', author: { name: 'Peterson Sena (r3v3rs3)', url: 'https://dev.to/r3v3rs3' }, homepage: pkg.homepage || 'https://corvusmem.vercel.app', repository: repo, license: 'SEE LICENSE IN LICENSE', ...(iconoCampo ? { icon: iconoCampo } : {}) };
     fs.writeFileSync(path.join(dir, '.claude-plugin', 'plugin.json'), JSON.stringify(plugin, null, 2) + '\n');
-    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs + ${ncli} cli + ${ncx} cortex${nc ? ` + ${nc} command(s)` : ''}`);
+    log(`  [plugin] ${dir}: .claude-plugin/plugin.json + hooks/hooks.json + ${n} .mjs + ${ncli} cli + ${ncx} cortex${nc ? ` + ${nc} command(s)` : ''}${iconoCampo ? ' + icon' : ''}`);
 }
 
 // Genera, DENTRO del repo, el plugin committeable `plugins/corvusmem/` y el `.claude-plugin/marketplace.json` de la

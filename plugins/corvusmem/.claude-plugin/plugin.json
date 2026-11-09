@@ -1,11 +1,14 @@
 {
   "name": "corvusmem",
+  "displayName": "Corvusmem",
   "description": "Deterministic, offline, zero-dependency memory for AI coding agents (Claude Code, Codex) and a standalone CLI.",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "author": {
-    "name": "Peterson Sena"
+    "name": "Peterson Sena (r3v3rs3)",
+    "url": "https://dev.to/r3v3rs3"
   },
   "homepage": "https://corvusmem.vercel.app",
-  "repository": "git+https://github.com/petersonsenadevs/corvusmem.git",
-  "license": "SEE LICENSE IN LICENSE"
+  "repository": "https://github.com/petersonsenadevs/corvusmem",
+  "license": "SEE LICENSE IN LICENSE",
+  "icon": ".claude-plugin/icon.png"
 }

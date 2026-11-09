@@ -5,7 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 
-## [0.5.2] — 2026-11-08
+## [0.5.3] — 2026-11-09
+### Added
+- **Ready for the Anthropic plugin directory.** The generated plugin now ships a square listing **icon**
+  (`.claude-plugin/icon.png` — the crow on a dark background), a `displayName`, and a plain `https://` `repository`
+  URL (the directory drops `git+…`/`.git`). `claude plugin validate --strict ./plugins/corvusmem` now passes clean,
+  so Corvusmem can be submitted to the directory at claude.ai/directory/manage (the git marketplace still works as-is).
 ### Added
 - **`/corvus-install` — bake Corvusmem into a project, as a command.** A new slash command (bundled in the plugin and
   in `.claude/commands/`) installs the hooks into the **current** project so it carries its own memory. Commit

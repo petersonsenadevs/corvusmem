@@ -4,7 +4,7 @@
     "name": "Peterson Sena"
   },
   "metadata": {
-    "version": "0.5.2",
+    "version": "0.5.3",
     "description": "Marketplace de Corvusmem: memoria determinista, offline y sin dependencias para agentes de IA."
   },
   "plugins": [
@@ -12,7 +12,7 @@
       "name": "corvusmem",
       "source": "./plugins/corvusmem",
       "description": "Deterministic, offline, zero-dependency memory for AI coding agents (Claude Code, Codex) and a standalone CLI.",
-      "version": "0.5.2",
+      "version": "0.5.3",
       "category": "development",
       "keywords": [
         "memory",

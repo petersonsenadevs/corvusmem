@@ -9,7 +9,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   recall gained the missing concepts (`indentation`, `office`, `deploy`, `fee/charge`), so a query phrased differently
   from the stored fact (`sangrar`≈indent, `publicar`≈deploy, `sede`≈office, `charge`≈cobra) now finds it — no
   embeddings, no network. On the adversarial battery: injected hit@5 **63.6 % → 90.9 %** with **abstention held at
-  100 %** (never recall more by inventing more).
+  100 %** (never recall more by inventing more). The one query that still misses is one the engine *should* decline —
+  it names something memory never heard (`API`), so it stays silent on purpose ("knows what it doesn't know"); the
+  battery now tracks that as an abstention check, not a recall miss.
 ### Added
 - **Memory reliability battery (`tools/eval-memoria/`).** A deterministic, LLM-free adversarial eval of the recall
   engine — paraphrase, synonyms, cross-language, temporal and trap queries — that reports **hit@5**, **injected hit@5**

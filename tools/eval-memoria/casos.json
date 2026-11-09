@@ -1,5 +1,5 @@
 {
-  "_nota": "Batería adversarial de memoria (F15-T1). Hechos conocidos + consultas etiquetadas. 'espera' = {dim[,val]} que debe salir en top-5; 'espera': null = TRAMPA (debe abstenerse: ningún hecho por encima del umbral). Determinista: sin red, sin LLM, fechas fijas. Las consultas 'dificiles' usan sinónimos/paráfrasis que NO están en las claves a propósito: son lo que F15-T5/T6 deben levantar.",
+  "_nota": "Batería adversarial de memoria (F15). Hechos conocidos + consultas etiquetadas. 'espera' = {dim[,val]} que debe salir en top-5 y por encima del umbral; 'espera': null = debe ABSTENERSE (trampa sin respuesta, o cat 'nombra': la pregunta nombra algo que la memoria nunca oyó —p.ej. «API»— y el motor se calla a propósito aunque haya un roce de una palabra: 'sabe que no sabe'). Determinista: sin red, sin LLM, fechas fijas. Las consultas 'dificiles' usan sinónimos/paráfrasis que NO están en las claves a propósito: son lo que F15-T5 levantó extendiendo el LEXICO.",
   "recall": [
     {
       "nombre": "preferencias-dev",
@@ -57,7 +57,7 @@
       ],
       "consultas": [
         { "q": "dónde vamos a publicar la web", "cat": "parafrasis", "espera": { "dim": "objetivo.deploy" } },
-        { "q": "puede el proyecto depender de una API externa", "cat": "parafrasis", "espera": { "dim": "restriccion.local" } },
+        { "q": "puede el proyecto depender de una API externa", "cat": "nombra", "espera": null },
         { "q": "cuál es mi color favorito", "cat": "trampa", "espera": null }
       ]
     }

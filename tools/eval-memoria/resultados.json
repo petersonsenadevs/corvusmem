@@ -3,18 +3,18 @@
   "umbral": 0.8,
   "global": {
     "consultas": 15,
-    "conRespuesta": 11,
-    "trampas": 4,
+    "conRespuesta": 10,
+    "trampas": 5,
     "hit5": 100,
-    "hit5_inyectado": 90.9,
+    "hit5_inyectado": 100,
     "abstencion": 100,
     "duplicados_ok": 100,
-    "ms_por_consulta": 0.79
+    "ms_por_consulta": 2.03
   },
   "porCategoria": {
     "parafrasis": {
-      "total": 5,
-      "hit5": 5,
+      "total": 4,
+      "hit5": 4,
       "hitInj": 4,
       "abst": 0,
       "trampas": 0
@@ -46,6 +46,13 @@
       "hitInj": 2,
       "abst": 0,
       "trampas": 0
+    },
+    "nombra": {
+      "total": 1,
+      "hit5": 0,
+      "hitInj": 0,
+      "abst": 1,
+      "trampas": 1
     }
   },
   "duplicados": [
@@ -62,21 +69,5 @@
       "ok": true
     }
   ],
-  "fallos": [
-    {
-      "escenario": "despliegue-offline",
-      "q": "puede el proyecto depender de una API externa",
-      "cat": "parafrasis",
-      "trampa": false,
-      "maxPunt": 0.242,
-      "top": [
-        {
-          "dim": "restriccion.local",
-          "val": "todo debe funcionar offline, sin servicios externos",
-          "punt": 0.242,
-          "debil": true
-        }
-      ]
-    }
-  ]
+  "fallos": []
 }

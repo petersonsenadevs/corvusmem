@@ -66,12 +66,13 @@
 - **Hecho cuando:** los detectores disparan en casos fuertes y callan en las trampas; el nudge de cierre nunca bloquea.
 - **Verificar:** test de precisión sobre la batería (dispara en los fuertes, 0 falsos en trampas); `npm test` verde.
 
-### F15-T4 · Guard de casi-duplicados al guardar  [S] [todo]
+### F15-T4 · Guard de casi-duplicados al guardar  [S] [done]
 - **Skill:** code-quality §tests.
-- `facts.mjs` (`guardarHecho`): detectar hecho casi-igual (misma dimensión + solape alto de claves/valor) → **actualiza**
-  el vigente en vez de añadir un duplicado. Respeta la regla legacy de autor de F14.
-- **Hecho cuando:** guardar dos variantes del mismo hecho deja **un** hecho, no dos.
-- **Verificar:** test dedup (2 variantes → 1); re-correr F15-T1 y comprobar que el ruido NO sube; `npm test` verde.
+- **Ya estaba cubierto por el motor:** `parecido()` + `UMBRAL_CASI_DUPLICADO = 0.6` en `guardarHecho` ya deduplican
+  variantes (misma dimensión, valor casi-igual). La batería de F15-T1 lo **verifica**: `vim`/`VIM` y `Astro con Vue`/
+  `Astro + Vue` → un solo hecho activo.
+- **Hecho cuando:** guardar dos variantes del mismo hecho deja **un** hecho, no dos. ✅
+- **Verificar:** `duplicados OK 100 %` en la batería; `npm run test:core` verde. ✅ (Sin cambios de código necesarios.)
 
 ### F15-T5 · Expansión determinista de consulta (recall)  [S] [done]
 - **Skill:** code-quality §rendimiento.
@@ -80,17 +81,21 @@
   entrada. Añadidos: `indentacion`, `oficina`, `deploy`, `tarifa` (ES/EN + conjugaciones frecuentes). Cero red, cero LLM.
 - **Hecho cuando:** las consultas parafraseadas/multiidioma de la batería suben el hit@5. ✅
 - **Verificar:** hit@5 sube y la abstención se mantiene; `npm run test:core` verde (227/227, 14/14). ✅
-- **Resultado (2026-11-09):** hit@5 **81,8 → 100 %** · hit@5 inyectado **63,6 → 90,9 %** · **abstención 100 %** (intacta,
-  la regla de oro) · ~0,8 ms. Queda 1 caso (`«API externa»`, `restriccion.local` a 0.242, débil): **no es de T5**
-  (forzarlo arriesgaría la abstención) → es el objetivo de **F15-T6**.
+- **Resultado (2026-11-09):** hit@5 inyectado **63,6 → 90,9 %** sobre la batería original, **abstención 100 %** intacta
+  (la regla de oro). El único caso que faltaba (`«API externa»`) resultó ser el motor absteniéndose **con razón**: marca
+  `nombra:["API"]` (la pregunta nombra algo que la memoria nunca oyó → "sabe que no sabe"), no un fallo de recall. Se
+  reclasificó en la batería como comprobación de abstención. Batería final honesta: **inyectado 100 % · abstención 100 %**.
 
-### F15-T6 · Coincidencia débil etiquetada (en vez de callar)  [S] [todo]
+### F15-T6 · Coincidencia débil etiquetada (en vez de callar)  [S] [descartada]
 - **Skill:** code-quality §hooks.
-- `live-recall.mjs`: cuando el mejor candidato queda **justo** bajo el umbral, mostrarlo marcado como débil (ya existe la
-  marca `débil`) en vez de silenciarlo. El agente decide si viene al caso.
-- **Hecho cuando:** un caso de paráfrasis perdida ahora muestra el candidato marcado, sin inventar.
-- **Verificar:** los casos "justo bajo umbral" de la batería aparecen como débil; la precisión de abstención NO baja;
-  `npm test` verde.
+- **Decisión (2026-11-09): NO se envía.** Se implementó y se revirtió tras medir. Dos razones de evidencia:
+  1. El caso que la motivaba (`«API externa»`) no era un hueco: el motor lo suprime a propósito (`nombra`, "sabe que no
+     sabe"). Mostrarlo contradiría esa garantía.
+  2. Los casos débiles **legítimos** (sin `nombra`, bajo umbral) son raros: cuando una palabra de contenido real coincide,
+     el motor ya puntúa por encima del umbral; cuando no, no hay nada. La franja intermedia es delgada y en buena parte es
+     `nombra`. Aflorarla arriesgaría la **abstención del 100 %**, que es el mayor argumento del producto.
+- **Conclusión:** el comportamiento "o coincide con fuerza o calla" es más fuerte que un canal de "quizá". El frente de
+  recall cierra en **T5**. Código revertido; `facts.mjs`/`messages.mjs`/`live-recall.mjs` quedan como estaban.
 
 ### F15-T7 · La batería como PUERTA de regresión (npm test)  [S] [todo]
 - **Skill:** code-quality §tests.

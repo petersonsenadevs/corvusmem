@@ -60,14 +60,20 @@
 - **Verificar:** `tests/test-save-criterios.mjs` (18/0): el criterio enumera los disparadores en ES+EN y lo usan
   `session-start` y `facts-guard`. `npm run test:core` verde. ✅
 
-### F15-T3 · Detectores "con forma de hecho" + nudge suave de cierre  [S] [todo]
+### F15-T3 · Detectores "con forma de hecho" + nudge suave de cierre  [S] [done]
 - **Skill:** code-quality §hooks.
-- `live-memory.mjs`: patrones de **alta precisión** más allá de reglas («el cliente X paga…», «usamos…», «vive en…»,
-  «la API es…») → empujan a guardar. Precisión alta, recall bajo: antes perder uno que meter ruido.
-- `session-state.mjs` (Stop): nudge **no bloqueante** de destilado si la sesión tocó código o avanzó plan y guardó
-  **cero** hechos ("¿salió un aprendizaje reusable? guárdalo o di `--none`").
-- **Hecho cuando:** los detectores disparan en casos fuertes y callan en las trampas; el nudge de cierre nunca bloquea.
-- **Verificar:** test de precisión sobre la batería (dispara en los fuertes, 0 falsos en trampas); `npm test` verde.
+- `live-memory.mjs`: patrones de **alta precisión** más allá de reglas («usamos X», «… cobra 600 €», «vivo en Madrid»,
+  «la oficina está en Bilbao», «la API es …») → empujan a guardar. Detectores **puros y exportables**
+  (`esHechoGuardable`, `PREGUNTA`), con el hook tras una guarda «solo como script» para poder testearlos sin montarlo.
+  **Guardián de precisión:** una PREGUNTA nunca es un hecho (así «qué framework usamos…» o «cuánto paga…» NO disparan).
+  Deja la marca `hecho-pendiente`; usa la vara única `save.criterios` (F15-T2).
+- `session-state.mjs` (Stop, sección 2b): recordatorio **no bloqueante** (`systemMessage`, nunca `decision:block`) si
+  quedó un `hecho-pendiente` y la sesión no guardó nada (facts.jsonl / MEMORIA.md / memoria del usuario sin tocar).
+- **Hecho cuando:** los detectores disparan en casos fuertes y callan en las trampas; el nudge de cierre nunca bloquea. ✅
+- **Verificar:** `tests/test-hecho-detector.mjs` (34/0): dispara en los 8 hechos fuertes, **0 falsos** sobre las 15
+  consultas de la batería + ruido conversacional, y el cierre solo usa `systemMessage`. `npm run test:core` verde. ✅
+- **Nota (bug encontrado):** `\b` tras vocal acentuada (á/é) no casa en JS (los acentos no son «word char» ASCII), así que
+  `\bqu[eé]\b` no veía "qué" y `\best[aá]\b` no veía "está". Arreglado con lookarounds `(?<![\p{L}])…(?![\p{L}])` (flag `u`).
 
 ### F15-T4 · Guard de casi-duplicados al guardar  [S] [done]
 - **Skill:** code-quality §tests.

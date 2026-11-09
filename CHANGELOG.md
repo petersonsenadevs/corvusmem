@@ -4,6 +4,14 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+### Added
+- **Fact-shaped nudges while you work (high precision).** Beyond rules/corrections, the live hook now spots statements
+  that carry a reusable datum — a tool in use (`we use X`), a figure with a currency (`charges 600 €`), a location
+  (`vivo en Madrid`), an office/API named — and nudges the agent to save it, then leaves a non-blocking reminder at
+  close if nothing was saved. A **question is never treated as a fact**, so `which package manager do we use` or
+  `cuánto paga…` stay silent: 0 false positives across the whole adversarial battery. The detector is pure and tested
+  (`tests/test-hecho-detector.mjs`, 34/0); the close nudge only ever emits `systemMessage`, never blocks.
+
 ### Improved
 - **Clearer bar for what to save (less agent variance).** The save prompt is now one concrete, positive checklist
   (`save.criterios`) — decision made, limit/constraint found, stable preference, external fact with a name/figure,

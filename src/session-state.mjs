@@ -66,18 +66,36 @@ if (evento === 'Stop') try {
     }
 } catch {}
 
-// 2. al cerrar: ¿quedó apuntada la regla o corrección del usuario?
+// 2. al cerrar: ¿quedó apuntado lo que dijo el usuario?
 if (evento !== 'Stop') process.exit(0);
-const marca = sessionFlag(sid, 'memoria-pendiente');
-if (!fs.existsSync(marca)) process.exit(0);
-let desde = 0; try { desde = fs.statSync(marca).mtimeMs; } catch {}
 const mtime = f => { try { return fs.statSync(f).mtimeMs; } catch { return 0; } };
-const apuntada = Math.max(memoriaProyecto(root).mtime, mtime(path.join(ruta(root, 'devlog'), 'MEMORIA-historico.md')), mtime(rutaMemoriaUsuario())) >= desde;
-if (apuntada) process.exit(0);
-const dijo = (() => { try { return fs.readFileSync(marca, 'utf8'); } catch { return ''; } })();
-const razon = `[senzu] El usuario dio una regla o una corrección en esta sesión («${dijo.slice(0, 120)}») y no está en la memoria. `
-    + `Apúntala: de este proyecto → ${rutaRel(root, 'devlog')}/MEMORIA.md; de todos sus proyectos → ${rutaMemoriaUsuario().replace(/\\/g, '/')}. `
-    + 'Si no era una regla duradera, dilo en una línea y cierra.';
-if (p.stop_hook_active !== true && testOnce(sid, 'stop-recordar')) process.stdout.write(JSON.stringify({ decision: 'block', reason: razon }) + '\n');
-else process.stdout.write(JSON.stringify({ systemMessage: razon }) + '\n');
+
+// 2a. regla o corrección pendiente → bloquea UNA vez (es una instrucción del usuario: la vara más alta).
+const marca = sessionFlag(sid, 'memoria-pendiente');
+if (fs.existsSync(marca)) {
+    let desde = 0; try { desde = fs.statSync(marca).mtimeMs; } catch {}
+    const apuntada = Math.max(memoriaProyecto(root).mtime, mtime(path.join(ruta(root, 'devlog'), 'MEMORIA-historico.md')), mtime(rutaMemoriaUsuario())) >= desde;
+    if (!apuntada) {
+        const dijo = (() => { try { return fs.readFileSync(marca, 'utf8'); } catch { return ''; } })();
+        const razon = `[senzu] El usuario dio una regla o una corrección en esta sesión («${dijo.slice(0, 120)}») y no está en la memoria. `
+            + `Apúntala: de este proyecto → ${rutaRel(root, 'devlog')}/MEMORIA.md; de todos sus proyectos → ${rutaMemoriaUsuario().replace(/\\/g, '/')}. `
+            + 'Si no era una regla duradera, dilo en una línea y cierra.';
+        if (p.stop_hook_active !== true && testOnce(sid, 'stop-recordar')) process.stdout.write(JSON.stringify({ decision: 'block', reason: razon }) + '\n');
+        else process.stdout.write(JSON.stringify({ systemMessage: razon }) + '\n');
+        process.exit(0);
+    }
+}
+
+// 2b. (F15-T3) frase con forma de hecho sin guardar → recordatorio SUAVE, NUNCA bloquea (systemMessage).
+// Si la sesión guardó algún hecho (facts.jsonl), editó MEMORIA.md o la memoria del usuario, se calla: ya hubo registro.
+const marcaHecho = sessionFlag(sid, 'hecho-pendiente');
+if (fs.existsSync(marcaHecho)) {
+    let desdeH = 0; try { desdeH = fs.statSync(marcaHecho).mtimeMs; } catch {}
+    const guardado = Math.max(memoriaProyecto(root).mtime, mtime(rutaHechos(root)), mtime(rutaMemoriaUsuario())) >= desdeH;
+    if (!guardado && testOnce(sid, 'stop-hecho')) {
+        const dijoH = (() => { try { return fs.readFileSync(marcaHecho, 'utf8'); } catch { return ''; } })();
+        process.stdout.write(JSON.stringify({ systemMessage: `[senzu] En esta sesión salió un dato que puede servir la próxima vez («${dijoH.slice(0, 100)}») y no está guardado. `
+            + 'Si vale para la próxima vez, guárdalo (node … --guardar --dimension familia.tema --valor "…"); si era solo de este momento, déjalo.' }) + '\n');
+    }
+}
 process.exit(0);

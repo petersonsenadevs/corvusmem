@@ -118,4 +118,22 @@ if (fallos.length) {
 }
 for (const d of dup) if (!d.ok) L(`    ✗ [duplicado] ${d.nombre} → acción '${d.accion}', ${d.vivos} vivos`);
 L(`\n  Guardado en tools/eval-memoria/resultados.json`);
+
+// --- PUERTA de regresión (F15-T7): con --gate, falla (exit 1) si la memoria regresa ---
+// Umbrales por encima del baseline y con margen, salvo la abstención, que es la regla de oro (exacta al 100%).
+// MIN_CASOS evita "pasar" vaciando la batería.
+const GATE = { hit5_inyectado: 90, abstencion: 100, duplicados_ok: 100, MIN_CASOS: 12 };
+if (process.argv.includes('--gate')) {
+    const checks = [
+        ['hit@5 inyectado', global.hit5_inyectado, GATE.hit5_inyectado],
+        ['abstención', global.abstencion, GATE.abstencion],
+        ['duplicados', global.duplicados_ok, GATE.duplicados_ok],
+    ];
+    let malo = 0;
+    L('\n  PUERTA (F15-T7):');
+    if (global.consultas < GATE.MIN_CASOS) { malo++; L(`    FALLA  casos ${global.consultas} (mínimo ${GATE.MIN_CASOS}: la batería se encogió)`); }
+    for (const [n, v, min] of checks) { const ok = (v ?? 0) >= min; if (!ok) malo++; L(`    ${ok ? 'OK   ' : 'FALLA'} ${n} ${v}% (mínimo ${min}%)`); }
+    if (malo) { L(`\n  ✗ La memoria regresó: ${malo} comprobación(es) por debajo. No se avanza.`); process.exit(1); }
+    L(`\n  ✓ Puerta superada.`);
+}
 process.exit(0);

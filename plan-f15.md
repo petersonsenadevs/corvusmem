@@ -97,12 +97,14 @@
 - **Conclusión:** el comportamiento "o coincide con fuerza o calla" es más fuerte que un canal de "quizá". El frente de
   recall cierra en **T5**. Código revertido; `facts.mjs`/`messages.mjs`/`live-recall.mjs` quedan como estaban.
 
-### F15-T7 · La batería como PUERTA de regresión (npm test)  [S] [todo]
+### F15-T7 · La batería como PUERTA de regresión (npm test)  [S] [done]
 - **Skill:** code-quality §tests.
-- Congelar el set de F15-T1 y meterlo en `npm test` con umbrales: `hit@5 ≥ X`, abstención `≥ Y`, 0 duplicados (X e Y se
-  fijan con los números reales de F15-T5/T6, nunca por debajo del baseline).
-- **Hecho cuando:** `npm test` falla si el recall o el guardado regresan.
-- **Verificar:** forzar una regresión (bajar un umbral del motor) → test rojo; revertir → verde.
+- `tools/eval-memoria/eval.mjs --gate` (nuevo modo) falla con **exit 1** si la memoria regresa. Umbrales: **hit@5
+  inyectado ≥ 90 %**, **abstención = 100 %** (la regla de oro, exacta), **duplicados = 100 %**, y **MIN_CASOS 12**
+  (para que nadie "pase" vaciando la batería). Cableado en `test` y `test:core` de `package.json`.
+- **Hecho cuando:** `npm test` falla si el recall, la abstención o el dedup regresan. ✅
+- **Verificar:** forzar regresión (umbral a 101 %) → **exit 1, rojo**; revertir a 90 % → verde; `test:core` completo
+  verde con la puerta dentro (exit 0). ✅ Probado 2026-11-09.
 
 ### F15-T8 · (opcional) `--health` y panel de fiabilidad en el Cortex  [S] [todo]
 - **Skill:** ui-ux-pro-max (para el panel) + cli.

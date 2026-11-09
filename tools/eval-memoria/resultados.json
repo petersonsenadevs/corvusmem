@@ -9,7 +9,7 @@
     "hit5_inyectado": 100,
     "abstencion": 100,
     "duplicados_ok": 100,
-    "ms_por_consulta": 2.03
+    "ms_por_consulta": 0.71
   },
   "porCategoria": {
     "parafrasis": {

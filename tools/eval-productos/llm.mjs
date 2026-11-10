@@ -54,20 +54,42 @@ export function coste(modelo, uso) {
 // Ollama nativo (/api/chat): hace falta think:false para APAGAR el razonamiento de Qwen3. Por el endpoint OpenAI el
 // pensamiento va a un campo aparte y deja el contenido vacío si el tope de tokens llega antes de terminar de pensar;
 // así que para 'local' se usa la API nativa. Mismo contrato de salida que openaiChat ({ texto, uso }).
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+// REINTENTOS (F16): llama-server local se cae/reinicia bajo carga (HTTP 5xx o conexión cortada a mitad). Un glitch
+// pasajero no debe matar un run de horas. Hasta REINTENTOS_LLM intentos con espera creciente (1s,2s,4s,8s,15s); solo
+// ante 5xx o error de red (un 4xx —petición mal formada— no se reintenta). Avisa por stderr para que SE VEA el reintento.
+const REINTENTOS_LLM = Number(process.env.EVAL_LLM_REINTENTOS) || 5;
 async function ollamaChat({ modelo, sistema, usuario, maxTokens, temperatura, apiBase }) {
-    const res = await fetch(`${apiBase}/api/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            model: modelo,
-            messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: usuario }],
-            stream: false, think: false,
-            options: { temperature: temperatura, num_predict: maxTokens, seed: 7 },
-        }),
+    const cuerpo = JSON.stringify({
+        model: modelo,
+        messages: [...(sistema ? [{ role: 'system', content: sistema }] : []), { role: 'user', content: usuario }],
+        stream: false, think: false,
+        options: { temperature: temperatura, num_predict: maxTokens, seed: 7 },
     });
-    if (!res.ok) throw new Error(`LLM HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`);
-    const j = await res.json();
-    const texto = (j.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-    return { texto, uso: { entrada: j.prompt_eval_count ?? 0, salida: j.eval_count ?? 0 } };
+    let ultimo;
+    for (let intento = 1; intento <= REINTENTOS_LLM; intento++) {
+        try {
+            const res = await fetch(`${apiBase}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: cuerpo });
+            if (!res.ok) {
+                const txt = (await res.text()).slice(0, 300);
+                const err = new Error(`LLM HTTP ${res.status}: ${txt}`);
+                if (res.status >= 500 && intento < REINTENTOS_LLM) { ultimo = err; }      // 5xx: Ollama se cayó → reintentar
+                else throw err;                                                           // 4xx u último intento: rendirse
+            } else {
+                const j = await res.json();
+                const texto = (j.message?.content ?? '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+                return { texto, uso: { entrada: j.prompt_eval_count ?? 0, salida: j.eval_count ?? 0 } };
+            }
+        } catch (e) {
+            if (intento >= REINTENTOS_LLM) throw e;                                        // error de red en el último intento: propaga
+            ultimo = e;
+        }
+        const espera = Math.min(15000, 1000 * 2 ** (intento - 1));
+        process.stderr.write(`  ⟳ Ollama falló (${String(ultimo?.message || '').slice(0, 80)}). Reintento ${intento}/${REINTENTOS_LLM - 1} en ${espera / 1000}s…\n`);
+        await dormir(espera);
+    }
+    throw ultimo;
 }
 
 async function openaiChat({ modelo, sistema, usuario, maxTokens, temperatura, apiBase, apiKey }) {

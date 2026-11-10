@@ -70,6 +70,18 @@ let cortado = false;
 process.stdout.write(`\nPipeline end-to-end · ${DATASET} · ingesta ${INGESTA} · retriever ${RETR} · top-${TOPK}${DRY ? ' · DRY (sin LLM)' : ` · tope $${TOPE} · juez ${JUEZ_MODELO ? (JUEZ_PROV || 'openai') + ':' + JUEZ_MODELO : 'local'}`}\n`);
 if (hechos) process.stdout.write(`Reanudando: ${hechos} preguntas ya resueltas (gasto previo $${gasto.toFixed(4)})\n`);
 
+const hechosInicio = hechos;
+const TOTAL = LIMITE ? Math.min(ds.items.length, LIMITE) : ds.items.length;
+const runStart = Date.now();
+// Progreso en vivo (F16): [hechas/total] % aciertos · gasto · velocidad · ETA. En la MISMA línea (\r); cada 10 deja
+// rastro en el historial y hace checkpoint. Así se ve el avance de un run de horas sin tener que mirar el fichero.
+const progreso = () => {
+    const el = (Date.now() - runStart) / 1000, vel = (hechos - hechosInicio) / Math.max(el, 0.001);
+    const quedan = Math.max(0, TOTAL - hechos), eta = vel > 0 ? quedan / vel : 0;
+    const etaTxt = eta >= 3600 ? (eta / 3600).toFixed(1) + 'h' : eta >= 60 ? Math.round(eta / 60) + 'min' : Math.round(eta) + 's';
+    process.stdout.write(`  [${hechos}/${TOTAL}] ${pct(estado)}% aciertos · $${gasto.toFixed(4)} · ${vel.toFixed(2)} q/s · ETA ${etaTxt}        \r`);
+    if (hechos % 10 === 0) { guardar(); process.stdout.write('\n'); }
+};
 let hayIdx = 0; const hayTotal = porHay.size;
 for (const [hid, items] of porHay) {
     if (cortado) break;
@@ -99,17 +111,24 @@ for (const [hid, items] of porHay) {
             process.stdout.write(`\n⛔ Tope de gasto $${TOPE} alcanzado (gasto $${gasto.toFixed(4)}). Paro y guardo; relanza para continuar.\n`);
             cortado = true; break;
         }
-        const resp = await contestarPregunta(ctx, it.pregunta);
-        const predicha = (resp.texto || '').trim();
-        let correcto, juezTxt = null, costeJuez = 0;
-        if (it.abstencion) { correcto = esAbstencion(predicha); }     // oro = "no se puede responder": acierta si se abstiene
-        else { const j = await juzgar(it.pregunta, it.respuesta, predicha, { proveedor: JUEZ_PROV, modelo: JUEZ_MODELO }); correcto = j.correcto; juezTxt = j.texto; costeJuez = j.coste; }
+        let resp, predicha, correcto, juezTxt = null, costeJuez = 0;
+        try {
+            resp = await contestarPregunta(ctx, it.pregunta);
+            predicha = (resp.texto || '').trim();
+            if (it.abstencion) { correcto = esAbstencion(predicha); }     // oro = "no se puede responder": acierta si se abstiene
+            else { const j = await juzgar(it.pregunta, it.respuesta, predicha, { proveedor: JUEZ_PROV, modelo: JUEZ_MODELO }); correcto = j.correcto; juezTxt = j.texto; costeJuez = j.coste; }
+        } catch (e) {                                                     // el LLM se rindió tras los reintentos: no perder lo hecho
+            guardar();
+            process.stdout.write(`\n\n⚠️  El LLM falló tras los reintentos: ${e.message}\n`);
+            process.stdout.write(`   Guardado el progreso (${hechos}/${TOTAL}). ¿Sigue vivo Ollama? (ollama ps). Relanza el MISMO comando y continúa donde quedó.\n`);
+            process.exit(1);
+        }
         const coste = resp.coste + costeJuez;
         gasto += coste;
         estado.hechos[it.id] = { tipo: it.tipo, abstencion: it.abstencion, predicha, oro: it.respuesta, correcto, juez: juezTxt,
             recuperados: tids.length, coste, ms: +(performance.now() - t0).toFixed(1) };
         hechos++;
-        if (hechos % 10 === 0) { guardar(); process.stdout.write(`  ${hechos} preguntas · aciertos ${pct(estado)}% · gasto $${gasto.toFixed(4)}\r`); }
+        progreso();
     }
     idx.limpiar?.();
 }

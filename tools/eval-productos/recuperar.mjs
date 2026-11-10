@@ -36,7 +36,10 @@ export async function recuperadorEmbedding(turnos) {
 }
 
 // --- recuperador 2: el motor de Corvusmem (cada turno un hecho con dimensión única; se mapea el id del hecho a su tid) ---
-export function recuperadorMotor(turnos) {
+// umbral (F16): puntuación mínima para que un turno entre al contexto. 0 = sin filtro (ranking puro). Un umbral > 0
+// imita el UMBRAL_RECUERDO del producto: en preguntas SIN respuesta las puntuaciones son bajas → contexto vacío →
+// el contestador se abstiene. Sube la abstención (cat5) sin tocar las preguntas con respuesta (puntuación alta).
+export function recuperadorMotor(turnos, { umbral = 0 } = {}) {
     const base = fs.mkdtempSync(path.join(os.tmpdir(), 'senzu-recup-'));
     const P = path.join(base, 'proj');
     fs.mkdirSync(path.join(P, 'senzu'), { recursive: true });
@@ -50,10 +53,16 @@ export function recuperadorMotor(turnos) {
             { ahora: new Date(T0 + i * 1000).toISOString() });
         map.set(r.hecho.id, t.tid);
     });
-    return {
-        buscar(q, k) { return motor.buscarHechos(P, q, { limite: k }).map(h => map.get(h.hecho.id)).filter(Boolean); },
+    const api = {
+        ultPunt: null,                                      // F16: puntuación TOP de la última búsqueda (diagnóstico del umbral)
+        buscar(q, k) {
+            const hits = motor.buscarHechos(P, q, { limite: k });
+            api.ultPunt = hits.length ? hits[0].puntuacion : 0;   // top (vienen ordenados desc); 0 = el motor no trajo nada
+            return hits.filter(h => h.puntuacion >= umbral).map(h => map.get(h.hecho.id)).filter(Boolean);
+        },
         limpiar() { fs.rmSync(base, { recursive: true, force: true }); },
     };
+    return api;
 }
 
 // --- recuperador 3 (X-T22): el motor con INGESTA ESTRUCTURADA. Cada memoria trae una CLAVE estable (home_city, job…);

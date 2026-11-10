@@ -33,6 +33,7 @@ const RETR = val('--retriever', 'motor');            // motor (nuestro) | embedd
 const INGESTA = val('--ingesta', 'crudo');           // crudo (turnos tal cual) | llm (Qwen3 extrae hechos) | estructurada (X-T22: hechos con clave estable; el motor sustituye/data)
 const TIPOS = (val('--tipos', '') || '').split(',').map(s => s.trim()).filter(Boolean);   // X-T22: filtrar por tipo de pregunta (p. ej. knowledge-update,temporal-reasoning)
 const TOPK = Number(val('--topk', 10));              // turnos que entran en el contexto del contestador
+const UMBRAL = Number(val('--umbral', 0)) || 0;      // F16: puntuación mínima del motor para entrar al contexto (0 = sin filtro)
 const TOPE = Number(val('--tope-gasto', 2));         // $ máximos; se corta en seco al superarlo
 const DRY = opt('--dry');
 const JUEZ_PROV = val('--juez-proveedor', null);     // override del juez (p. ej. openai) sin tocar el contestador
@@ -40,8 +41,18 @@ const JUEZ_MODELO = val('--juez-modelo', null);
 const SALIDA = val('--salida', path.join(HERE, `resultados-e2e-${DATASET}-${RETR}-${INGESTA}.json`));
 
 // --- checkpoint reanudable ---
-let estado = { dataset: DATASET, retriever: RETR, ingesta: INGESTA, topk: TOPK, juez: JUEZ_MODELO || 'local', inicio: new Date().toISOString(), hechos: {} };
-if (fs.existsSync(SALIDA)) { try { const p = JSON.parse(fs.readFileSync(SALIDA, 'utf8')); if (p.dataset === DATASET && p.retriever === RETR && (p.ingesta || 'crudo') === INGESTA) estado = p; } catch { /* checkpoint corrupto: se reinicia */ } }
+let estado = { dataset: DATASET, retriever: RETR, ingesta: INGESTA, topk: TOPK, umbral: UMBRAL, juez: JUEZ_MODELO || 'local', inicio: new Date().toISOString(), hechos: {} };
+if (fs.existsSync(SALIDA)) {
+    let p = null; try { p = JSON.parse(fs.readFileSync(SALIDA, 'utf8')); } catch { p = 'corrupto'; }
+    const casa = p && p !== 'corrupto' && p.dataset === DATASET && p.retriever === RETR && (p.ingesta || 'crudo') === INGESTA && (p.umbral || 0) === UMBRAL;
+    if (casa) estado = p;                                   // MISMO run (dataset/retriever/ingesta): reanuda donde quedó
+    else {                                                   // SEGURIDAD (F16): NO pisar un fichero de OTRA config (p. ej. el bench histórico)
+        const hoy = new Date().toISOString().slice(0, 10);
+        process.stderr.write(`\n⛔ ${path.basename(SALIDA)} ya existe y ${p === 'corrupto' ? 'no se puede leer' : `es de otra configuración (${p.retriever}/${p.ingesta || 'crudo'}), no de este run (${RETR}/${INGESTA})`}.\n`);
+        process.stderr.write(`   No lo sobrescribo. Usa otro --salida (p. ej. resultados-e2e-${DATASET}-${RETR}-${INGESTA}-${hoy}.json) o borra ese fichero si ya no lo quieres.\n`);
+        process.exit(1);
+    }
+}
 const guardar = () => fs.writeFileSync(SALIDA, JSON.stringify(estado, null, 2) + '\n');
 
 // --- contexto a partir de los turnos recuperados (en orden de ranking) ---
@@ -67,7 +78,7 @@ for (const it of ds.items) { if (!porHay.has(it.haystack)) porHay.set(it.haystac
 let gasto = Object.values(estado.hechos).reduce((s, h) => s + (h.coste || 0), 0);
 let hechos = Object.keys(estado.hechos).length;
 let cortado = false;
-process.stdout.write(`\nPipeline end-to-end · ${DATASET} · ingesta ${INGESTA} · retriever ${RETR} · top-${TOPK}${DRY ? ' · DRY (sin LLM)' : ` · tope $${TOPE} · juez ${JUEZ_MODELO ? (JUEZ_PROV || 'openai') + ':' + JUEZ_MODELO : 'local'}`}\n`);
+process.stdout.write(`\nPipeline end-to-end · ${DATASET} · ingesta ${INGESTA} · retriever ${RETR} · top-${TOPK}${UMBRAL ? ` · umbral ${UMBRAL}` : ''}${DRY ? ' · DRY (sin LLM)' : ` · tope $${TOPE} · juez ${JUEZ_MODELO ? (JUEZ_PROV || 'openai') + ':' + JUEZ_MODELO : 'local'}`}\n`);
 if (hechos) process.stdout.write(`Reanudando: ${hechos} preguntas ya resueltas (gasto previo $${gasto.toFixed(4)})\n`);
 
 const hechosInicio = hechos;
@@ -96,7 +107,7 @@ for (const [hid, items] of porHay) {
     const porTid = new Map(unidades.map(t => [t.tid, t]));
     // El motor con ingesta estructurada usa su adaptador que SUSTITUYE/data (X-18/X-20); embedding siempre embebe plano
     const idx = RETR === 'embedding' ? await recuperadorEmbedding(unidades)
-        : (INGESTA === 'estructurada' ? recuperadorMotorEstructurado(unidades) : recuperadorMotor(unidades));
+        : (INGESTA === 'estructurada' ? recuperadorMotorEstructurado(unidades) : recuperadorMotor(unidades, { umbral: UMBRAL }));
     for (const it of items) {
         if (LIMITE && hechos >= LIMITE) { cortado = true; break; }
         if (estado.hechos[it.id]) continue;              // ya resuelta en una tirada anterior
@@ -104,7 +115,7 @@ for (const [hid, items] of porHay) {
         const tids = await idx.buscar(it.pregunta, TOPK);
         const ctx = armarContexto(tids, porTid);
         if (DRY) {                                        // offline: solo cableado, sin LLM
-            estado.hechos[it.id] = { tipo: it.tipo, seco: true, recuperados: tids.length, ctxChars: ctx.length, coste: 0 };
+            estado.hechos[it.id] = { tipo: it.tipo, seco: true, recuperados: tids.length, puntMax: idx.ultPunt ?? null, ctxChars: ctx.length, coste: 0 };
             hechos++; continue;
         }
         if (gasto >= TOPE) {                              // tope de gasto duro: parar antes de gastar más
@@ -126,7 +137,7 @@ for (const [hid, items] of porHay) {
         const coste = resp.coste + costeJuez;
         gasto += coste;
         estado.hechos[it.id] = { tipo: it.tipo, abstencion: it.abstencion, predicha, oro: it.respuesta, correcto, juez: juezTxt,
-            recuperados: tids.length, coste, ms: +(performance.now() - t0).toFixed(1) };
+            recuperados: tids.length, puntMax: idx.ultPunt ?? null, coste, ms: +(performance.now() - t0).toFixed(1) };
         hechos++;
         progreso();
     }

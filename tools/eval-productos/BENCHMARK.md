@@ -101,9 +101,11 @@ node tools/eval-productos/bajar-locomo.mjs
 node tools/eval-productos/recuperar.mjs --locomo --motor --limite 10
 node tools/eval-productos/pipeline.mjs  --locomo --dry --retriever motor --limite 5
 
-# 2) run real de Corvusmem (necesita Ollama + qwen3:8b): motor y baseline embedding
-node tools/eval-productos/pipeline.mjs --locomo --retriever motor     --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-motor-llm.json
-node tools/eval-productos/pipeline.mjs --locomo --retriever embedding --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-embedding-llm.json
+# 2) run real de Corvusmem (necesita Ollama + qwen3:8b): motor y baseline embedding.
+#    OJO: --ingesta llm es lo que da las cifras de la tabla (el «-llm» del nombre del fichero = modo de ingesta).
+#    Sin --ingesta llm se mide «crudo» (turnos sin extraer), que es OTRO método y NO reproduce estos números.
+node tools/eval-productos/pipeline.mjs --locomo --ingesta llm --retriever motor     --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-motor-llm.json
+node tools/eval-productos/pipeline.mjs --locomo --ingesta llm --retriever embedding --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-embedding-llm.json
 
 # 3) mem0 (venv Python propio + Ollama); desde tools/eval-productos/mem0:
 #    .venv/Scripts/python.exe mem0_locomo.py --topk 10 --coleccion locomo_full --salida ../resultados-e2e-locomo-mem0-full.json

@@ -5,6 +5,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 ### Added
+- **Head-to-head benchmark vs paid memory products (`tools/eval-productos/`).** Corvusmem's memory engine measured
+  against **mem0** and **Zep/Graphiti** on the academic **LoCoMo** benchmark (1986 questions), under identical
+  conditions (same local Qwen3 answerer + judge; only the memory differs). Corvusmem **beats mem0 globally**
+  (25.6 % vs 21.1 %) and **nearly triples it on temporal** questions (16.2 % vs 5.3 %), is **best at abstention**,
+  and sits level with the free embedding baseline — all while being deterministic, offline and $0. Honest caveat
+  documented: local Qwen3, not GPT-4o, so not comparable to their official leaderboards. Raw results + `comparar.mjs`
+  reproduce the tables offline (`BENCHMARK.md`). Dev tooling — not shipped in the npm package.
 - **`corvusmem --health` and a reliability panel in the Cortex.** One source (`datosSalud`) answers "is the memory
   working?": active facts (and by family), open goals/todos, real-world use (injected vs used, real precision from your
   own sessions), the deterministic battery result (`hit@5`, abstention, dedup, ms — shown only where the dev eval

@@ -32,6 +32,7 @@ const ALIAS_FLAG = {
     '--limit': '--limite', '--budget': '--presupuesto', '--reason': '--motivo', '--link': '--enlazar',
     '--links': '--enlaces', '--client': '--cliente', '--text': '--texto', '--report': '--informe',
     '--output': '--salida', '--all': '--todo', '--none': '--nada', '--as': '--como', '--author': '--autor',
+    '--health': '--salud',
 };
 const ALIAS_VAL = { user: 'usuario', project: 'proyecto', agent: 'agente' };   // valores de enum en inglés
 for (let i = 0; i < args.length; i++) if (ALIAS_FLAG[args[i]]) args[i] = ALIAS_FLAG[args[i]];
@@ -181,5 +182,28 @@ if (opt('--cortex')) {   // Cortex: la memoria en un HTML local, sin red; --clie
     if (!cliente) out('  Tiene datos privados: para enseñarlo, genera la vista para el cliente con --cortex --cliente.');
     process.exit(0);
 }
-out('Usage: --save --dimension <family.topic> --value <text> [--keys a,b] [--scope user] [--doubt] | --search <query> [--history] | --context | --list [--all] | --forget <id> | --cortex [--client] [--output <dir>]');
+if (opt('--salud')) {   // F15-T8: la salud de la memoria en números (hechos, uso real, batería, última sesión)
+    if (!m.datosSalud) { out('Este Corvus no trae --health todavía: actualízalo.'); process.exit(2); }
+    const s = m.datosSalud(root, { dias: Number(opt('--dias')) || 30 });
+    if (opt('--json')) { out(JSON.stringify(s, null, 2)); process.exit(0); }
+    out(`Corvusmem · salud de la memoria (${root})`);
+    const fam = Object.entries(s.hechos.porFamilia).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(' · ');
+    out('\nHechos');
+    out(`  ${s.hechos.activos} activos${s.hechos.dudosos ? ` · ${s.hechos.dudosos} dudosos` : ''} · ${s.hechos.historico} en histórico · ${s.hechos.abiertos} objetivos/pendientes abiertos`);
+    if (fam) out(`  por familia: ${fam}`);
+    out(`\nUso real (últimos ${s.uso ? s.uso.dias : 30} días)`);
+    if (s.uso) out(`  ${s.uso.mensajes} mensajes · ${s.uso.inyectados} recuerdos inyectados · ${s.uso.usados} usados · ${s.uso.ignorados} ignorados`
+        + (s.uso.precision != null ? ` · precisión real ${s.uso.precision} %` : ''));
+    else out('  sin registro todavía: se llena solo al hablar con el agente.');
+    out('\nBatería (eval determinista)');
+    if (s.bateria) out(`  hit@5 inyectado ${s.bateria.hit5} % · abstención ${s.bateria.abstencion} % · duplicados ${s.bateria.duplicados} % · ${s.bateria.ms} ms/consulta (${s.bateria.consultas} consultas, ${s.bateria.fecha})`);
+    else out('  no disponible en una instalación (es una herramienta de desarrollo del repo).');
+    out('\nÚltima sesión');
+    if (s.ultimaSesion && s.ultimaSesion.fecha) {
+        if (s.ultimaSesion.guardo) out(`  ${s.ultimaSesion.fecha} · guardó ${s.ultimaSesion.guardo} hecho(s): ${s.ultimaSesion.hechos.map(h => `[${h.dimension}]`).join(' ')}`);
+        else out(`  ${s.ultimaSesion.fecha} · no guardó nada${s.ultimaSesion.archivos ? ` (tocó ${s.ultimaSesion.archivos} archivos)` : ''}`);
+    } else out('  sin datos de sesión todavía.');
+    process.exit(0);
+}
+out('Usage: --save --dimension <family.topic> --value <text> [--keys a,b] [--scope user] [--doubt] | --search <query> [--history] | --context | --list [--all] | --health | --forget <id> | --cortex [--client] [--output <dir>]');
 process.exit(2);

@@ -18,8 +18,8 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "test": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-save-criterios.mjs && node tests/test-hecho-detector.mjs && node tools/eval-memoria/eval.mjs --gate && node tests/test-cortex-visual.mjs",
-    "test:core": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-save-criterios.mjs && node tests/test-hecho-detector.mjs && node tools/eval-memoria/eval.mjs --gate",
+    "test": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-save-criterios.mjs && node tests/test-hecho-detector.mjs && node tests/test-health.mjs && node tools/eval-memoria/eval.mjs --gate && node tests/test-cortex-visual.mjs",
+    "test:core": "node tests/test-boundary.mjs && node tests/test-facts.mjs && node tests/test-hard-recall.mjs && node tests/test-install.mjs && node tests/test-import.mjs && node tests/test-plugin.mjs && node tests/test-parity.mjs && node tests/test-save-criterios.mjs && node tests/test-hecho-detector.mjs && node tests/test-health.mjs && node tools/eval-memoria/eval.mjs --gate",
     "bench:tokens": "node tools/eval-tokens.mjs",
     "preversion": "npm run test:core",
     "prepublishOnly": "npm run test:core"

@@ -1104,8 +1104,11 @@ export function datosCortex(root, { cliente = false, ahora = hoy(), dias = 7, en
         .map(h => ({ id: h.id, privado: privado(h) || undefined, tema: temaDe(h.dimension), valor: h.valor, zona: zonaDe(h), progreso: h.progreso || 'abierto', dias: Math.max(0, Math.floor((Date.parse(ahora) - Date.parse(h.creado)) / 864e5)) }));
     // el nombre del proyecto: el que sabe la memoria (proyecto.nombre) o, si no, el de la carpeta
     const nombre = actuales.find(h => h.dimension === 'proyecto.nombre');
+    // F15-T8: salud en el panel. Con cliente, sin lo privado (uso real y última sesión): solo hechos y batería.
+    const salud = datosSalud(root, { ahora });
+    const saludVista = cliente ? { generado: salud.generado, hechos: salud.hechos, bateria: salud.bateria } : salud;
     return { proyecto: nombre ? nombre.valor : path.basename(path.resolve(root)), generado: ahora, cliente, zonas, cambios: cambios.slice(0, 20), abiertos: abiertosV,
-        actividad: actividadCortex(root, { cliente, ahora }) };
+        actividad: actividadCortex(root, { cliente, ahora }), salud: saludVista };
 }
 // Cómo PIENSA (X-T10): del registro de uso real, qué zonas ha consultado el agente y cuánto. Cada recuerdo que llegó
 // pesa más cuanto más reciente (se reduce a la mitad cada 3 días), más si lo usó y menos si lo ignoró. Y la secuencia
@@ -1236,6 +1239,34 @@ export function informeUso(root, { dias = 30, ahora = hoy() } = {}) {
         ruido: [...porRecuerdo.values()].filter(v => v.ignorado >= 2 && v.ignorado > v.usado).sort((a, b) => b.ignorado - a.ignorado).slice(0, 8),
         ignoradosRecientes: items.filter(i => i.usado === false).slice(-8).reverse().map(i => ({ consulta: i.consulta, texto: i.texto, t: i.t })),
         silenciosRecientes: l.filter(x => !x.items.length).slice(-8).reverse().map(x => ({ consulta: x.consulta, t: x.t })),
+    };
+}
+
+// F15-T8: la salud de la memoria en números, UNA sola fuente para `--health` (CLI) y el panel del Cortex. Todo sale
+// del propio registro del proyecto (hechos, uso real, última sesión). La batería (eval determinista) solo existe en el
+// repo —es una herramienta de desarrollo, no va en el paquete—: en una instalación, `bateria` es null (y se dice).
+export function datosSalud(root, { dias = 30, ahora = hoy() } = {}) {
+    const todos = todosLosHechos(root).filter(h => h.estado !== 'invalidado');
+    const activos = todos.filter(h => h.estado === 'activo');
+    const porFamilia = {};
+    for (const h of activos) { const i = h.dimension.indexOf('.'); const fam = i >= 0 ? h.dimension.slice(0, i) : h.dimension; porFamilia[fam] = (porFamilia[fam] || 0) + 1; }
+    const uso = informeUso(root, { dias, ahora });
+    let ultimaSesion = null;
+    try {
+        const s = JSON.parse(fs.readFileSync(rutaEstado(root), 'utf8'));
+        const g = Array.isArray(s.hechosGuardados) ? s.hechosGuardados : [];
+        ultimaSesion = { fecha: String(s.actualizado || '').slice(0, 10) || null, guardo: g.length, hechos: g.slice(0, 5).map(h => ({ dimension: h.dimension, valor: h.valor })), archivos: Array.isArray(s.editados) ? s.editados.length : 0 };
+    } catch {}
+    let bateria = null;
+    try {
+        const f = path.join(AQUI, '..', 'tools', 'eval-memoria', 'resultados.json');
+        if (fs.existsSync(f)) { const r = JSON.parse(fs.readFileSync(f, 'utf8')); const g = r.global || {}; bateria = { fecha: r.fecha, hit5: g.hit5_inyectado, abstencion: g.abstencion, duplicados: g.duplicados_ok, ms: g.ms_por_consulta, consultas: g.consultas }; }
+    } catch {}
+    return {
+        generado: ahora,
+        hechos: { activos: activos.length, dudosos: todos.filter(h => h.estado === 'dudoso').length, historico: todos.filter(h => h.estado === 'sustituido' || h.estado === 'cerrado').length, abiertos: abiertos(root, { ahora }).length, porFamilia },
+        uso: uso.mensajes ? { dias, mensajes: uso.mensajes, inyectados: uso.inyectados, usados: uso.usados, ignorados: uso.ignorados, precision: uso.precision } : null,
+        bateria, ultimaSesion,
     };
 }
 

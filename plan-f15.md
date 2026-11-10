@@ -115,15 +115,27 @@
 - **Verificar:** forzar regresión (umbral a 101 %) → **exit 1, rojo**; revertir a 90 % → verde; `test:core` completo
   verde con la puerta dentro (exit 0). ✅ Probado 2026-11-09.
 
-### F15-T8 · (opcional) `--health` y panel de fiabilidad en el Cortex  [S] [todo]
+### F15-T8 · `--health` y panel de fiabilidad en el Cortex  [S] [done]
 - **Skill:** ui-ux-pro-max (para el panel) + cli.
-- `corvusmem --health`: hechos guardados, tasa de acierto sobre la eval, última sesión (guardó/omitió). Panel en el
-  Cortex con lo mismo. Responde al "¿por qué no lo recordó?" con transparencia.
-- **Hecho cuando:** `--health` imprime el estado y el Cortex lo muestra.
-- **Verificar:** `node cli/corvusmem.mjs --health` da el informe; panel visible; `npm test` verde.
+- **Una sola fuente:** `datosSalud(root)` en `facts.mjs` (hechos activos/histórico/por familia, objetivos abiertos, uso
+  REAL de `informeUso`, última sesión de `ultima-sesion.json`, y la batería `eval-memoria/resultados.json` **solo si
+  existe** —es herramienta de desarrollo, en una instalación sale `null` y se dice).
+- `corvusmem --health` (alias de `--salud`, `+--json`): imprime el informe. `datosCortex` incluye `salud`; `htmlCortex`
+  pinta un panel **server-rendered** (se lee sin JS; etiquetas por `data-t` con fallback es→en). Las filas privadas
+  (uso real, última sesión) van con `solo-dueno` y **no viajan** al HTML/JSON del cliente (gate verificado).
+- **Hecho cuando:** `--health` imprime el estado y el Cortex lo muestra, sin filtrar nada privado al cliente. ✅
+- **Verificar:** `tests/test-health.mjs` (14/0): forma de `datosSalud`, panel del dueño con filas `solo-dueno`, cliente
+  sin uso ni última sesión (ni en JSON), y `corvusmem --health --json` exit 0 parseable. `npm run test:core` verde +
+  `test-cortex-visual` 40/0. ✅
 
 ---
 
 ## Orden recomendado
-T1 (baseline, obligatoria) → T2, T3, T4 (guardado) → T5, T6 (recall) → T7 (puerta) → T8 (opcional).
+T1 (baseline, obligatoria) → T2, T3, T4 (guardado) → T5, T6 (recall) → T7 (puerta) → T8.
 Los números de los umbrales de T7 salen de medir en T5/T6: **primero se mide, luego se sella.**
+
+## Estado final de F15 (2026-11-10)
+**Completa.** T1·T2·T3·T4·T5·T7·T8 **done** · T6 **descartada con evidencia**. Batería: hit@5 inyectado 100 % ·
+abstención 100 % · duplicados 100 % · ~0,7 ms, convertida en puerta de `npm test`. Guardado endurecido (criterio único,
+detectores con forma de hecho, dedup) y recall ampliado deterministamente. Fiabilidad visible con `--health` y el panel
+del Cortex. Cero embeddings, cero LLM en los hooks, formato `.jsonl` intacto. Siguiente frente: **F16 (bench vs Mem0/Zep).**

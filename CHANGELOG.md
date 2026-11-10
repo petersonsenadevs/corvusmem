@@ -5,6 +5,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
 
 ## [Unreleased]
 ### Added
+- **`corvusmem --health` and a reliability panel in the Cortex.** One source (`datosSalud`) answers "is the memory
+  working?": active facts (and by family), open goals/todos, real-world use (injected vs used, real precision from your
+  own sessions), the deterministic battery result (`hit@5`, abstention, dedup, ms — shown only where the dev eval
+  exists), and what the last session saved or skipped. The Cortex shows the same as a panel that reads without
+  JavaScript; private rows (real use, last session) are owner-only and never travel to the client view or its JSON.
 - **Fact-shaped nudges while you work (high precision).** Beyond rules/corrections, the live hook now spots statements
   that carry a reusable datum — a tool in use (`we use X`), a figure with a currency (`charges 600 €`), a location
   (`vivo en Madrid`), an office/API named — and nudges the agent to save it, then leaves a non-blocking reminder at

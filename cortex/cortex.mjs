@@ -156,6 +156,12 @@ h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .16em; color: v
 .cambios li::before, .abiertos li::before { content: ""; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: var(--c); box-shadow: 0 0 10px var(--c); }
 .cambios small, .abiertos small { display: block; color: var(--suave); font-size: 12px; }
 .vacio { color: var(--suave); font-size: 14px; margin: 0; }
+.salud { display: grid; gap: 10px; }
+.salud-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.salud-l li { display: flex; align-items: baseline; gap: 8px; font-size: 14px; border: 1px solid var(--borde); border-radius: var(--radio); padding: 8px 12px; background: var(--papel-alto); }
+.salud-l li > span { color: var(--suave); }
+.salud-l li > b { color: var(--texto); font-variant-numeric: tabular-nums; }
+.salud-l li > small { color: var(--suave); margin-left: auto; text-align: right; font-size: 12px; }
 .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .hecho { padding: 12px 16px 12px 18px; border-radius: 16px; background: var(--papel-alto); border: 1px solid var(--borde); display: grid; gap: 2px; cursor: pointer; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: border-color .2s, transform .2s, box-shadow .2s; }
 .hecho::before { content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px; border-radius: 3px; background: var(--c); box-shadow: 0 0 12px var(--c); }
@@ -739,6 +745,20 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 // JSON dentro de <script type="application/json">: «<» escapado, así ningún valor puede cerrar la etiqueta
 const json = o => JSON.stringify(o).replace(/</g, '\\u003c');
 
+// F15-T8: panel de fiabilidad, server-rendered desde datos.salud (se lee sin JavaScript; las etiquetas se traducen por
+// data-t, los números son neutros). Filas privadas (uso real, última sesión) con `solo-dueno`: ocultas en vista cliente.
+function panelSalud(s, cliente, es) {
+    if (!s) return '';
+    const fam = Object.entries(s.hechos.porFamilia || {}).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([k, v]) => `${k} ${v}`).join(' · ');
+    const fila = (clave, val, det, priv) => `<li${priv ? ' class="solo-dueno"' : ''}><span data-t="salud.${clave}">${es.salud[clave]}</span><b>${esc(String(val))}</b>${det ? `<small>${esc(det)}</small>` : ''}</li>`;
+    const filas = [fila('hechos', s.hechos.activos, fam)];
+    if (s.bateria) filas.push(fila('bateria', `${s.bateria.hit5}%`, `hit@5 · ${s.bateria.abstencion}% abst · ${s.bateria.ms} ms`));
+    if (!cliente && s.uso) filas.push(fila('uso', s.uso.precision != null ? `${s.uso.precision}%` : '—', `${s.uso.usados}/${s.uso.inyectados}`, true));
+    if (!cliente && s.ultimaSesion && s.ultimaSesion.fecha) filas.push(fila('sesion', s.ultimaSesion.guardo ? `+${s.ultimaSesion.guardo}` : '0',
+        `${s.ultimaSesion.fecha}${s.ultimaSesion.hechos.length ? ' · ' + s.ultimaSesion.hechos.map(h => String(h.dimension).split('.')[0]).join(' ') : ''}`, true));
+    return `<section class="salud" id="salud-s"><h2 data-t="salud.t">${es.salud.t}</h2><ul class="salud-l">${filas.join('')}</ul></section>`;
+}
+
 export function htmlCortex(datos, { cli = null, idioma = null, soloCerebro = false } = {}) {
     const cliente = !!datos.cliente;
     const solo = !!(datos.soloCerebro || soloCerebro);   // modo incrustable: solo el cerebro 3D, sin panel ni mandos
@@ -791,6 +811,7 @@ export function htmlCortex(datos, { cli = null, idioma = null, soloCerebro = fal
       <button type="button" class="panel-cerrar" id="panel-toggle" data-t-aria="panelOcultar" data-t-title="panelOcultar" aria-label="${es.panelOcultar}" title="${es.panelOcultar}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
     <label class="busca"><span class="sr" data-t="buscarL">${es.buscarL}</span><svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="buscar" type="search" data-t-ph="buscar" placeholder="${es.buscar}" autocomplete="off"></label>
+    ${solo ? '' : panelSalud(datos.salud, cliente, es)}
     <section><h2 data-t="semana">${es.semana}</h2><ul class="cambios" id="cambios-l"></ul><p class="vacio" id="cambios-v" data-t="nadaSemana">${es.nadaSemana}</p></section>
     <section id="abiertos-s"><h2 data-t="sigueAbierto">${es.sigueAbierto}</h2><ul class="abiertos" id="abiertos-l"></ul></section>
     <section>

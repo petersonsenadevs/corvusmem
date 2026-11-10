@@ -89,11 +89,30 @@ node tools/eval-productos/comparar.mjs \
 
 - **Resultados crudos** (per-pregunta, juzgados, con procedencia): `resultados-e2e-locomo-*.json`.
 - **Motor medido:** el de Corvusmem (`src/facts.mjs`) — cada turno ingerido como un hecho, con su propio ranking
-  determinista.
-- **Re-ejecutar desde cero** (ingesta + recuperación + juez) necesita Ollama + Qwen3 local, y mem0/Zep además
-  Docker/Neo4j. Ese arnés completo (loader, pipeline, recuperación, ingesta, juez, mem0/, zep/) es la
-  **procedencia** del dato; aquí se incluye la **evidencia reproducible** (resultados + `comparar.mjs`). Un
-  re-run nativo contra el motor de hoy es un paso aparte.
+  determinista. El arnés lo carga de `src/` (override con `CORVUS_ENGINE_DIR`).
+
+### Re-ejecutar desde cero (el arnés vive aquí, apuntando al motor de Corvusmem)
+
+```
+# 0) una vez: dataset LoCoMo (~2,7 MB de GitHub, luego offline)
+node tools/eval-productos/bajar-locomo.mjs
+
+# 1) comprobar el cableado SIN LLM (sin Ollama): recuperación + montaje de contexto
+node tools/eval-productos/recuperar.mjs --locomo --motor --limite 10
+node tools/eval-productos/pipeline.mjs  --locomo --dry --retriever motor --limite 5
+
+# 2) run real de Corvusmem (necesita Ollama + qwen3:8b): motor y baseline embedding
+node tools/eval-productos/pipeline.mjs --locomo --retriever motor     --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-motor-llm.json
+node tools/eval-productos/pipeline.mjs --locomo --retriever embedding --topk 10 --salida tools/eval-productos/resultados-e2e-locomo-embedding-llm.json
+
+# 3) mem0 (venv Python propio + Ollama); desde tools/eval-productos/mem0:
+#    .venv/Scripts/python.exe mem0_locomo.py --topk 10 --coleccion locomo_full --salida ../resultados-e2e-locomo-mem0-full.json
+```
+
+Notas honestas: **la columna embedding** necesita `@huggingface/transformers` (import dinámico; descarga el modelo
+una vez a `tools/.models/`, gitignored). **mem0/Zep** llevan su propio entorno Python (venv) y, Zep, Docker/Neo4j —
+por eso Zep solo se midió en muestra (a escala completa en local es inviable por tiempo). Todo determinista
+(temp 0, seed fija), 0 € y reanudable.
 
 > Nota: este banco de pruebas es **herramienta de desarrollo**; no viaja en el paquete npm (no está en la lista
 > `files` de `package.json`), igual que `tools/eval-memoria/`.

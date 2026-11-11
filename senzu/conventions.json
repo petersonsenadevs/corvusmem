@@ -1,0 +1,10 @@
+{
+  "_sello": "senzu:inmutable",
+  "_generado": "/adoptar 2026-11-11 — no editar a mano; para cambiar: borrar senzu/conventions.json y senzu/conventions.md y re-ejecutar /adoptar",
+  "rules": [
+    { "files": "\\.(ts|tsx)$", "forbid": ".", "why": "el proyecto es Node ESM puro en .mjs; nada de TypeScript" },
+    { "files": "\\.mjs$", "forbid": "from\\s+['\"](fs|path|crypto|os|url|child_process|util|events|stream|assert|zlib|http|https|readline)['\"]", "why": "los builtins de Node se importan con prefijo node: (import fs from 'node:fs')" },
+    { "files": "\\.mjs$", "forbid": "\\brequire\\s*\\(", "why": "modulos ESM: usa import, no require()" },
+    { "files": "\\.mjs$", "forbid": "module\\.exports", "why": "modulos ESM: usa export, no module.exports" }
+  ]
+}

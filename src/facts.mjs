@@ -690,6 +690,10 @@ export function buscarHechos(root, consulta, { historico = false, futuro = false
     // menudo y dejaba fuera justo lo relevante); así sigue contando algo (≈0,7) y los raros pesan más
     const idf = w => Math.log(1 + (nVig + 1) / ((df.get(w) || 0) + 0.5));
     const qConPeso = q.filter(palabraConPeso).length;
+    // Techo de la consulta (F17-T7): masa idf de las palabras con peso de la pregunta. Normaliza la puntuación a una
+    // CONFIANZA corpus-independiente (puntuación ÷ techo): así el umbral de abstención deja de depender del tamaño del
+    // corpus (la idf escala con nVig). No cambia el ranking (es una constante por consulta), solo añade una señal [0,1].
+    const techoConsulta = [...new Set(q.filter(palabraConPeso))].reduce((s, w) => s + idf(w), 0) || 1;
     const desconocidos = nombresDesconocidos(consulta, new Set(toks.flat()));
     const hits = docs.map((h, i) => {
         const t = toks[i], tf = new Map();
@@ -850,6 +854,7 @@ export function buscarHechos(root, consulta, { historico = false, futuro = false
     const cupo = x => familia(x.origen || x.via || x.hecho.dimension);
     const elegidos = conCupos(juntar(hits.filter(x => !flojo(x))), limite, g => cupo(g[0])).flat().slice(0, limite);
     return elegidos.concat(hits.filter(flojo).slice(0, Math.max(0, limite - elegidos.length))).map(x => ({ ...x,
+        confianza: techoConsulta > 0 ? +Math.min(x.puntuacion / techoConsulta, 1).toFixed(3) : 0,   // F17-T7: señal [0,1] corpus-independiente
         motivo: (x.via ? (x.por ? `vía «${x.por}» con ${x.via}` : `vía enlace con ${x.via}`) : `coincide: ${x.motivo.join(', ')}`)
             + (x.reforzado ? ` · reforzado ${x.reforzado.por ? `vía «${x.reforzado.por}»` : 'vía enlace'} con ${x.reforzado.via}` : '') + (x.hecho.estado === 'sustituido' ? ` · ya no vigente (sustituido el ${String(x.hecho.hasta || '').slice(0, 10)})` : '')
             + (x.hecho.estado === 'cerrado' ? ` · cerrado (${x.hecho.progreso} el ${String(x.hecho.cerrado || '').slice(0, 10)}${x.hecho.nota_cierre ? ': ' + x.hecho.nota_cierre : ''})` : '')

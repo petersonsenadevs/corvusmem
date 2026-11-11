@@ -34,6 +34,18 @@
 - **Consecuencias:** se revierte el andamiaje (50b6575); F17-T1 queda `blocked` a la espera de rescope
   (grafo de co-ocurrencia del contenido, no de nombres) o de reordenar a F17-T2.
 
+## dev-008 — La abstención sí sale de un umbral, pero NORMALIZADO (corrige dev-007)
+- **Contexto:** diagnóstico en LongMemEval. La puntuación escala con el corpus (idf ∝ log nVig): el gate absoluto
+  0.8 funciona en la batería (scores ~0.8) pero nunca abstiene en corpus grande (scores 8–39). El barrido mostró
+  separación parcial (`_abs` puntúa más bajo), al contrario que en LoCoMo cat5.
+- **Opciones:** (a) ingesta estructurada con LLM (lo propuesto en dev-007); (b) normalizar la puntuación a una
+  confianza [0,1] corpus-independiente y mover el gate ahí.
+- **Elección:** (b). **Corrige la conclusión de dev-007**: no hace falta LLM ni estructura; era calibración.
+- **Motivo:** mantiene el paradigma (determinista, offline, cero dependencias) y ataca la causa real (umbral absoluto
+  sobre una escala relativa). dev-007 acertó en "el umbral crudo no sirve"; se equivocó en el remedio.
+- **Consecuencias:** F17-T7 (confianza normalizada). Pendiente: confirmar que la confianza separa y que el nuevo
+  gate no baja la abstención 100% de la batería ni el recall cat1-4 de LoCoMo (regla de oro).
+
 ## dev-007 — La abstención no sale de un umbral sobre BM25 (necesita ingesta estructurada)
 - **Contexto:** baseline del motor en LongMemEval (offline, turnos crudos). abstención `_abs` = 0/24;
   knowledge-update recall@5 73,8%, temporal-reasoning 58,8%.

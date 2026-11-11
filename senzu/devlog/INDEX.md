@@ -11,3 +11,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 005 | 2026-11-11 | F17-T2: ninguna medición actual ve el uso/recencia | decisión | — | F17-T2 |
 | 006 | 2026-11-11 | F17 reanclado: abstención + knowledge-update (LongMemEval) | decisión | 005 | F17-T2 |
 | 007 | 2026-11-11 | F17 baseline LongMemEval: abstención por umbral = 0% (necesita ingesta estructurada) | decisión | 006 | F17-T2 |
+| 008 | 2026-11-11 | F17-T7: abstención = umbral mal calibrado; confianza normalizada (corrige 007) | decisión | 007 | F17-T7 |

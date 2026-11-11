@@ -35,12 +35,29 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: —
 - Devlog: —
 
-### F17-T2 · Ranking por activación (ACT-R base-level)  [M] [doing]
+### F17-T2 · Ranking por activación (ACT-R base-level)  [M] [todo]
 - Para qué: unificar recencia + frecuencia de uso + olvido en **una sola ecuación probada** (`B_i = ln(Σ t^−d)`, d≈0,5) como término del score, en vez de señales sueltas. Base de T3 y T4.
 - Skill: `code-quality → references/node-api.md` · teoría: `docs/investigacion-memoria-humana.md` §2.1
 - Archivos: `src/facts.mjs` (función de score: léxico BM25 actual **+** base-level ACT-R); `tests/test-facts.mjs` (determinismo con fechas fijas); baseline en `tools/eval-memoria/resultados.json`.
 - Hecho cuando: hit@5 de la batería **≥ hoy**, **abstención 100%**, cat1-4 del bench sin regresión; la ecuación verificada contra la fuente ACT-R antes de codificar.
 - Verificar: `node tools/eval-memoria/eval.mjs --json` (comparar hit@5 y abstención con el baseline) · `npm run test:core`.
+- Depende de: —
+- Verificado: —
+- Cumple: —
+- Devlog: —
+
+### F17-T7 · Abstención por confianza normalizada (umbral corpus-independiente)  [M] [doing]
+> **Hallazgo que la motiva (devlog 008):** el gate de abstención compara la puntuación CRUDA contra `UMBRAL_RECUERDO=0.8`
+> absoluto, pero la puntuación escala con el tamaño del corpus (idf ∝ log nVig). En la batería (corpus pequeño) 0.8
+> funciona (abstención 100%); en LongMemEval (cientos de turnos) las puntuaciones viven en 8–39 y 0.8 nunca abstiene (0/24).
+- Para qué: que el "me callo" NO dependa del tamaño del corpus. Se añade `confianza = puntuación ÷ techo de la consulta`
+  (masa idf de las palabras con peso), señal [0,1] corpus-independiente; el gate de abstención pasa a usarla.
+- Skill: `code-quality → references/node-api.md` · dato: barrido LongMemEval (devlog 008): `_abs` mediana 14,3 vs answerable 19,4.
+- Archivos: `src/facts.mjs` (`buscarHechos`: `techoConsulta` + campo `confianza`); gate en `tools/eval-memoria/eval.mjs`,
+  `tools/eval-productos/recuperar.mjs` y el llamador del producto; `tests/test-facts.mjs` (determinismo de `confianza`).
+- Hecho cuando: en LongMemEval sube la abstención **sin** bajar la abstención 100% de la batería ni el recall cat1-4 de
+  LoCoMo; `confianza` es determinista y el ranking (orden de `puntuacion`) no cambia. **Si baja la abstención de la batería, se descarta** (regla de oro, como F15-T6) con evidencia.
+- Verificar: `node tools/eval-memoria/eval.mjs --gate` (abstención 100%, hit@5 ≥ hoy) · `node tools/eval-productos/recuperar.mjs --locomo --motor` (cat1-4 sin regresión) · barrido de `confianza` en LongMemEval · `npm run test:core`.
 - Depende de: —
 - Verificado: —
 - Cumple: —
@@ -106,6 +123,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 | 2026-11-11 | Plan F17 creado desde `docs/investigacion-memoria-humana.md` | Formalizar la semilla investigada en tarjetas medibles |
 | 2026-11-11 | F17-T1 → blocked (fan-tuning descartado, ver 004) | Medición: el lever no mueve cat3; rescope o reordenar a F17-T2 |
 | 2026-11-11 | F17 reanclado a abstención + knowledge-update en LongMemEval (ver 006) | Credibilidad: Corvus gana en abstención determinista, no en recall multi-hop; bench serio = LongMemEval |
+| 2026-11-11 | F17-T7 creada → doing (ver 008) | El 0% de abstención en LongMemEval era umbral absoluto sobre puntuación que escala con el corpus; se normaliza a confianza [0,1] |
 
 ## Riesgos y bloqueos
 | Riesgo / bloqueo | Impacto | Mitigación / qué se necesita | Estado |

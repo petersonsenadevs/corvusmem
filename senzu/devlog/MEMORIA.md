@@ -23,6 +23,7 @@ Lo que vale en TODOS los proyectos del usuario no va aquí: va a su memoria pers
 - Convenciones selladas con `/adoptar` en `senzu/conventions.md` + `senzu/conventions.json` (`senzu:inmutable`): Node ESM puro `.mjs`, sin TypeScript, builtins con `node:`, cero dependencias de runtime, cabecera de autoría r3v3rs3 intocable · ver 003
 
 ## Lo que no funcionó (no repetir)
+- Abstención por umbral (0.8) sobre el BM25 de turnos crudos: 0/24 en LongMemEval; la abstención real necesita ingesta estructurada · ver 007
 
 ## Pendientes abiertos
 - [desde 2026-11-11] Decidir rama y qué versionar tras instalar Corvus + actualizar Senzu: `.claude/`, `.mcp.json`, `AGENTS.md`, `CLAUDE.md`, `senzu/`, `.corvusmem/` (y si `.corvusmem/memory/` se comparte o no) · ver 002

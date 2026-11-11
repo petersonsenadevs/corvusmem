@@ -34,6 +34,16 @@
 - **Consecuencias:** se revierte el andamiaje (50b6575); F17-T1 queda `blocked` a la espera de rescope
   (grafo de co-ocurrencia del contenido, no de nombres) o de reordenar a F17-T2.
 
+## dev-007 — La abstención no sale de un umbral sobre BM25 (necesita ingesta estructurada)
+- **Contexto:** baseline del motor en LongMemEval (offline, turnos crudos). abstención `_abs` = 0/24;
+  knowledge-update recall@5 73,8%, temporal-reasoning 58,8%.
+- **Opciones:** (a) seguir afinando el umbral sobre turnos crudos; (b) abstención por ingesta estructurada.
+- **Elección:** (b). El umbral sobre BM25 nunca abstiene (0/24): es un callejón.
+- **Motivo:** la abstención determinista (el diferenciador, D-006) exige memoria estructurada
+  (`recuperadorMotorEstructurado`: claves estables, sustitución cronológica), no un filtro sobre ranking léxico.
+- **Consecuencias:** candidata a primera card real = abstención por ingesta estructurada; F17-T2 (ACT-R) sigue
+  `doing` sin tocar. Decidir reordenación con el usuario. No contradice LoCoMo cat5 (end-to-end con LLM).
+
 ## dev-006 — Credibilidad de F17 = abstención + knowledge-update (LongMemEval), no recall por uso
 - **Contexto:** ¿qué bench serio da credibilidad a Corvus vs mem0/Zep? La frecuencia de uso no la mide
   ningún bench (dev-005); el multi-hop es terreno de LLM/embeddings (dev-004).

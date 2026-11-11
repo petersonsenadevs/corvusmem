@@ -863,12 +863,8 @@ export function buscarHechos(root, consulta, { historico = false, futuro = false
 // letras y cifras («php8»), o de una escritura sin mayúsculas (大阪, القاهرة), y con peso. Un nombre enlaza los
 // hechos que lo llevan con la fuerza del efecto abanico de ACT-R (S − ln abanico): en 2 hechos, 1; en 3, 0,56; en 4,
 // 0,24; en 5 o más ya no distingue nada («FitLab» está en medio proyecto) y no enlaza.
-// Perillas de experimentación (F17-T1): por defecto reproducen EXACTAMENTE el comportamiento previo. Solo se tocan
-// desde el banco de medición (env) para barrer parámetros; en producción no se definen y los defaults mandan.
-const envNum = (k, d) => { const v = Number(process.env[k]); return Number.isFinite(v) && v > 0 ? v : d; };
-export const SALTOS = envNum('CORVUS_SALTOS', 2), DECAE_ENLACE = 0.7, DECAE_NOMBRE = envNum('CORVUS_DECAE_NOMBRE', 0.6), MAX_PROPAGADOS = envNum('CORVUS_MAX_PROP', 2);
-export const FAN = envNum('CORVUS_FAN', 5);   // un nombre en ≥ FAN hechos ya no distingue a nadie y no enlaza (efecto abanico)
-const ABANICO = Math.log(FAN);
+export const SALTOS = 2, DECAE_ENLACE = 0.7, DECAE_NOMBRE = 0.6, MAX_PROPAGADOS = 2;
+const ABANICO = Math.log(5);
 export const fuerzaNombre = abanico => (abanico < 2 ? 0 : Math.max(0, (ABANICO - Math.log(abanico)) / (ABANICO - Math.log(2))));
 export function nombresDe(h) {
     const out = new Set();
@@ -884,9 +880,9 @@ export function nombresDe(h) {
 // hechos, aunque en otros vaya en minúscula, no distingue a nadie).
 function redDeNombres(palabrasDe, docs) {
     const donde = new Map(), cache = new Map();
-    palabrasDe.forEach((ws, i) => { if (ws) for (const w of new Set(ws)) { const l = donde.get(w); if (!l) donde.set(w, [i]); else if (l.length < FAN) l.push(i); } });
+    palabrasDe.forEach((ws, i) => { if (ws) for (const w of new Set(ws)) { const l = donde.get(w); if (!l) donde.set(w, [i]); else if (l.length <= 4) l.push(i); } });
     const nombresDeI = i => { if (!cache.has(i)) cache.set(i, nombresDe(docs[i])); return cache.get(i); };
-    const conNombre = n => { const l = donde.get(n) || []; return l.length >= FAN ? [] : l.filter(i => nombresDeI(i).has(n)).map(i => docs[i]); };
+    const conNombre = n => { const l = donde.get(n) || []; return l.length > 4 ? [] : l.filter(i => nombresDeI(i).has(n)).map(i => docs[i]); };
     const indice = new Map(docs.map((h, i) => [h.id, i]));
     return { nombres: h => nombresDeI(indice.get(h.id)), conNombre };
 }

@@ -23,7 +23,8 @@
 
 Método (para TODAS las tarjetas): hipótesis → implementar determinista → **medir** en batería (`node tools/eval-memoria/eval.mjs --json`) y, si aplica, en bench LoCoMo → quedarse o **descartar con evidencia**. **Antes de implementar cada fórmula, verificarla contra la fuente primaria citada en la semilla.**
 
-### F17-T1 · Multi-hop por activación propagada  [L] [doing]
+### F17-T1 · Multi-hop por activación propagada  [L] [blocked]
+> **Bloqueada (2026-11-11, ver devlog 004):** el lever de afinar el fan-guard / profundizar la propagación por nombres NO mejora cat3 (medido: clavado en 19,2%, empeora al aflojar). Necesita rescope (grafo de co-ocurrencia del contenido, no de nombres/uso) o reordenar a F17-T2. Baseline cat3 recall@5 = 24,3%.
 - Para qué: que Corvus responda preguntas que exigen **cruzar dos hechos** (cat3), como el recuerdo asociativo humano, sin LLM. Es la apuesta #1 (mayor hueco medido: 17,7% motor vs 24% embedding).
 - Skill: `code-quality → references/node-api.md` (lógica + tests) · teoría: `docs/investigacion-memoria-humana.md` §2.2
 - Archivos: `src/facts.mjs` (recuperación: tras el top-k, propagar 1–2 saltos por hechos co-ocurrentes/enlazados, con peso), grafo de co-activación desde el uso real; tests en `tests/test-hard-recall.mjs`; casos en `tools/eval-memoria/casos.json`.
@@ -103,6 +104,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 | Fecha | Cambio | Motivo |
 |---|---|---|
 | 2026-11-11 | Plan F17 creado desde `docs/investigacion-memoria-humana.md` | Formalizar la semilla investigada en tarjetas medibles |
+| 2026-11-11 | F17-T1 → blocked (fan-tuning descartado, ver 004) | Medición: el lever no mueve cat3; rescope o reordenar a F17-T2 |
 
 ## Riesgos y bloqueos
 | Riesgo / bloqueo | Impacto | Mitigación / qué se necesita | Estado |

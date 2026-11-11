@@ -23,4 +23,15 @@
 - **Consecuencias:** regla sellada en `senzu/conventions.md` §Idioma; la CLI pública mantiene inglés
   primario con alias en español (i18n, F14).
 
+## dev-004 — Afinar el fan-guard no mejora cat3 (F17-T1)
+- **Contexto:** cat3 (multi-hop) es el mayor hueco del motor. Hipótesis: el fan-guard de la propagación
+  por nombres (`fuerzaNombre`, nombre en ≥5 hechos → peso 0) la corta en entidades frecuentes y por eso
+  cat3 no sube.
+- **Opciones:** (a) aflojar FAN / subir SALTOS / MAX_PROP; (b) dejarlo y buscar otro mecanismo.
+- **Elección:** (b). Medido en un barrido (devlog 004): cat3 queda clavado en 19,2% con FAN=5/8/12 y
+  EMPEORA al aflojar más (FAN=20→15%, ∞→11,7%), arrastrando cat2/4/5. FAN=5 es lo mejor.
+- **Motivo:** sobre turnos crudos la propagación por nombres no contribuye a cat3; aflojar solo mete ruido.
+- **Consecuencias:** se revierte el andamiaje (50b6575); F17-T1 queda `blocked` a la espera de rescope
+  (grafo de co-ocurrencia del contenido, no de nombres) o de reordenar a F17-T2.
+
 

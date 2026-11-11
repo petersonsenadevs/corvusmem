@@ -50,6 +50,7 @@
     "url": "https://github.com/petersonsenadevs/corvusmem/issues"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.3.2",
     "gpt-tokenizer": "^4.1.0"
   }
 }

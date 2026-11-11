@@ -55,11 +55,9 @@ export function recuperadorMotor(turnos, { umbral = 0 } = {}) {
     });
     const api = {
         ultPunt: null,                                      // F16: puntuación TOP de la última búsqueda (diagnóstico del umbral)
-        ultConf: null,                                      // F17-T7: confianza TOP [0,1] corpus-independiente
         buscar(q, k) {
             const hits = motor.buscarHechos(P, q, { limite: k });
             api.ultPunt = hits.length ? hits[0].puntuacion : 0;   // top (vienen ordenados desc); 0 = el motor no trajo nada
-            api.ultConf = hits.length ? (hits[0].confianza ?? 0) : 0;
             return hits.filter(h => h.puntuacion >= umbral).map(h => map.get(h.hecho.id)).filter(Boolean);
         },
         limpiar() { fs.rmSync(base, { recursive: true, force: true }); },

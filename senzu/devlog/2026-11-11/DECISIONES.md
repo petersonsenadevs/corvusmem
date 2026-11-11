@@ -34,7 +34,18 @@
 - **Consecuencias:** se revierte el andamiaje (50b6575); F17-T1 queda `blocked` a la espera de rescope
   (grafo de co-ocurrencia del contenido, no de nombres) o de reordenar a F17-T2.
 
-## dev-008 — La abstención sí sale de un umbral, pero NORMALIZADO (corrige dev-007)
+## dev-009 — La confianza normalizada no porta entre regímenes (descarta F17-T7, sustituye dev-008)
+- **Contexto:** medido en LongMemEval (turnos verbatim) y en la batería (hechos comprimidos = régimen real del producto).
+- **Datos:** LongMemEval separa con T≈0,7 (55% abstención, 0% pérdida); la batería separa con T≈0,15 pero empata con el
+  `punt<0.8` actual. El 0,7 hunde la batería (−90% reales); el 0,15 no abstiene en LongMemEval. Umbral único imposible.
+- **Elección:** descartar F17-T7 con evidencia; revertir el código (`confianza`/`techoConsulta`/`ultConf`).
+- **Motivo:** la confianza mide cobertura pregunta↔texto, que depende del RÉGIMEN (verbatim vs comprimido), no solo del
+  corpus. dev-008 se equivocó al creer que normalizar bastaba para un umbral único.
+- **Consecuencias:** **sustituye a dev-008** (D-008 → D-009). La abstención por umbral desde el motor está agotada de
+  forma determinista (junto a dev-005/007 y cat5 de LoCoMo). El puente real sería un extractor determinista o medir en
+  el régimen de hechos comprimidos.
+
+## dev-008 — La abstención sí sale de un umbral, pero NORMALIZADO (corrige dev-007) [SUSTITUIDA por dev-009]
 - **Contexto:** diagnóstico en LongMemEval. La puntuación escala con el corpus (idf ∝ log nVig): el gate absoluto
   0.8 funciona en la batería (scores ~0.8) pero nunca abstiene en corpus grande (scores 8–39). El barrido mostró
   separación parcial (`_abs` puntúa más bajo), al contrario que en LoCoMo cat5.

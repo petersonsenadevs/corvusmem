@@ -46,8 +46,12 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: —
 - Devlog: —
 
-### F17-T7 · Abstención por confianza normalizada (umbral corpus-independiente)  [M] [doing]
-> **Hallazgo que la motiva (devlog 008):** el gate de abstención compara la puntuación CRUDA contra `UMBRAL_RECUERDO=0.8`
+### F17-T7 · Abstención por confianza normalizada (umbral corpus-independiente)  [M] [descartada]
+> **DESCARTADA con evidencia (2026-11-11, devlog 009):** la confianza normalizada NO porta entre regímenes. El umbral
+> que separa en LongMemEval (turnos verbatim, ~0,7) hunde la batería (régimen de hechos comprimidos, reales conf 0,21–1);
+> el que vale en la batería (~0,15) no abstiene nada en LongMemEval. Un umbral único es imposible y el código se revirtió.
+> Lección: la confianza mide cobertura pregunta↔texto, que depende del régimen (verbatim vs comprimido), no solo del corpus.
+> **Hallazgo que la motivó (devlog 008):** el gate de abstención compara la puntuación CRUDA contra `UMBRAL_RECUERDO=0.8`
 > absoluto, pero la puntuación escala con el tamaño del corpus (idf ∝ log nVig). En la batería (corpus pequeño) 0.8
 > funciona (abstención 100%); en LongMemEval (cientos de turnos) las puntuaciones viven en 8–39 y 0.8 nunca abstiene (0/24).
 - Para qué: que el "me callo" NO dependa del tamaño del corpus. Se añade `confianza = puntuación ÷ techo de la consulta`
@@ -124,6 +128,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 | 2026-11-11 | F17-T1 → blocked (fan-tuning descartado, ver 004) | Medición: el lever no mueve cat3; rescope o reordenar a F17-T2 |
 | 2026-11-11 | F17 reanclado a abstención + knowledge-update en LongMemEval (ver 006) | Credibilidad: Corvus gana en abstención determinista, no en recall multi-hop; bench serio = LongMemEval |
 | 2026-11-11 | F17-T7 creada → doing (ver 008) | El 0% de abstención en LongMemEval era umbral absoluto sobre puntuación que escala con el corpus; se normaliza a confianza [0,1] |
+| 2026-11-11 | F17-T7 → descartada (ver 009) | La confianza no porta entre regímenes (verbatim vs comprimido); umbral único imposible; código revertido |
 
 ## Riesgos y bloqueos
 | Riesgo / bloqueo | Impacto | Mitigación / qué se necesita | Estado |

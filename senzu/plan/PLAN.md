@@ -35,7 +35,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: —
 - Devlog: —
 
-### F17-T2 · Ranking por activación (ACT-R base-level)  [M] [todo]
+### F17-T2 · Ranking por activación (ACT-R base-level)  [M] [doing]
 - Para qué: unificar recencia + frecuencia de uso + olvido en **una sola ecuación probada** (`B_i = ln(Σ t^−d)`, d≈0,5) como término del score, en vez de señales sueltas. Base de T3 y T4.
 - Skill: `code-quality → references/node-api.md` · teoría: `docs/investigacion-memoria-humana.md` §2.1
 - Archivos: `src/facts.mjs` (función de score: léxico BM25 actual **+** base-level ACT-R); `tests/test-facts.mjs` (determinismo con fechas fijas); baseline en `tools/eval-memoria/resultados.json`.

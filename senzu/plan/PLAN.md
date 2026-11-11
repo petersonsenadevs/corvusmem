@@ -92,7 +92,12 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 ---
 
 ## Tareas ad hoc (fuera del plan original)
-### X-T1 · (ninguna todavía)
+### X-T1 · Aislar test-plugin de la instalación global de Corvus  [S] [todo]
+- Para qué: `tests/test-plugin.mjs:117` (`rutaCliMemoria sin instalación -> npx`) falla si hay Corvus instalado en `~/.config/corvusmem/` (lo instalamos esta sesión): el test asume máquina limpia y `rutaCliMemoria` prioriza global sobre npx. No es regresión de F17; es aislamiento del test.
+- Skill: `code-quality → references/node-api.md` (tests deterministas/aislados)
+- Hecho cuando: el test fuerza el caso "sin instalación" sin depender del entorno real (p. ej. override de HOME/USERPROFILE o un flag de aislamiento) y `npm run test:core` pasa en verde en una máquina con Corvus global.
+- Verificar: `node tests/test-plugin.mjs` → 0 fallos.
+- Depende de: —
 
 ## Cambios al plan
 | Fecha | Cambio | Motivo |

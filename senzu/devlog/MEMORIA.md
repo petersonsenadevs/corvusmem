@@ -18,6 +18,7 @@ Lo que vale en TODOS los proyectos del usuario no va aquí: va a su memoria pers
 - D-002 · La memoria del proyecto la lleva Corvusmem; Senzu 2.25.0 cede sus hooks de memoria (no-op con `hayCorvus()`) · ver 002
 - D-003 · Idioma de identificadores: mixto real (dominio en español, plumbing a veces inglés), NO se consolida — gana la consistencia existente · ver 003
 - D-006 · Credibilidad de Corvus = abstención determinista + knowledge-update (bench serio: LongMemEval), NO recall multi-hop ni frecuencia de uso · ver 006
+- D-008 · La abstención se arregla NORMALIZANDO el umbral (confianza [0,1] = puntuación/techo, corpus-independiente), NO con ingesta estructurada/LLM; corrige el remedio de dev-007 · ver 008
 
 ## Reglas del cliente y del proyecto
 - Convenciones selladas con `/adoptar` en `senzu/conventions.md` + `senzu/conventions.json` (`senzu:inmutable`): Node ESM puro `.mjs`, sin TypeScript, builtins con `node:`, cero dependencias de runtime, cabecera de autoría r3v3rs3 intocable · ver 003

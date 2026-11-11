@@ -6,6 +6,7 @@ node_modules/
 *.log
 .DS_Store
 blog/
-
+/.agents
+/.claude
 # Local runtime memory/hooks (never part of the package source)
 .corvusmem/

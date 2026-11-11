@@ -191,6 +191,10 @@ if (opt('--salud')) {   // F15-T8: la salud de la memoria en números (hechos, u
     out('\nHechos');
     out(`  ${s.hechos.activos} activos${s.hechos.dudosos ? ` · ${s.hechos.dudosos} dudosos` : ''} · ${s.hechos.historico} en histórico · ${s.hechos.abiertos} objetivos/pendientes abiertos`);
     if (fam) out(`  por familia: ${fam}`);
+    if (s.pistasSaturadas && s.pistasSaturadas.length) {   // F17-T4: efecto fan — pistas con muchos hechos (interferencia)
+        out('\nPistas saturadas (efecto fan: concreta la consulta)');
+        for (const p of s.pistasSaturadas) out(`  «${p.dimension}» · ${p.hechos} hechos · interferencia ${p.interferencia}`);
+    }
     out(`\nUso real (últimos ${s.uso ? s.uso.dias : 30} días)`);
     if (s.uso) out(`  ${s.uso.mensajes} mensajes · ${s.uso.inyectados} recuerdos inyectados · ${s.uso.usados} usados · ${s.uso.ignorados} ignorados`
         + (s.uso.precision != null ? ` · precisión real ${s.uso.precision} %` : ''));

@@ -1248,8 +1248,13 @@ export function informeUso(root, { dias = 30, ahora = hoy() } = {}) {
 export function datosSalud(root, { dias = 30, ahora = hoy() } = {}) {
     const todos = todosLosHechos(root).filter(h => h.estado !== 'invalidado');
     const activos = todos.filter(h => h.estado === 'activo');
-    const porFamilia = {};
-    for (const h of activos) { const i = h.dimension.indexOf('.'); const fam = i >= 0 ? h.dimension.slice(0, i) : h.dimension; porFamilia[fam] = (porFamilia[fam] || 0) + 1; }
+    const porFamilia = {}, porDimension = {};
+    for (const h of activos) { const i = h.dimension.indexOf('.'); const fam = i >= 0 ? h.dimension.slice(0, i) : h.dimension; porFamilia[fam] = (porFamilia[fam] || 0) + 1; porDimension[h.dimension] = (porDimension[h.dimension] || 0) + 1; }
+    // F17-T4: efecto fan (ACT-R, S − ln fan): una pista con MUCHOS hechos hace cada uno menos recuperable (interferencia).
+    // Aviso determinista para que el agente concrete la consulta; no toca el ranking. Umbral = 5 (igual que ABANICO).
+    const UMBRAL_FAN = 5;
+    const pistasSaturadas = Object.entries(porDimension).filter(([, n]) => n >= UMBRAL_FAN).sort((a, b) => b[1] - a[1])
+        .map(([dimension, n]) => ({ dimension, hechos: n, interferencia: +Math.log(n).toFixed(2), aviso: `${n} hechos en «${dimension}»: concreta la pista para recuperar el que buscas` }));
     const uso = informeUso(root, { dias, ahora });
     let ultimaSesion = null;
     try {
@@ -1265,6 +1270,7 @@ export function datosSalud(root, { dias = 30, ahora = hoy() } = {}) {
     return {
         generado: ahora,
         hechos: { activos: activos.length, dudosos: todos.filter(h => h.estado === 'dudoso').length, historico: todos.filter(h => h.estado === 'sustituido' || h.estado === 'cerrado').length, abiertos: abiertos(root, { ahora }).length, porFamilia },
+        pistasSaturadas,
         uso: uso.mensajes ? { dias, mensajes: uso.mensajes, inyectados: uso.inyectados, usados: uso.usados, ignorados: uso.ignorados, precision: uso.precision } : null,
         bateria, ultimaSesion,
     };

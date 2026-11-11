@@ -78,16 +78,19 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: —
 - Devlog: —
 
-### F17-T4 · Efecto fan / saturación de pistas  [S] [todo]
-- Para qué: cuando una dimensión/clave tiene **muchos** hechos, cada uno es menos recuperable (interferencia): penalizar en ranking o **avisar** al agente ("14 hechos en `nota.cliente`, concreta"). Mejora precisión en dominios densos y da un dato a `--health`.
+### F17-T4 · Efecto fan / saturación de pistas  [S] [done]
+- Para qué: cuando una dimensión/clave tiene **muchos** hechos, cada uno es menos recuperable (interferencia): **avisar**
+  al agente ("14 hechos en `nota.cliente`, concreta"). Diagnóstico para `--health` y señal para que el agente desambigüe.
 - Skill: `code-quality → references/node-api.md` · teoría: `docs/investigacion-memoria-humana.md` §2.6 (`S_ji = S − ln(fan)`)
-- Archivos: `src/facts.mjs` (conteo de fan por pista + término en el score/aviso); `cli/memory.mjs`/`src/facts-guard.mjs` (dato en `--health`).
-- Hecho cuando: en dominios densos sube la precisión sin bajar abstención; `--health` muestra las pistas saturadas.
-- Verificar: `node tools/eval-memoria/eval.mjs --json` (casos de dominio denso) · `node cli/corvusmem.mjs --health` (o su equivalente) muestra el fan.
-- Depende de: F17-T2
-- Verificado: —
-- Cumple: —
-- Devlog: —
+- Archivos: `src/facts.mjs` (`datosSalud`: `pistasSaturadas` = dimensiones con ≥5 hechos activos + interferencia ln(fan)); `cli/memory.mjs` (sección en `--health`); `tests/test-health.mjs`.
+- Hecho cuando: `--health` (y el JSON) muestran las pistas saturadas con su interferencia; determinista; **sin tocar el
+  ranking** → abstención/hit@5 de la batería sin cambio. (El penalizar-en-ranking se deja FUERA a propósito: riesgo a la
+  regla de oro y sin necesidad medida; sería extensión futura, dependiente de F17-T2.)
+- Verificar: `node tests/test-health.mjs` (casos 5: pista saturada sí/no) · `node tools/eval-memoria/eval.mjs --gate` (sin cambio).
+- Depende de: — (el aviso no depende de F17-T2; solo el término en el ranking lo haría)
+- Verificado: `test-health` 18/0 · `test-facts` 227/0 · `test-parity` 28/0 · GATE 100% (abstención/hit@5/duplicados) · ver 010
+- Cumple: `--health` lista las pistas con ≥5 hechos y su ln(fan); ranking intacto; regla de oro intacta.
+- Devlog: 010
 
 ### F17-T5 · Consolidación episódico→semántico  [M] [todo]
 - Para qué: al cerrar sesión ("sueño"), detectar hechos **episódicos repetidos** y **abstraerlos** en una regla/preferencia estable — menos ruido, más señal duradera. Determinista: por recurrencia y co-ocurrencia.

@@ -105,6 +105,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 |---|---|---|
 | 2026-11-11 | Plan F17 creado desde `docs/investigacion-memoria-humana.md` | Formalizar la semilla investigada en tarjetas medibles |
 | 2026-11-11 | F17-T1 → blocked (fan-tuning descartado, ver 004) | Medición: el lever no mueve cat3; rescope o reordenar a F17-T2 |
+| 2026-11-11 | F17 reanclado a abstención + knowledge-update en LongMemEval (ver 006) | Credibilidad: Corvus gana en abstención determinista, no en recall multi-hop; bench serio = LongMemEval |
 
 ## Riesgos y bloqueos
 | Riesgo / bloqueo | Impacto | Mitigación / qué se necesita | Estado |

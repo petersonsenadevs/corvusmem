@@ -9,3 +9,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 003 | 2026-11-11 | /adoptar: convenciones del proyecto selladas | docs | — | — |
 | 004 | 2026-11-11 | F17-T1: afinar el fan-guard NO mejora cat3 (descartado) | decisión | — | F17-T1 |
 | 005 | 2026-11-11 | F17-T2: ninguna medición actual ve el uso/recencia | decisión | — | F17-T2 |
+| 006 | 2026-11-11 | F17 reanclado: abstención + knowledge-update (LongMemEval) | decisión | 005 | F17-T2 |

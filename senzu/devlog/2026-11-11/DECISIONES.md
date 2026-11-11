@@ -34,4 +34,18 @@
 - **Consecuencias:** se revierte el andamiaje (50b6575); F17-T1 queda `blocked` a la espera de rescope
   (grafo de co-ocurrencia del contenido, no de nombres) o de reordenar a F17-T2.
 
+## dev-006 — Credibilidad de F17 = abstención + knowledge-update (LongMemEval), no recall por uso
+- **Contexto:** ¿qué bench serio da credibilidad a Corvus vs mem0/Zep? La frecuencia de uso no la mide
+  ningún bench (dev-005); el multi-hop es terreno de LLM/embeddings (dev-004).
+- **Opciones:** (a) perseguir recall multi-hop en LoCoMo; (b) construir batería propia de uso/recencia;
+  (c) anclar en el DIFERENCIADOR de Corvus (abstención determinista + knowledge-update) con un bench serio.
+- **Elección:** (c). Bench: **LongMemEval** (`knowledge-update` + `temporal-reasoning` + `_abs`), como
+  escaparate del determinismo/abstención, no como carrera de recall. LoCoMo sigue de arena primario.
+- **Motivo:** Corvus no gana en recall puro (por diseño, sin LLM/embeddings), pero SÍ en abstención
+  (en LoCoMo cat5 ya es el mejor) y en actualización de conocimiento (sustitución por dimensión). La
+  credibilidad sale de un bench serio donde Corvus puede GANAR, no solo competir. (b) sería "criterio
+  propio", sin credibilidad externa.
+- **Consecuencias:** el ranking por `usos`/olvido-por-desuso baja a pulido de producto. F17 se reordena a
+  knowledge-update + abstención tras ver el baseline de LongMemEval (devlog 006).
+
 

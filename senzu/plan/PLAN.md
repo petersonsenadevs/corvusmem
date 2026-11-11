@@ -23,7 +23,7 @@
 
 Método (para TODAS las tarjetas): hipótesis → implementar determinista → **medir** en batería (`node tools/eval-memoria/eval.mjs --json`) y, si aplica, en bench LoCoMo → quedarse o **descartar con evidencia**. **Antes de implementar cada fórmula, verificarla contra la fuente primaria citada en la semilla.**
 
-### F17-T1 · Multi-hop por activación propagada  [L] [todo]
+### F17-T1 · Multi-hop por activación propagada  [L] [doing]
 - Para qué: que Corvus responda preguntas que exigen **cruzar dos hechos** (cat3), como el recuerdo asociativo humano, sin LLM. Es la apuesta #1 (mayor hueco medido: 17,7% motor vs 24% embedding).
 - Skill: `code-quality → references/node-api.md` (lógica + tests) · teoría: `docs/investigacion-memoria-humana.md` §2.2
 - Archivos: `src/facts.mjs` (recuperación: tras el top-k, propagar 1–2 saltos por hechos co-ocurrentes/enlazados, con peso), grafo de co-activación desde el uso real; tests en `tests/test-hard-recall.mjs`; casos en `tools/eval-memoria/casos.json`.

@@ -14,3 +14,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 008 | 2026-11-11 | F17-T7: abstención = umbral mal calibrado; confianza normalizada (corrige 007) | decisión | 007 | F17-T7 |
 | 009 | 2026-11-11 | F17-T7 descartada: la confianza no porta entre regímenes (verbatim vs comprimido) | decisión | 008 | F17-T7 |
 | 010 | 2026-11-11 | F17-T4: efecto fan / pistas saturadas en --health (aviso, sin tocar ranking) | feature | — | F17-T4 |
+| 011 | 2026-11-12 | F17-T3: la recencia no mejora knowledge-update (lo empeora, −4pts) | decisión | — | F17-T3 |

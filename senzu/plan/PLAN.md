@@ -67,7 +67,10 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: —
 - Devlog: —
 
-### F17-T3 · Olvido blando + refuerzo por uso  [M] [todo]
+### F17-T3 · Olvido blando + refuerzo por uso  [M] [blocked]
+> **Bloqueada (2026-11-12, devlog 011):** la recencia NO mejora knowledge-update (medido: Δ −4,1 pts; enfría turnos-oro
+> viejos). El lever `pesoUso` (±21%) es muy suave para ayudar y suficiente para estorbar. La otra pata (menos ruido en
+> historias largas) no la ve la batería (dev-005). Necesita otro régimen de ingesta (extractor, ver 009), no recencia sobre turnos crudos.
 - Para qué: que lo no usado en meses **baje de ranking** (no se borra) y lo recurrente suba — menos ruido en proyectos con mucha historia. Es el `B_i` de ACT-R aplicado al tiempo.
 - Skill: `code-quality → references/node-api.md` · teoría: `docs/investigacion-memoria-humana.md` §2.3 (Ebbinghaus/SM-2)
 - Archivos: `src/facts.mjs` (decaimiento temporal + refuerzo con `ultimo_uso`/`usos`); `tests/test-facts.mjs` (hechos "viejos" vs "recientes").

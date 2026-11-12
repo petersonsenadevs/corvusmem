@@ -95,6 +95,25 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 - Cumple: `--health` lista las pistas con ≥5 hechos y su ln(fan); ranking intacto; regla de oro intacta.
 - Devlog: 010
 
+### F17-T8 · Extractor determinista (turnos → hechos con clave)  [L] [todo]
+> **La única palanca que queda (devlog 004/009/011):** ningún lever interno del motor sobre TURNOS CRUDOS mueve el bench.
+> El motor gana en el régimen de HECHOS COMPRIMIDOS (batería/producto). Puente = extraer hechos con clave de la
+> conversación, para que la SUSTITUCIÓN del motor resuelva knowledge-update y el régimen comprimido habilite la abstención.
+- Para qué: meter LongMemEval en el régimen donde el motor sí gana, **sin LLM** (determinista, cero deps = paradigma).
+- **Sub-problema duro (nombrarlo, no esconderlo):** derivar una CLAVE estable de texto libre sin LLM ni ontología abierta.
+  Corvus ya tiene `LEXICO` (~25 temas) → claves deterministas para dominios conocidos; fuera de ellos, cobertura parcial.
+- **PASO 0 — de-risk ANTES de construir (necesita Ollama/qwen3:8b, ~5 GB RAM):** correr el extractor LLM YA EXISTENTE
+  como TECHO: `node tools/eval-productos/pipeline.mjs --longmemeval --ingesta estructurada --retriever estructurado`
+  sobre knowledge-update, y comparar recall@5 con el baseline de turnos crudos (73,8%). **Si el estructurado NO supera a
+  los turnos crudos, el camino del extractor se descarta con evidencia** (el régimen no ayuda) y se ahorra construirlo.
+  Si SÍ supera, se cuantifica el techo y se construye el extractor determinista (LEXICO-based) para acercarse a él sin LLM.
+- Skill: `code-quality → references/node-api.md` · teoría: `aprendizaje.regimen-comprimido-vs-verbatim`, devlog 009/011.
+- Archivos (si pasa el paso 0): `tools/eval-productos/ingesta.mjs` (variante determinista LEXICO-based de `memoriasEstructuradas`); medición en `recuperar.mjs` (`recuperadorMotorEstructurado` ya existe).
+- Hecho cuando: el extractor determinista sube knowledge-update sobre turnos crudos (hacia el techo del paso 0) sin bajar
+  la abstención de la batería; determinista y offline.
+- Depende de: — (paso 0 solo necesita Ollama + RAM)
+- Verificado: — · Cumple: — · Devlog: —
+
 ### F17-T5 · Consolidación episódico→semántico  [M] [todo]
 - Para qué: al cerrar sesión ("sueño"), detectar hechos **episódicos repetidos** y **abstraerlos** en una regla/preferencia estable — menos ruido, más señal duradera. Determinista: por recurrencia y co-ocurrencia.
 - Skill: `code-quality → references/node-api.md` · teoría: `docs/investigacion-memoria-humana.md` §2.4 (CLS)
@@ -135,6 +154,7 @@ Método (para TODAS las tarjetas): hipótesis → implementar determinista → *
 | 2026-11-11 | F17 reanclado a abstención + knowledge-update en LongMemEval (ver 006) | Credibilidad: Corvus gana en abstención determinista, no en recall multi-hop; bench serio = LongMemEval |
 | 2026-11-11 | F17-T7 creada → doing (ver 008) | El 0% de abstención en LongMemEval era umbral absoluto sobre puntuación que escala con el corpus; se normaliza a confianza [0,1] |
 | 2026-11-11 | F17-T7 → descartada (ver 009) | La confianza no porta entre regímenes (verbatim vs comprimido); umbral único imposible; código revertido |
+| 2026-11-12 | F17-T3 → blocked (ver 011) · F17-T8 creada | La recencia no mejora knowledge-update; única palanca restante = extractor (régimen comprimido), con de-risk LLM primero |
 
 ## Riesgos y bloqueos
 | Riesgo / bloqueo | Impacto | Mitigación / qué se necesita | Estado |

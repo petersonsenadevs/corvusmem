@@ -1154,6 +1154,22 @@ export function apuntarInyeccion(root, { sid, origen, consulta, items = [] }, { 
 function leerUso(root) {
     try { return fs.readFileSync(rutaUso(root), 'utf8').split(/\r?\n/).filter(Boolean).map(l => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean); } catch { return []; }
 }
+// F17-T9: la ESCALA del diario (y las decisiones) para darles un suelo ABSOLUTO proporcional a su tamaño. Los puntos
+// de search.mjs dependen del tamaño del devlog (~0,7 pequeño, ~38 grande), así que un suelo fijo rompería los diarios
+// pequeños. La escala = p90 del MEJOR acierto de diario por consulta en el historial real (recuerdo-uso.jsonl), que ya
+// se acumula solo. Sin historial suficiente → 0 (sin suelo: se comporta como antes; no se daña a un proyecto nuevo).
+const MIN_CONSULTAS_ESCALA = 20;   // por debajo de esto no hay muestra para fiarse: no se pone suelo
+export function escalaDiario(root) {
+    const mejores = [];
+    for (const l of leerUso(root)) {
+        if (l.origen === 'consulta') continue;
+        let mx = 0; for (const it of (l.items || [])) if ((it.fuente === 'devlog' || it.fuente === 'memoria') && it.puntuacion != null && it.puntuacion > mx) mx = it.puntuacion;
+        if (mx > 0) mejores.push(mx);
+    }
+    if (mejores.length < MIN_CONSULTAS_ESCALA) return 0;
+    mejores.sort((a, b) => a - b);
+    return mejores[Math.min(mejores.length - 1, Math.floor(mejores.length * 0.90))];   // p90
+}
 // Lo que dijo el agente, con su hora, de una conversación de Claude Code (JSONL). Formato desconocido → [].
 export function textosDelAgente(transcript) {
     let crudo = ''; try { crudo = fs.readFileSync(transcript, 'utf8'); } catch { return []; }

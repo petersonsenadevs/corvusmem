@@ -22,3 +22,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 016 | 2026-11-17 | F17-T8d: línea base de uso real (--informe) antes del extractor | decisión | 014 | F17-T8 |
 | 017 | 2026-11-17 | F17: de-risk del lever de precisión de inyección (sobre-disparo, +7pts, bloqueado por proxy) | decisión | 016 | F17 |
 | 018 | 2026-11-17 | F17-T9a: de-risk del suelo escalado del diario (0,25 × escala, seguro en grande y pequeño) | decisión | 017 | F17-T9a |
+| 019 | 2026-11-17 | F17-T9b/c: el suelo del diario en el motor (0,25 × escala, gate verde) | feature | 018 | F17-T9 |

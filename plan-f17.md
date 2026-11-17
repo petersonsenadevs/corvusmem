@@ -141,22 +141,18 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   36 útiles (acierto 21→24 %), pequeño corta 4 / pierde 0 (22→24 %); ambos mejoran, ninguno regresa. Pasar de ~0,30
   daña el pequeño. Aviso: pequeño n=37 (poco), pero 0,25 es conservador e inocuo-a-favor allí.
 
-#### F17-T9b · Suelo en el motor  [M] [todo]  ← SIGUIENTE
-- **Skill:** code-quality. En `src/live-recall.mjs:43`, dar a `devlog` + `memoria` el suelo **`0,25 × escala`** (los
-  `hecho` NO se tocan). **Escala auto-calibrada del historial:** p90 de los `mejor(diario)` por consulta que ya se
-  acumulan en `recuerdo-uso.jsonl`; **sin historial (proyecto nuevo) → sin suelo** (comportamiento relativo actual,
-  no se daña a nadie al arrancar). Determinista, sin red ni LLM.
-- **Hecho cuando:** el filtro aplica `0,25 × escala`; una consulta floja NO inyecta diario, una fuerte SÍ; sin
-  historial, se comporta como hoy.
-- **Verificar:** test unit del umbral del diario (con/sin historial) + hook e2e (`echo '{...}' | node
-  src/live-recall.mjs`) con un caso flojo y uno fuerte.
+#### F17-T9b · Suelo en el motor  [M] [done]
+- **Skill:** code-quality. ✅ **(2026-11-17, devlog 019).** `src/live-recall.mjs` aplica `puntuacion >= 0,25 × escala`
+  a `devlog`+`memoria` (los `hecho` NO se tocan). Escala = `escalaDiario(root)` en `src/facts.mjs` = p90 del mejor
+  acierto de diario por consulta en `recuerdo-uso.jsonl`. **Fallback:** < 20 consultas → escala 0 → sin suelo
+  (proyecto nuevo/pequeño intacto). Verificado: dev-standards escala 20,2; hemispheric 0 (aún poca historia).
 
-#### F17-T9c · Gate de no-regresión  [S] [todo]
-- **Skill:** code-quality §tests. La regla de oro de la fase aplicada a esta tarjeta.
-- **Hecho cuando:** `npm test` verde, batería abstención 100 %, sin regresión LoCoMo cat1–4.
-- **Verificar:** `npm run test:core` + `node tools/eval-memoria/eval.mjs --gate`.
+#### F17-T9c · Gate de no-regresión  [S] [done]
+- **Skill:** code-quality §tests. ✅ **(2026-11-17).** `eval-memoria --gate`: hit@5 100 %, **abstención 100 %**,
+  duplicados 100 %. `tests/test-recall-piso.mjs` 9/0 (registrado en `test`/`test:core`). Resto verde; rojo ajeno
+  `test-plugin` (ambiental, Corvus global en la máquina). No afecta a LoCoMo (mide el motor, no la inyección).
 
-#### F17-T9d · Confirmar en uso real  [S] [todo]
+#### F17-T9d · Confirmar en uso real  [S] [todo]  ← SIGUIENTE (lo lanza Peterson, tras días de uso)
 - **Skill:** —. Reejecutar `--informe` tras días de uso con el suelo puesto y comparar contra la línea base (devlog
   016: 23,9 % / 23,5 %). Lo lanza Peterson ([[preference.bench-lanzamiento]]).
 - **Hecho cuando:** la precisión de uso real sube de forma medible frente a 016.

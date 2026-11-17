@@ -23,8 +23,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   close if nothing was saved. A **question is never treated as a fact**, so `which package manager do we use` or
   `cuánto paga…` stay silent: 0 false positives across the whole adversarial battery. The detector is pure and tested
   (`tests/test-hecho-detector.mjs`, 34/0); the close nudge only ever emits `systemMessage`, never blocks.
+- **Deterministic fact extractor — the agent no longer has to invent the key.** When you state a fact-shaped
+  sentence, the live hook now **distills the save command itself** (`--dimension … --valor … --claves …`, already
+  canonical) and offers it for the agent to review, instead of leaving the agent to pick the key (the cause of saves
+  landing under the wrong dimension/store). Pure and canonical (`dimensionConvencional`/`clavesConvencionales`), tested
+  (`tests/test-extractor.mjs` 83/0; integration `tests/test-extractor-integracion.mjs` 12/0 proving extract → store →
+  recall and chronological substitution). De-risked on LongMemEval knowledge-update (n=21): the compressed fact régimen
+  beats raw turns on **both recall@5 and abstention**.
 
 ### Improved
+- **Less noise from the project diary (higher real-world precision).** Live recall now gives diary/decision hits an
+  **absolute floor** (`0.25–0.35 × the diary's own score scale`, auto-calibrated from your usage history and scaled by
+  confidence) on top of the relative threshold. The diary was ~70 % of injected noise — injected on weak overlap
+  because it only had to be "best of its source"; facts and standing preferences are untouched, and projects without
+  enough history get no floor (behavior unchanged). Measured on real usage logs: injection precision **23.7 % →
+  28.8 %** (new `npm run bench:precision`), ~6 noisy injections cut per useful one lost, with the battery's
+  **abstention held at 100 %**.
 - **Clearer bar for what to save (less agent variance).** The save prompt is now one concrete, positive checklist
   (`save.criterios`) — decision made, limit/constraint found, stable preference, external fact with a name/figure,
   a gotcha and its cause, a goal/pending — with the test "would you need it next time and it's not in the code?".

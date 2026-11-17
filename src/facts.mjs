@@ -1159,10 +1159,16 @@ function leerUso(root) {
 // pequeños. La escala = p90 del MEJOR acierto de diario por consulta en el historial real (recuerdo-uso.jsonl), que ya
 // se acumula solo. Sin historial suficiente → 0 (sin suelo: se comporta como antes; no se daña a un proyecto nuevo).
 const MIN_CONSULTAS_ESCALA = 20;   // por debajo de esto no hay muestra para fiarse: no se pone suelo
+const MAX_LINEAS_ESCALA = 1000;    // solo la historia RECIENTE: representa la escala ACTUAL del diario (que crece con el
+                                   // tiempo) y acota el coste del hook (parsear 3000 líneas por mensaje era ~14 ms)
 function mejoresDiario(root) {
+    let raw = ''; try { raw = fs.readFileSync(rutaUso(root), 'utf8'); } catch { return []; }
+    const lineas = raw.split(/\r?\n/).filter(Boolean);
+    const recientes = lineas.length > MAX_LINEAS_ESCALA ? lineas.slice(-MAX_LINEAS_ESCALA) : lineas;
     const mejores = [];
-    for (const l of leerUso(root)) {
-        if (l.origen === 'consulta') continue;
+    for (const ln of recientes) {
+        let l; try { l = JSON.parse(ln); } catch { continue; }
+        if (!l || l.origen === 'consulta') continue;
         let mx = 0; for (const it of (l.items || [])) if ((it.fuente === 'devlog' || it.fuente === 'memoria') && it.puntuacion != null && it.puntuacion > mx) mx = it.puntuacion;
         if (mx > 0) mejores.push(mx);
     }

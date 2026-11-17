@@ -27,3 +27,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 021 | 2026-11-17 | F17-T10: fatiga de inyección descartada con evidencia (+0,4 pts a 3:1) | decisión | 020 | F17-T10 |
 | 022 | 2026-11-17 | F17-T9e: el suelo del diario escalado por confianza (dev-standards +5,1 pts) | feature | 019 | F17-T9e |
 | 023 | 2026-11-17 | F17-T5: consolidación aplazada (no hay recurrencia que consolidar aún) | decisión | — | F17-T5 |
+| 024 | 2026-11-17 | F17-T9: el suelo mira solo la historia reciente (14ms→2ms, y más exacto) | perf | 022 | F17-T9 |

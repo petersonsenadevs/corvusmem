@@ -100,6 +100,11 @@ let np = 0; const proyecto = () => { const d = path.join(base, 'p' + (++np)); fs
     sembrar(P, Array.from({ length: 15 }, () => 20));   // < 20 → sin suelo
     ok(m.pisoDiario(P) === 0, 'sin historia suficiente: pisoDiario = 0 (sin suelo)', `piso=${m.pisoDiario(P)}`);
 }
+{   // tope de coste: con un log enorme solo se mira la historia RECIENTE (≤ 1000 líneas); el piso sale bien igual.
+    const P = proyecto();
+    sembrar(P, Array.from({ length: 1200 }, () => 20));   // > 1000 → se usan las últimas 1000 (N ≥ 200 → fracción 0,35)
+    ok(m.pisoDiario(P) === 7, 'log grande: solo historia reciente, piso = 0,35 × escala = 7', `piso=${m.pisoDiario(P)}`);
+}
 // 7. El suelo separa un acierto flojo de uno fuerte (la decisión que toma live-recall para diario+memoria).
 {
     const P = proyecto();

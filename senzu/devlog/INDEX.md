@@ -17,3 +17,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 011 | 2026-11-12 | F17-T3: la recencia no mejora knowledge-update (lo empeora, −4pts) | decisión | — | F17-T3 |
 | 012 | 2026-11-17 | F17-T8b: extractor determinista de hechos (turnos → clave canónica) | feature | — | F17-T8 |
 | 013 | 2026-11-17 | F17-T8c: el nudge usa el extractor (comando destilado) + fix node node | feature | 012 | F17-T8 |
+| 014 | 2026-11-17 | F17-T8d: el lazo extractor→motor (acepta, recupera, sustituye) | test | 013 | F17-T8 |

@@ -1159,16 +1159,34 @@ function leerUso(root) {
 // pequeños. La escala = p90 del MEJOR acierto de diario por consulta en el historial real (recuerdo-uso.jsonl), que ya
 // se acumula solo. Sin historial suficiente → 0 (sin suelo: se comporta como antes; no se daña a un proyecto nuevo).
 const MIN_CONSULTAS_ESCALA = 20;   // por debajo de esto no hay muestra para fiarse: no se pone suelo
-export function escalaDiario(root) {
+function mejoresDiario(root) {
     const mejores = [];
     for (const l of leerUso(root)) {
         if (l.origen === 'consulta') continue;
         let mx = 0; for (const it of (l.items || [])) if ((it.fuente === 'devlog' || it.fuente === 'memoria') && it.puntuacion != null && it.puntuacion > mx) mx = it.puntuacion;
         if (mx > 0) mejores.push(mx);
     }
+    return mejores;
+}
+export function escalaDiario(root) {
+    const mejores = mejoresDiario(root);
     if (mejores.length < MIN_CONSULTAS_ESCALA) return 0;
     mejores.sort((a, b) => a - b);
     return mejores[Math.min(mejores.length - 1, Math.floor(mejores.length * 0.90))];   // p90
+}
+// F17-T9e: el SUELO del diario = fracción × escala, con la fracción ESCALADA POR CONFIANZA. Con poca historia (recién
+// pasado el mínimo) el suelo es suave (0,25); con mucha, firme (0,35). De-risk 018/022: en un proyecto maduro el suelo
+// aguanta más alto sin estropear la relación ruido:útil, pero a 0,35 fijo el proyecto pequeño sufría → más datos, más
+// confianza, listón más alto. Sin historial suficiente → 0 (sin suelo). Única fuente del suelo (la usan hook y bench).
+const FRAC_MIN = 0.25, FRAC_MAX = 0.35, N_FRAC_MAX = 200;   // 0,25 en el mínimo (20) → 0,35 con ≥200 consultas de diario
+export function pisoDiario(root) {
+    const mejores = mejoresDiario(root);
+    const n = mejores.length;
+    if (n < MIN_CONSULTAS_ESCALA) return 0;
+    mejores.sort((a, b) => a - b);
+    const escala = mejores[Math.min(n - 1, Math.floor(n * 0.90))];
+    const t = Math.max(0, Math.min(1, (n - MIN_CONSULTAS_ESCALA) / (N_FRAC_MAX - MIN_CONSULTAS_ESCALA)));
+    return (FRAC_MIN + (FRAC_MAX - FRAC_MIN) * t) * escala;
 }
 // Lo que dijo el agente, con su hora, de una conversación de Claude Code (JSONL). Formato desconocido → [].
 export function textosDelAgente(transcript) {

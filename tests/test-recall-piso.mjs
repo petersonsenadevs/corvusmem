@@ -78,13 +78,34 @@ let np = 0; const proyecto = () => { const d = path.join(base, 'p' + (++np)); fs
     ok(m.escalaDiario(P) === 0, 'las búsquedas del agente (origen=consulta) no cuentan', `escala=${m.escalaDiario(P)}`);
 }
 
-// 6. El suelo = 0,25 × escala separa un item flojo de uno fuerte (la decisión que toma live-recall para diario).
+// 6. pisoDiario = fracción × escala, con la fracción ESCALADA POR CONFIANZA (F17-T9e): 0,25 con poca historia (recién
+//    pasado el mínimo de 20) → 0,35 con ≥ 200 consultas de diario. Escala fija 20 para aislar la fracción.
 {
     const P = proyecto();
-    sembrar(P, Array.from({ length: 25 }, () => 20));   // escala p90 = 20 → piso = 5
-    const piso = 0.25 * m.escalaDiario(P);
-    ok(piso === 5, 'piso concreto = 5 con escala 20', `piso=${piso}`);
-    const pasa = p => p > 0 && p >= piso;   // la parte de suelo del filtro de live-recall para diario+memoria
+    sembrar(P, Array.from({ length: 20 }, () => 20));   // N = 20 (mínimo) → fracción 0,25
+    ok(m.pisoDiario(P) === 5, 'poca historia (N=20): piso = 0,25 × escala = 5', `piso=${m.pisoDiario(P)}`);
+}
+{
+    const P = proyecto();
+    sembrar(P, Array.from({ length: 200 }, () => 20));  // N = 200 → fracción 0,35
+    ok(m.pisoDiario(P) === 7, 'mucha historia (N≥200): piso = 0,35 × escala = 7', `piso=${m.pisoDiario(P)}`);
+}
+{
+    const P = proyecto();
+    sembrar(P, Array.from({ length: 110 }, () => 20));  // N = 110 (medio) → fracción 0,30
+    ok(m.pisoDiario(P) === 6, 'historia media (N=110): piso = 0,30 × escala = 6', `piso=${m.pisoDiario(P)}`);
+}
+{
+    const P = proyecto();
+    sembrar(P, Array.from({ length: 15 }, () => 20));   // < 20 → sin suelo
+    ok(m.pisoDiario(P) === 0, 'sin historia suficiente: pisoDiario = 0 (sin suelo)', `piso=${m.pisoDiario(P)}`);
+}
+// 7. El suelo separa un acierto flojo de uno fuerte (la decisión que toma live-recall para diario+memoria).
+{
+    const P = proyecto();
+    sembrar(P, Array.from({ length: 20 }, () => 20));   // piso = 5
+    const piso = m.pisoDiario(P);
+    const pasa = p => p > 0 && p >= piso;
     ok(!pasa(4), 'un acierto de diario flojo (4 < piso 5) se descarta', '');
     ok(pasa(8), 'un acierto de diario fuerte (8 ≥ piso 5) pasa', '');
 }

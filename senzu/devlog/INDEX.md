@@ -25,3 +25,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 019 | 2026-11-17 | F17-T9b/c: el suelo del diario en el motor (0,25 × escala, gate verde) | feature | 018 | F17-T9 |
 | 020 | 2026-11-17 | F17-T9: bench de precisión de inyección (dev-standards 23,6→26,6 %) | feature | 019 | F17-T9d |
 | 021 | 2026-11-17 | F17-T10: fatiga de inyección descartada con evidencia (+0,4 pts a 3:1) | decisión | 020 | F17-T10 |
+| 022 | 2026-11-17 | F17-T9e: el suelo del diario escalado por confianza (dev-standards +5,1 pts) | feature | 019 | F17-T9e |

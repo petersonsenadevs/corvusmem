@@ -152,10 +152,16 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   duplicados 100 %. `tests/test-recall-piso.mjs` 9/0 (registrado en `test`/`test:core`). Resto verde; rojo ajeno
   `test-plugin` (ambiental, Corvus global en la máquina). No afecta a LoCoMo (mide el motor, no la inyección).
 
+#### F17-T9e · Suelo escalado por confianza (0,25→0,35)  [M] [done]
+- **Skill:** code-quality. ✅ **(2026-11-17, devlog 022).** La fracción del suelo sube con la historia: 0,25 recién
+  pasado el mínimo (20 consultas) → 0,35 con ≥ 200. `pisoDiario(root)` en `src/facts.mjs` es la única fuente (hook +
+  bench). Bench: dev-standards **23,7 → 28,8 % (+5,1 pts)**, casi el doble del suelo plano; pequeño intacto. Seguro por
+  construcción (0,35 solo con mucha historia). `test-recall-piso` 12/0; gate abstención 100 %.
+
 #### F17-T9d · Confirmar en uso real  [S] [todo]  ← SIGUIENTE (lo lanza Peterson, tras días de uso)
 - **Skill:** —. **Bench oficial listo (devlog 020): `tools/eval-precision-inyeccion.mjs`** — replay sobre el historial
   real con etiquetas usado/ignorado; reporta precisión antes→después del suelo. Hoy (contrafactual sobre lo ya
-  acumulado): dev-standards **23,6 → 26,6 % (+3 pts)**, 7,4 ruido:1 útil; hemispheric aún sin suelo (poca historia).
+  acumulado): dev-standards **23,7 → 28,8 % (+5,1 pts)**, 5,6 ruido:1 útil; hemispheric aún sin suelo (poca historia).
 - **Hecho cuando:** tras días de uso, la precisión «después» se vuelve la «antes» real y sube frente a 016; también en
   hemispheric cuando junte ≥ 20 consultas de diario.
 - **Verificar:** `node tools/eval-precision-inyeccion.mjs D:/dev-standards D:/hemispheric` (lo lanza Peterson,

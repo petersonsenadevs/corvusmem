@@ -18,8 +18,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const m = await import(pathToFileURL(path.join(ROOT, 'src', 'facts.mjs')).href);
-const { escalaDiario, rutaUso } = m;
-const FRAC = 0.25;   // el mismo que src/live-recall.mjs
+const { escalaDiario, pisoDiario, rutaUso } = m;   // pisoDiario = la misma fuente del suelo que usa el hook
 
 const roots = process.argv.slice(2);
 if (!roots.length) roots.push(process.cwd());
@@ -36,7 +35,7 @@ for (const root of roots) {
     const L = lineasUso(root);
     const items = L.flatMap(l => (l.items || []).filter(it => it.usado === true || it.usado === false));
     if (!items.length) { console.log(`\n### ${root}\n  sin registro de uso todavía (se llena solo al hablar con el agente).`); continue; }
-    const piso = FRAC * escalaDiario(root);
+    const piso = pisoDiario(root);
 
     const usados = items.filter(i => i.usado).length;
     const antes = { iny: items.length, usados, ignorados: items.length - usados };

@@ -174,7 +174,11 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   suprimirla mata sus usos futuros. Ruido residual del diario DISPERSO, sin patrón concentrado. Descartada con
   evidencia. El único lever de fondo restante —mejor proxy de utilidad— es investigación, no se abre a ciegas.
 
-### F17-T5 · Consolidación episódico → semántico  [M] [todo]
+### F17-T5 · Consolidación episódico → semántico  [M] [paused]
+- **De-risk 2026-11-17 (devlog 023): APLAZADA.** Memoria global = 13 hechos, cada uno en su propia dimensión (fan 0);
+  almacenes de proyecto 6–8. No hay recurrencia que consolidar a esta escala; construirlo ahora sería adivinar.
+  **Disparador para retomar:** una dimensión de acumular con ≥ 5 hechos, o `--health` avisando de saturación sobre
+  HECHOS (no diario). Hasta entonces, no se toca.
 - **Skill:** code-quality. Al cerrar sesión, abstraer hechos recurrentes en una **regla estable** (menos ruido, más
   señal duradera). Mide en **uso real** (`--informe`), no en recall puro.
 - **Hecho cuando:** el uso real (inyectado→usado) mejora o el ruido baja sin tocar la abstención. Depende de que T8

@@ -60,9 +60,9 @@ al **hecho con clave** (comprimido), que además es el régimen **real** del pro
   y lo SUPERA en acierto@5 (100% vs 87,5%)**. El baseline crudo reprodujo la referencia (75% ≈ 73,8% de dev-007),
   así que la medición es válida. Con una heurística de clave burdísima ya empata → el puente turnos→hecho-con-clave
   es viable y hay margen para keyear mejor. Variantes: k=1 r@5 58,3%/ac@5 100% (comprime de más); k=2 60,4%/87,5%.
-  **Pendiente:** confirmar con n=21 (la muestra de referencia) — 3 intentos cortados por el guardián de RAM de la
-  máquina (el proceso solo gastaba ~346 MB; la RAM global estaba crítica por Ollama/Chrome). Relanzar con RAM libre
-  o `CLAUDE_CODE_DISABLE_BG_SHELL_PRESSURE_REAP=1`. Cuello: `guardarHecho` reescribe el `.jsonl` por turno (O(n²)).
+  **Confirmado ✅ (n=21, 2026-11-17, lo lanzó Peterson):** el comprimido con v0 salientes k=3 **SUPERA al crudo en las
+  DOS métricas — r@5 75,4% vs 73,8% y ac@5 100% vs 90,5%** (en n=8 solo empataba en r@5). Fundamento de T8 firme con
+  la muestra de referencia. (Cuello conocido: `guardarHecho` reescribe el `.jsonl` por turno, O(n²).)
 - Convertir los turnos de una conversación en hechos con **clave estable** (`recuperadorMotorEstructurado`:
   sustitución cronológica por dimensión) de forma **determinista** (sin LLM en el camino caliente; LLM, si acaso,
   solo como de-risk de laboratorio, nunca en los hooks).
@@ -92,9 +92,10 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   knowledge-update. **Medido 2026-11-17 (`scratchpad/lme-extractor-v1.mjs`, n=8):** el STEMMING NO ayuda, EMPEORA —
   stem k=3 r@5 68,8% / stem k=4 66,7% / conjunto-completo 66,7%, todos ac@5 87,5%; la **v0 salientes k=3 (72,9% /
   ac@5 100%) sigue siendo la mejor** clave comprimida. Recortar sufijos colapsa palabras distintas y BM25 pierde
-  señal; meter todas las palabras añade ruido. **Camino del stemming cerrado con evidencia.** *Pendiente:* confirmar
-  con n grande (lo lanza Peterson, ver [[preference.bench-lanzamiento]]), pero el n=8 ya es consistente (3 variantes
-  por debajo). *Decisión provisional:* llevar la **v0 (salientes k=3)** a T8b; el margen de r@5 no estaba en la clave.
+  señal; meter todas las palabras añade ruido. **Camino del stemming cerrado con evidencia.** **Confirmado n=21
+  (2026-11-17, lo lanzó Peterson, ver [[preference.bench-lanzamiento]]):** v0 salientes k=3 r@5 **75,4%** / ac@5
+  **100%**; stem k=3 71,4%, stem k=4 70,6%, conjunto 73,0% — ninguna variante nueva cumple el criterio (superar v0
+  sin bajar ac@5). *Decisión FIRME:* la **v0 (salientes k=3)** es la clave del producto; el r@5 no estaba en la clave.
 - **T8b · Módulo extractor en el producto** ✅ **(2026-11-17, `src/extractor.mjs` + `tests/test-extractor.mjs`,
   76/76 verde).** `extraerHecho(texto)` → `{dimension, valor, claves, fragmento, regla}` CANÓNICO (pasa por
   `dimensionConvencional()` + `clavesConvencionales()`, cero divergencia de formato) o `null`. v0 ACOTADO a los

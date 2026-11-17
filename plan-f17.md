@@ -115,6 +115,28 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   duplicados, sin regresión en LoCoMo cat1–4; gate `npm test`. *Hecho cuando:* cableado sin bajar la abstención.
 - **T8e · Devlog + decisión viva.** Gana y se integra, o se descarta con evidencia.
 
+### F17-T9 · Suelo absoluto para el diario (el 70 % del ruido de uso real)  [M] [todo · de-riskado]
+- **Skill:** code-quality §tests. **Origen:** medición de uso real 2026-11-17 (devlog 016–017). La precisión de uso
+  real es ~24 % (3 de cada 4 recuerdos inyectados se ignoran), y el **69 % de ese ruido es el DIARIO** (`[devlog]`,
+  1045 inyecciones, 21 % de acierto). Los **permanentes** (preferencia/identidad/restricción) son solo el **2,8 %**
+  del ruido → NO se tocan (ahí está [[preference.autoria]]: parece no usarse pero importa; el proxy «usado» la
+  infravalora porque moldea código, no el chat).
+- **Causa raíz (código real):** `src/live-recall.mjs:43`. Los hechos tienen suelo ABSOLUTO (`UMBRAL_HECHO`); el diario
+  y las decisiones solo tienen umbral RELATIVO (`puntuacion > 0 && >= RELATIVO * mejor(fuente)`). Sin suelo absoluto,
+  el diario cuela sus mejores entradas aunque la relación real sea mínima («el mejor de un grupo flojo»).
+- **De-risk ✅ (sobre `recuerdo-uso.jsonl`, 1127 items de diario+decisiones con puntuación):** un suelo absoluto corta
+  mucho ruido perdiendo pocos útiles — suelo 5: −289 ignorados / −42 usados (~7:1); suelo 6: −410 / −66 (~6:1). La
+  precisión GLOBAL sube ~24 % → **~27 %** solo con esta perilla, sin tocar hechos ni permanentes. Rodilla en 5–6.
+- **Matiz de implementación (por qué NO es un `if` de una línea):** la puntuación del diario DEPENDE del tamaño del
+  diario (`search.mjs`: ~0,7 en uno pequeño, ~38 en uno grande; ver comentario en `live-recall.mjs:14-16`) — por eso
+  existe el umbral relativo. El suelo tiene que ser **proporcional a la escala** (normalizado o percentil del propio
+  diario), NO una constante que rompería los diarios pequeños.
+- **Sub-tareas:** (a) de-risk del suelo ESCALADO sobre el log (que el +~3 pts aguante al normalizar por tamaño);
+  (b) implementarlo en `live-recall.mjs` (diario + decisiones, no hechos); (c) gate: `npm test` verde, abstención
+  100 % intacta, sin regresión LoCoMo cat1–4; (d) reejecutar `--informe` tras días de uso y confirmar el +pts real.
+- **Hecho cuando:** la precisión de uso real sube de forma medible SIN bajar la abstención 100 % ni perder recall de
+  hechos. Si al escalar el suelo el margen se evapora, se descarta con evidencia.
+
 ### F17-T5 · Consolidación episódico → semántico  [M] [todo]
 - **Skill:** code-quality. Al cerrar sesión, abstraer hechos recurrentes en una **regla estable** (menos ruido, más
   señal duradera). Mide en **uso real** (`--informe`), no en recall puro.

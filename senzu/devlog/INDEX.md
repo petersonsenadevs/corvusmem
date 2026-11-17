@@ -20,3 +20,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 014 | 2026-11-17 | F17-T8d: el lazo extractor→motor (acepta, recupera, sustituye) | test | 013 | F17-T8 |
 | 015 | 2026-11-17 | F17-T8: de-risk confirmado con n=21 (el comprimido supera al crudo) | decisión | 012 | F17-T8 |
 | 016 | 2026-11-17 | F17-T8d: línea base de uso real (--informe) antes del extractor | decisión | 014 | F17-T8 |
+| 017 | 2026-11-17 | F17: de-risk del lever de precisión de inyección (sobre-disparo, +7pts, bloqueado por proxy) | decisión | 016 | F17 |

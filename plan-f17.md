@@ -153,10 +153,13 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   `test-plugin` (ambiental, Corvus global en la máquina). No afecta a LoCoMo (mide el motor, no la inyección).
 
 #### F17-T9d · Confirmar en uso real  [S] [todo]  ← SIGUIENTE (lo lanza Peterson, tras días de uso)
-- **Skill:** —. Reejecutar `--informe` tras días de uso con el suelo puesto y comparar contra la línea base (devlog
-  016: 23,9 % / 23,5 %). Lo lanza Peterson ([[preference.bench-lanzamiento]]).
-- **Hecho cuando:** la precisión de uso real sube de forma medible frente a 016.
-- **Verificar:** `node cli/memory.mjs --informe --dias 60` en ambos proyectos; tabla antes/después.
+- **Skill:** —. **Bench oficial listo (devlog 020): `tools/eval-precision-inyeccion.mjs`** — replay sobre el historial
+  real con etiquetas usado/ignorado; reporta precisión antes→después del suelo. Hoy (contrafactual sobre lo ya
+  acumulado): dev-standards **23,6 → 26,6 % (+3 pts)**, 7,4 ruido:1 útil; hemispheric aún sin suelo (poca historia).
+- **Hecho cuando:** tras días de uso, la precisión «después» se vuelve la «antes» real y sube frente a 016; también en
+  hemispheric cuando junte ≥ 20 consultas de diario.
+- **Verificar:** `node tools/eval-precision-inyeccion.mjs D:/dev-standards D:/hemispheric` (lo lanza Peterson,
+  [[preference.bench-lanzamiento]]); comparar con `node cli/memory.mjs --informe` para el detalle.
 
 ### F17-T5 · Consolidación episódico → semántico  [M] [todo]
 - **Skill:** code-quality. Al cerrar sesión, abstraer hechos recurrentes en una **regla estable** (menos ruido, más

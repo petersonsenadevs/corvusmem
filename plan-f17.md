@@ -161,6 +161,13 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
 - **Verificar:** `node tools/eval-precision-inyeccion.mjs D:/dev-standards D:/hemispheric` (lo lanza Peterson,
   [[preference.bench-lanzamiento]]); comparar con `node cli/memory.mjs --informe` para el detalle.
 
+#### F17-T10 · Fatiga de inyección  [M] [discarded]
+- **Skill:** code-quality §tests. ❌ **(2026-11-17, devlog 021).** Suprimir entradas de SITUACIÓN sobre-disparadas
+  (iny ≥ 8, uso < 20 %), scoped para no tocar permanentes. De-risk CAUSAL sobre el log (ya con suelo T9): **+0,4 pts
+  como mucho, a 3:1** (vs suelo 7:1). No compensa: cuando una entrada «demuestra» que no sirve ya hizo el daño, y
+  suprimirla mata sus usos futuros. Ruido residual del diario DISPERSO, sin patrón concentrado. Descartada con
+  evidencia. El único lever de fondo restante —mejor proxy de utilidad— es investigación, no se abre a ciegas.
+
 ### F17-T5 · Consolidación episódico → semántico  [M] [todo]
 - **Skill:** code-quality. Al cerrar sesión, abstraer hechos recurrentes en una **regla estable** (menos ruido, más
   señal duradera). Mide en **uso real** (`--informe`), no en recall puro.

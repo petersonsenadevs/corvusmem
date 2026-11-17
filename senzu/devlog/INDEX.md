@@ -19,3 +19,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 013 | 2026-11-17 | F17-T8c: el nudge usa el extractor (comando destilado) + fix node node | feature | 012 | F17-T8 |
 | 014 | 2026-11-17 | F17-T8d: el lazo extractor→motor (acepta, recupera, sustituye) | test | 013 | F17-T8 |
 | 015 | 2026-11-17 | F17-T8: de-risk confirmado con n=21 (el comprimido supera al crudo) | decisión | 012 | F17-T8 |
+| 016 | 2026-11-17 | F17-T8d: línea base de uso real (--informe) antes del extractor | decisión | 014 | F17-T8 |

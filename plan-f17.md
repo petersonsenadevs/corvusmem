@@ -134,20 +134,22 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
 - **Hecho cuando (la tarjeta madre):** la precisión de uso real sube de forma medible SIN bajar la abstención 100 % ni
   perder recall de hechos. Si al escalar el suelo el margen se evapora, se descarta con evidencia.
 
-#### F17-T9a · De-risk del suelo ESCALADO (laboratorio, barato)  [S] [todo]
-- **Skill:** code-quality §tests. Sobre `recuerdo-uso.jsonl` de los DOS proyectos (grande: dev-standards; pequeño:
-  hemispheric), reconstruir por consulta el `mejor(diario)` de cada línea y probar un suelo expresado como **fracción
-  de la escala del propio diario** (no constante), que es lo que sobrevive al tamaño. El de-risk inicial (+~3 pts) se
-  hizo con puntuación cruda y datos mezclados; aquí se confirma que aguanta normalizado y en el diario PEQUEÑO.
-- **Hecho cuando:** una regla de suelo escalada que, en replay, corta ruido perdiendo pocos útiles en AMBOS proyectos.
-- **Verificar:** script de replay sobre los dos `.jsonl` → tabla (ruido cortado / útiles perdidos) por proyecto.
+#### F17-T9a · De-risk del suelo ESCALADO (laboratorio, barato)  [S] [done]
+- **Skill:** code-quality §tests. ✅ **(2026-11-17, devlog 018, `scratchpad/t9a-suelo-escalado.mjs`).** Suelo =
+  **fracción × escala(p90 del mejor acierto de diario por consulta)**. Escala grande 20,2 vs pequeña 4,7 (~4×) →
+  confirma que una constante rompería el pequeño. **Punto seguro `0,25 × escala`:** grande corta 266 ignorados / pierde
+  36 útiles (acierto 21→24 %), pequeño corta 4 / pierde 0 (22→24 %); ambos mejoran, ninguno regresa. Pasar de ~0,30
+  daña el pequeño. Aviso: pequeño n=37 (poco), pero 0,25 es conservador e inocuo-a-favor allí.
 
-#### F17-T9b · Suelo en el motor  [M] [todo]
-- **Skill:** code-quality. En `src/live-recall.mjs:43`, dar a `devlog` + `memoria` el suelo escalado de T9a (los
-  `hecho` NO se tocan). Determinista, sin red ni LLM.
-- **Hecho cuando:** el filtro aplica el suelo de T9a; una consulta floja NO inyecta diario, una fuerte SÍ.
-- **Verificar:** test unit del umbral del diario + hook e2e (`echo '{...}' | node src/live-recall.mjs`) con un caso
-  flojo y uno fuerte.
+#### F17-T9b · Suelo en el motor  [M] [todo]  ← SIGUIENTE
+- **Skill:** code-quality. En `src/live-recall.mjs:43`, dar a `devlog` + `memoria` el suelo **`0,25 × escala`** (los
+  `hecho` NO se tocan). **Escala auto-calibrada del historial:** p90 de los `mejor(diario)` por consulta que ya se
+  acumulan en `recuerdo-uso.jsonl`; **sin historial (proyecto nuevo) → sin suelo** (comportamiento relativo actual,
+  no se daña a nadie al arrancar). Determinista, sin red ni LLM.
+- **Hecho cuando:** el filtro aplica `0,25 × escala`; una consulta floja NO inyecta diario, una fuerte SÍ; sin
+  historial, se comporta como hoy.
+- **Verificar:** test unit del umbral del diario (con/sin historial) + hook e2e (`echo '{...}' | node
+  src/live-recall.mjs`) con un caso flojo y uno fuerte.
 
 #### F17-T9c · Gate de no-regresión  [S] [todo]
 - **Skill:** code-quality §tests. La regla de oro de la fase aplicada a esta tarjeta.

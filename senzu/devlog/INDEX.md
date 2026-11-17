@@ -16,3 +16,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 010 | 2026-11-11 | F17-T4: efecto fan / pistas saturadas en --health (aviso, sin tocar ranking) | feature | — | F17-T4 |
 | 011 | 2026-11-12 | F17-T3: la recencia no mejora knowledge-update (lo empeora, −4pts) | decisión | — | F17-T3 |
 | 012 | 2026-11-17 | F17-T8b: extractor determinista de hechos (turnos → clave canónica) | feature | — | F17-T8 |
+| 013 | 2026-11-17 | F17-T8c: el nudge usa el extractor (comando destilado) + fix node node | feature | 012 | F17-T8 |

@@ -11,7 +11,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const { extraerHecho } = await import(pathToFileURL(path.join(ROOT, 'src', 'extractor.mjs')).href);
-const { esHechoGuardable } = await import(pathToFileURL(path.join(ROOT, 'src', 'live-memory.mjs')).href);
+const { esHechoGuardable, comandoGuardado } = await import(pathToFileURL(path.join(ROOT, 'src', 'live-memory.mjs')).href);
 const { dimensionConvencional } = await import(pathToFileURL(path.join(ROOT, 'src', 'facts.mjs')).href);
 
 let casos = 0, fallos = 0;
@@ -68,6 +68,20 @@ for (const [t] of EXTRAE) {
   const a = JSON.stringify(extraerHecho(t)), b = JSON.stringify(extraerHecho(t));
   ok(a === b, 'determinista', JSON.stringify(t));
 }
+
+// 8. T8c — el nudge de live-memory usa la sugerencia: comando YA destilado cuando la dimensión es inequívoca,
+//    placeholder familia.tema cuando no (ambiguo o ruido). Así el agente deja de inventar la clave.
+const CLI = 'node cli/corvusmem.mjs';
+{
+  const c = comandoGuardado('ahora vivo en Valencia', CLI);
+  ok(c.includes('--dimension identidad.ubicacion'), 'nudge: dimensión destilada', c);
+  ok(c.includes('--valor "Valencia"'), 'nudge: valor destilado', c);
+  ok(!c.includes('familia.tema'), 'nudge destilado NO deja el placeholder', c);
+}
+ok(comandoGuardado('usamos pnpm', CLI).includes('--dimension preferencia.gestor-paquetes'), 'nudge: destila la herramienta');
+ok(comandoGuardado('Marco Bianchi cobra 600 € al mes', CLI).includes('familia.tema'), 'nudge: el ambiguo cae al placeholder (agente destila)');
+ok(comandoGuardado('sigamos', CLI).includes('familia.tema'), 'nudge: el ruido cae al placeholder');
+ok(comandoGuardado('ahora vivo en Valencia', CLI) === comandoGuardado('ahora vivo en Valencia', CLI), 'comandoGuardado determinista');
 
 process.stdout.write(`\nextractor determinista (F17-T8) -> Casos: ${casos}  Fallos: ${fallos}\n`);
 process.exit(fallos ? 1 : 0);

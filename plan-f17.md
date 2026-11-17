@@ -131,11 +131,34 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   diario (`search.mjs`: ~0,7 en uno pequeño, ~38 en uno grande; ver comentario en `live-recall.mjs:14-16`) — por eso
   existe el umbral relativo. El suelo tiene que ser **proporcional a la escala** (normalizado o percentil del propio
   diario), NO una constante que rompería los diarios pequeños.
-- **Sub-tareas:** (a) de-risk del suelo ESCALADO sobre el log (que el +~3 pts aguante al normalizar por tamaño);
-  (b) implementarlo en `live-recall.mjs` (diario + decisiones, no hechos); (c) gate: `npm test` verde, abstención
-  100 % intacta, sin regresión LoCoMo cat1–4; (d) reejecutar `--informe` tras días de uso y confirmar el +pts real.
-- **Hecho cuando:** la precisión de uso real sube de forma medible SIN bajar la abstención 100 % ni perder recall de
-  hechos. Si al escalar el suelo el margen se evapora, se descarta con evidencia.
+- **Hecho cuando (la tarjeta madre):** la precisión de uso real sube de forma medible SIN bajar la abstención 100 % ni
+  perder recall de hechos. Si al escalar el suelo el margen se evapora, se descarta con evidencia.
+
+#### F17-T9a · De-risk del suelo ESCALADO (laboratorio, barato)  [S] [todo]
+- **Skill:** code-quality §tests. Sobre `recuerdo-uso.jsonl` de los DOS proyectos (grande: dev-standards; pequeño:
+  hemispheric), reconstruir por consulta el `mejor(diario)` de cada línea y probar un suelo expresado como **fracción
+  de la escala del propio diario** (no constante), que es lo que sobrevive al tamaño. El de-risk inicial (+~3 pts) se
+  hizo con puntuación cruda y datos mezclados; aquí se confirma que aguanta normalizado y en el diario PEQUEÑO.
+- **Hecho cuando:** una regla de suelo escalada que, en replay, corta ruido perdiendo pocos útiles en AMBOS proyectos.
+- **Verificar:** script de replay sobre los dos `.jsonl` → tabla (ruido cortado / útiles perdidos) por proyecto.
+
+#### F17-T9b · Suelo en el motor  [M] [todo]
+- **Skill:** code-quality. En `src/live-recall.mjs:43`, dar a `devlog` + `memoria` el suelo escalado de T9a (los
+  `hecho` NO se tocan). Determinista, sin red ni LLM.
+- **Hecho cuando:** el filtro aplica el suelo de T9a; una consulta floja NO inyecta diario, una fuerte SÍ.
+- **Verificar:** test unit del umbral del diario + hook e2e (`echo '{...}' | node src/live-recall.mjs`) con un caso
+  flojo y uno fuerte.
+
+#### F17-T9c · Gate de no-regresión  [S] [todo]
+- **Skill:** code-quality §tests. La regla de oro de la fase aplicada a esta tarjeta.
+- **Hecho cuando:** `npm test` verde, batería abstención 100 %, sin regresión LoCoMo cat1–4.
+- **Verificar:** `npm run test:core` + `node tools/eval-memoria/eval.mjs --gate`.
+
+#### F17-T9d · Confirmar en uso real  [S] [todo]
+- **Skill:** —. Reejecutar `--informe` tras días de uso con el suelo puesto y comparar contra la línea base (devlog
+  016: 23,9 % / 23,5 %). Lo lanza Peterson ([[preference.bench-lanzamiento]]).
+- **Hecho cuando:** la precisión de uso real sube de forma medible frente a 016.
+- **Verificar:** `node cli/memory.mjs --informe --dias 60` en ambos proyectos; tabla antes/después.
 
 ### F17-T5 · Consolidación episódico → semántico  [M] [todo]
 - **Skill:** code-quality. Al cerrar sesión, abstraer hechos recurrentes en una **regla estable** (menos ruido, más

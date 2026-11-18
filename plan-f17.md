@@ -52,7 +52,7 @@ al **hecho con clave** (comprimido), que además es el régimen **real** del pro
 
 ## Tarjetas
 
-### F17-T8 · Extractor determinista: turnos → hechos con clave  [L] [doing]  ← columna de la fase
+### F17-T8 · Extractor determinista: turnos → hechos con clave  [L] [done]  ✅ publicado en 0.6.0
 - **Skill:** code-quality §arquitectura + §tests. **De-risk primero** (commit f48a00d): probar en scratchpad sobre
   LongMemEval que el régimen comprimido sube knowledge-update/abstención ANTES de tocar el producto.
 - **De-risk ✅ (2026-11-16, `scratchpad/lme-extractor-v0.mjs`, LongMemEval knowledge-update, n=8):** el régimen
@@ -192,6 +192,43 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
 ### F17-T4 · Efecto fan / saturación de pistas en `--health`  [S] [done]
 - Aviso de dimensiones densas (pistas saturadas) en `--health`; **sin tocar el ranking**. Diagnóstico, no cambio de
   recuperación. ✅ devlog 010, commits 635e743 + 5774d96.
+
+### F17-T11 · Recuperación en las categorías flojas (cat1 single-hop, cat3 multi-hop)  [M] [todo · de-risk primero]
+- **Por qué:** el diagnóstico de hoy (devlog 025-026) mostró que la **recuperación es la fuerza del motor** (2-4× el
+  embedding) y que el modo crudo ya **gana end-to-end (34,8 %)**. El techo que queda está en las dos categorías flojas:
+  **cat1 single-hop (acierto@5 40,8 %)** y **cat3 multi-hop (34,8 %)**. Subir ahí empuja el 34,8 % más arriba. Reabre
+  legítimamente [[F17-T1]] (su condición era *"co-ocurrencia de contenido sobre hechos extraídos, post-T8"* — y **T8 ya
+  existe**). Método de la fase: **de-risk offline primero** (`recuperar.mjs`, sin LLM), **regla de oro (abstención
+  100 %) en cada paso**, el bench end-to-end pesado lo lanza Peterson ([[preference.bench-lanzamiento]]). Riesgo honesto:
+  puede acabar **descartada** (como T1/T3/T7/T10) si el fallo es disperso y sin palanca — y saberlo también es ganar.
+
+#### F17-T11a · Diagnóstico de los fallos de recuperación cat1/cat3 (offline, barato)  [S] [todo]  ← SIGUIENTE
+- **Skill:** code-quality §tests. En `scratchpad/`, sin tocar producto.
+- **Qué:** con `recuperar.mjs` sobre LoCoMo, sacar las preguntas de **cat1 y cat3** donde el motor NO mete la evidencia
+  en top-10 y **clasificar el fallo**: (a) **brecha de vocabulario** (palabras de la pregunta ≠ del turno-evidencia →
+  palanca léxico/expansión de conceptos), (b) **turno-evidencia corto/escaso** (poco texto que casar → normalización
+  por longitud), (c) **referencia/pronombre** (necesita contexto → estructural), (d) **multi-hop**: una evidencia
+  encontrada y las otras no. Contar cada tipo.
+- **Hecho cuando:** hay un recuento por tipo en cat1 y cat3 y queda claro **si hay una palanca determinista concentrada
+  (y cuál)** o si es disperso (→ descartar, como T10).
+- **Verificar:** script en `scratchpad/` reproducible, sin red; números por tipo de fallo.
+
+#### F17-T11b · Palanca determinista según el diagnóstico, medida offline  [M] [todo]
+- **Skill:** code-quality. Depende de T11a.
+- **Qué:** implementar la palanca MÁS concentrada que halle T11a tras un **flag/env** (sin tocar el camino por defecto):
+  p. ej. ampliar el léxico de conceptos para las brechas, o un ajuste de ranking/normalización por longitud. Medir con
+  `recuperar.mjs`: recall@5/@10 y acierto@5/@10 en **cat1/cat3 ARRIBA** y **el resto SIN regresar**.
+- **Hecho cuando:** sube la recuperación de cat1 y/o cat3 **sin bajar las otras categorías ni la abstención**. Se
+  **descarta sin drama** si regresa.
+- **Verificar:** `recuperar.mjs` antes/después por categoría; `eval-memoria --gate` verde (**abstención 100 %**, hit@5);
+  test propio si se toca código del motor.
+
+#### F17-T11c · Confirmación end-to-end crudo (la lanza Peterson)  [S] [todo]
+- **Skill:** —. Si T11b mejora la recuperación offline sin regresar, correr el end-to-end **crudo** del motor y comparar
+  global + por categoría contra el baseline de hoy (`resultados-e2e-locomo-motor-crudo.json`, 34,8 %).
+- **Hecho cuando:** el global crudo sube (o cat1/cat3 suben sin bajar el global). Si no, se descarta con evidencia.
+- **Verificar:** `pipeline.mjs --locomo --ingesta crudo --retriever motor` → `comparar.mjs` contra el crudo de hoy
+  ([[preference.bench-lanzamiento]], lo lanza Peterson).
 
 ---
 

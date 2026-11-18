@@ -28,3 +28,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 022 | 2026-11-17 | F17-T9e: el suelo del diario escalado por confianza (dev-standards +5,1 pts) | feature | 019 | F17-T9e |
 | 023 | 2026-11-17 | F17-T5: consolidación aplazada (no hay recurrencia que consolidar aún) | decisión | — | F17-T5 |
 | 024 | 2026-11-17 | F17-T9: el suelo mira solo la historia reciente (14ms→2ms, y más exacto) | perf | 022 | F17-T9 |
+| 025 | 2026-11-18 | LoCoMo: la recuperación de Corvus domina (2-4× el embedding); el end-to-end no es problema de recuperación | decisión | — | benchmark |

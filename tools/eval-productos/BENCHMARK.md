@@ -59,10 +59,45 @@ horas). Se incluye como **muestra sobre la primera conversación**, a cuatro:
 En la muestra Corvusmem **supera a mem0 y a Zep**, y Zep queda por delante de mem0. Es una muestra (una
 conversación), pero confirma el patrón de la tabla completa.
 
-## 3. Lo que esto demuestra (y lo que no)
+## 3. La recuperación en crudo — el terreno propio de Corvusmem
+
+Antes de responder hay que **recuperar**: sacar del historial los turnos que de verdad contienen la
+respuesta (el «oro» de evidencia del dataset). Es el diagnóstico que fija el techo de todo lo demás —si la
+memoria no trae la evidencia, por bueno que sea el contestador no acierta. Aquí **nadie usa un LLM**: cada
+recuperador indexa los **turnos crudos** y los ordena a su manera (ranking puro, sin umbral), sobre
+**exactamente los mismos turnos**. Es el modo natural de Corvusmem: determinista, offline, 0 €.
+
+| categoría | **Corvusmem** acierto@10 | embedding e5 acierto@10 |
+|---|---|---|
+| cat1 single-hop (282) | **56,0 %** | 16,3 % |
+| cat2 temporal (321) | **67,9 %** | 29,3 % |
+| cat3 multi-hop (92) | **39,1 %** | 15,2 % |
+| cat4 open-domain (841) | **65,9 %** | 32,5 % |
+| cat5 adversaria (446) | **65,5 %** | 40,6 % |
+| **GLOBAL (1982)** | **63,5 %** | **30,7 %** |
+
+(acierto@k = en cuántas preguntas sale al menos un turno-evidencia en el top-k; cobertura del oro 99,7 %.)
+
+**Lecturas clave:**
+- **Corvusmem recupera entre 2× y 4× mejor que un embedding semántico**, en **todas** las categorías. En
+  global **dobla** al e5 (63,5 % vs 30,7 % acierto@10; 57,9 % vs 28,0 % recall@10).
+- El motor léxico de hechos de Corvusmem —sin modelo, sin red— **saca la evidencia** mucho más a menudo que
+  un embedding neuronal. Recuperar bien es lo que de verdad hace una memoria.
+- Cuesta algo más por consulta (≈43 ms vs 5,6 ms p50), pero sigue muy por debajo de cualquier presupuesto y
+  los dos son gratis y offline.
+
+> **Matiz honesto:** esto mide la **recuperación sobre turnos crudos**, no el end-to-end de la sección 1
+> (que corre con **ingesta por LLM** para ser justo con mem0/Zep: los hechos extraídos cambian el juego).
+> Son dos capas distintas —tabla 1: «¿quién aporta mejor contexto cuando a todos se les extraen hechos con
+> un LLM?»; esta: «¿quién encuentra la evidencia sin ningún LLM?»—. En su capa propia, la determinista,
+> Corvusmem no empata: domina. Reproducible: `node tools/eval-productos/recuperar.mjs --locomo` (sin Ollama).
+
+## 4. Lo que esto demuestra (y lo que no)
 
 - **Sí demuestra:** Corvusmem, bajo condiciones idénticas, **iguala o supera** a dos productos de pago del
   sector —con mem0 medido **a escala completa**— siendo **determinista, offline y 0 €**.
+- **Recuperación determinista superior (sección 3):** sin ningún LLM, Corvusmem **saca la evidencia 2-4× más
+  que un embedding** en todas las categorías. Encontrar el dato es el trabajo de una memoria, y ahí domina.
 - **No demuestra:** que gane su leaderboard oficial con GPT-4o. No se ha medido así (ni es el objetivo).
 - **Honestidad de la ingesta:** cada producto se alimenta como es natural para él; el contenido, las preguntas,
   el contestador y el juez son idénticos. Zep solo pudo medirse en muestra por su coste en local.

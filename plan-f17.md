@@ -202,7 +202,12 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   100 %) en cada paso**, el bench end-to-end pesado lo lanza Peterson ([[preference.bench-lanzamiento]]). Riesgo honesto:
   puede acabar **descartada** (como T1/T3/T7/T10) si el fallo es disperso y sin palanca — y saberlo también es ganar.
 
-#### F17-T11a · Diagnóstico de los fallos de recuperación cat1/cat3 (offline, barato)  [S] [todo]  ← SIGUIENTE
+#### F17-T11a · Diagnóstico de los fallos de recuperación cat1/cat3 (offline, barato)  [S] [done]
+- ✅ **(2026-11-18, devlog 028).** **Vocabulario REFUTADO** (vocab_gap 5-8%): el léxico NO es la palanca. El fallo
+  dominante es **ranking_loss (44% cat1, 66% cat3)** — el oro puntúa >0 pero lo superan turnos de ruido (ranks 196,
+  254…). Causa: **solape pregunta↔oro ~0,3-0,64 palabras** (la pregunta nombra a alguien y la respuesta narra sin
+  nombrar el concepto); intrínsecamente duro (el embedding va aún peor). **Palanca candidata:** subir el peso del encaje
+  **entidad/hablante** (el oro es de/sobre la persona nombrada pero pesa poco). → T11b.
 - **Skill:** code-quality §tests. En `scratchpad/`, sin tocar producto.
 - **Qué:** con `recuperar.mjs` sobre LoCoMo, sacar las preguntas de **cat1 y cat3** donde el motor NO mete la evidencia
   en top-10 y **clasificar el fallo**: (a) **brecha de vocabulario** (palabras de la pregunta ≠ del turno-evidencia →
@@ -213,8 +218,8 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   (y cuál)** o si es disperso (→ descartar, como T10).
 - **Verificar:** script en `scratchpad/` reproducible, sin red; números por tipo de fallo.
 
-#### F17-T11b · Palanca determinista según el diagnóstico, medida offline  [M] [todo]
-- **Skill:** code-quality. Depende de T11a.
+#### F17-T11b · Palanca determinista según el diagnóstico, medida offline  [M] [todo]  ← SIGUIENTE
+- **Skill:** code-quality. Depende de T11a. **Palanca elegida (de T11a):** boost del encaje entidad/hablante.
 - **Qué:** implementar la palanca MÁS concentrada que halle T11a tras un **flag/env** (sin tocar el camino por defecto):
   p. ej. ampliar el léxico de conceptos para las brechas, o un ajuste de ranking/normalización por longitud. Medir con
   `recuperar.mjs`: recall@5/@10 y acierto@5/@10 en **cat1/cat3 ARRIBA** y **el resto SIN regresar**.

@@ -11,4 +11,6 @@ Run it with the **fastest local path available** — do not default to `npx` (th
 - **Global install** (`~/.config/corvusmem/cli/corvusmem.mjs` exists): `node "<that path>" --cortex`
 - **Nothing installed** (fallback only): `npx corvusmem --cortex`
 
-Pick the user's language for anything you say. The command writes a local HTML file and prints its path — tell the user the path so they can open it. Add `--cliente` for a client-facing view, or `--idioma en|es` to force the language. It renders only what is actually stored; never invent memory that is not there.
+The command writes a local HTML file and prints its path. **Open it in the user's browser right away** — don't just hand them the path. Use your browser tool to navigate to the `file://` path if you have one, otherwise the OS opener: `start "" "<path>"` on Windows, `open "<path>"` on macOS, `xdg-open "<path>"` (or `wslview "<path>"` on WSL) on Linux. Then tell the user it is open and give the path too, in case they want to reopen it.
+
+Pick the user's language for anything you say. Add `--cliente` for a client-facing view, or `--idioma en|es` to force the language. It renders only what is actually stored; never invent memory that is not there.

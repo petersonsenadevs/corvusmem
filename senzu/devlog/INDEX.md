@@ -34,3 +34,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 028 | 2026-11-18 | F17-T11a: diagnóstico recuperación cat1/cat3 — no es vocabulario, es ranking por solape casi nulo | decisión | — | F17-T11a |
 | 029 | 2026-11-18 | F17-T11b/c: boost de entidad/hablante descartado — sube cat1/cat3 pero hunde la abstención (cat5) | decisión | 028 | F17-T11b |
 | 030 | 2026-11-18 | fix: /corvus-absorb usa el CLI local (no npx) — arregla el import sobre proyectos WSL | fix | — | ad-hoc WSL |
+| 031 | 2026-11-18 | Cortex: oscuro siempre (sin modo claro), 3D por defecto y auto-abrir en el navegador | feature | — | ad-hoc Cortex |

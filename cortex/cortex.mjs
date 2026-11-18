@@ -245,7 +245,6 @@ const APP = String.raw`
     $$('[data-t-aria]').forEach(function (e) { e.setAttribute('aria-label', t(e.getAttribute('data-t-aria'))); });
     $$('[data-t-ph]').forEach(function (e) { e.setAttribute('placeholder', t(e.getAttribute('data-t-ph'))); });
     $$('[data-t-title]').forEach(function (e) { e.setAttribute('title', t(e.getAttribute('data-t-title'))); });
-    $('#tema').textContent = raiz.getAttribute('data-theme') === 'light' ? t('oscuro') : t('claro');
     $('#pie').textContent = t('pie', { f: new Date(D.generado).toLocaleString(L) }) + ' ' + (D.cliente ? t('pieCliente') : t('pieDueno'));
   }
   var sel = $('#idioma');
@@ -440,17 +439,10 @@ const APP = String.raw`
   $('#buscar').addEventListener('input', function (e) { filtro = e.target.value.trim().toLowerCase(); limite = PAGINA; lista(); focoBusqueda(); });
   $('#mas').addEventListener('click', function () { limite += PAGINA * 3; lista(); });
   $('#cerrar').addEventListener('click', function () { $('#detalle').hidden = true; });
-  var tema = $('#tema');
-  tema.addEventListener('click', function () {
-    var oscuro = raiz.getAttribute('data-theme') === 'light';
-    raiz.setAttribute('data-theme', oscuro ? 'dark' : 'light');
-    tema.textContent = oscuro ? t('claro') : t('oscuro'); todo();
-  });
-  // Embebido en la web (mismo origen → comparte localStorage): el Cortex SIGUE el tema de la web (clave 'theme';
-  // 'light' = claro, si no oscuro) para no quedar como una caja negra sobre una página clara (ni texto ilegible en el
-  // hero transparente). Reacciona al toggle de la web por el evento 'storage'.
+  // El Cortex es OSCURO (sin modo claro ni botón de tema). Única excepción: EMBEBIDO en la web (data-solo, mismo origen
+  // → comparte localStorage), sigue el tema de la página para no quedar como una caja negra sobre una página clara.
   function temaWeb() { try { return localStorage.getItem('theme') === 'light' ? 'light' : 'dark'; } catch (e) { return null; } }
-  function aplicarTemaWeb() { var w = temaWeb(); if (!w) return; raiz.setAttribute('data-theme', w); try { tema.textContent = w === 'light' ? t('oscuro') : t('claro'); } catch (e) {} }
+  function aplicarTemaWeb() { if (!raiz.hasAttribute('data-solo')) return; var w = temaWeb(); if (w) raiz.setAttribute('data-theme', w); }
   aplicarTemaWeb();
   window.addEventListener('storage', function (e) { if (e.key === 'theme') { aplicarTemaWeb(); todo(); } });
   var cli = $('#cliente');
@@ -737,7 +729,7 @@ const APP = String.raw`
   });
   traducir();
   todo();
-  if (raiz.hasAttribute('data-solo')) { var _b3 = $('[data-ir="3d"]'); if (_b3) _b3.click(); }   // incrustado: arranca en 3D
+  var _b3 = $('[data-ir="3d"]'); if (_b3) _b3.click();   // arranca SIEMPRE en 3D (es la vista por defecto), no solo incrustado
 })();
 `;
 
@@ -786,14 +778,13 @@ export function htmlCortex(datos, { cli = null, idioma = null, soloCerebro = fal
         <p class="cifras" id="cifras"></p>
       </div>
       <div class="mandos">
-        <span role="group" data-t-aria="vista"><button type="button" data-ir="2d" aria-pressed="true">2D</button> <button type="button" data-ir="3d" aria-pressed="false">3D</button></span>
+        <span role="group" data-t-aria="vista"><button type="button" data-ir="2d" aria-pressed="false">2D</button> <button type="button" data-ir="3d" aria-pressed="true">3D</button></span>
         ${cliente ? '' : `<button type="button" id="cliente" aria-pressed="false" data-t="vistaCliente" data-t-title="vistaClienteT">${es.vistaCliente}</button>`}
         ${datos.actividad && datos.actividad.pensamientos && datos.actividad.pensamientos.length ? `<button type="button" id="piensa" aria-pressed="false" data-t="piensa" data-t-title="piensaT">${es.piensa}</button>` : ''}
-        <button type="button" id="tema">${es.claro}</button>
         <label><span class="sr" data-t="idioma">${es.idioma}</span><select id="idioma"></select></label>
       </div>
     </div>
-    <div class="escenario" data-vista="2d">
+    <div class="escenario" data-vista="3d">
       <div class="v2d">
         <div class="dibujo">${cerebro()}</div>
         <p class="pista" data-t="pista">${es.pista}</p>

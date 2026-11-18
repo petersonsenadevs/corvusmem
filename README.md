@@ -100,6 +100,10 @@ project (`--global`, in your home). It does **not** change where memory lives: p
 project, then commit `.corvusmem/` (the shared project memory) and `.claude/settings.json` — teammates get Corvus firing
 the moment they clone, with nothing to install. Never commit `~/.config/corvusmem/` — that is your private memory.
 
+**On WSL**: if your project lives in WSL (`\\wsl$\…`), run **Claude Code and Corvus from inside WSL** so Node and
+`npx` are Linux-native. A Windows `npx` cannot reach a `\\wsl$\…` path (no UNC support), which is what breaks
+`npx corvusmem …` across the boundary; running on the Linux side — where the path is a normal `/home/…` — just works.
+
 ## Usage
 Once installed, the agent captures and recalls memory on its own — you don't do a thing. Two slash commands come with
 it (native — no `npx`):

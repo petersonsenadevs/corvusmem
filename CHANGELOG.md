@@ -4,6 +4,18 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- **`/corvus-absorb` works on a WSL project.** The command hard-coded `npx corvusmem import`, and a Windows `npx`
+  cannot reach a WSL path (`\\wsl$\…`, no UNC support), so the agent's absorb failed across the boundary. It now uses
+  the installed local CLI (`node "<…>/cli/corvusmem.mjs"`) like `/corvus-cortex` and `/corvus-install`, with `npx` only
+  as the fallback. README and docs gained a WSL note (run Claude Code and Corvus on the Linux side) and the **Node ≥18**
+  requirement is now explicit.
+
+### Changed
+- **The Cortex is dark-only, opens in 3D, and pops the browser.** Removed the light-mode toggle (the standalone Cortex
+  is always dark; the web-embedded brain still follows the page theme so it is not a black box on a light page); the
+  view now starts in **3D** by default (2D still a click away); and `/corvus-cortex` now opens the generated HTML in the
+  browser immediately instead of only printing its path.
 
 ## [0.6.0] — 2026-11-18
 ### Added

@@ -7,11 +7,14 @@ You are absorbing this project's **existing** knowledge into Corvus. The goal is
 **Speak the user's language.** Every question, confirmation and the final report go in the language the user writes to you in (Spanish, etc.) — only this command's name and the saved `--keys` identifiers stay in English (and `--keys` should also include the user's own language).
 
 ## 1. Find the documents (deterministic — let the tool do this)
-Run:
+Use the memory CLI's `import`, with the **fastest local path available** — do **not** default to `npx` (it is only the fallback for an agent with nothing installed, and a Windows `npx` cannot reach a WSL project at `\\wsl$\…` because it does not support UNC paths). Use the first that applies:
 
-```
-npx corvusmem import --json
-```
+- **Plugin** (`CLAUDE_PLUGIN_ROOT` set): `node "$CLAUDE_PLUGIN_ROOT/cli/corvusmem.mjs" import --json`
+- **Per-project** (`.corvusmem/cli/corvusmem.mjs` exists): `node "$CLAUDE_PROJECT_DIR/.corvusmem/cli/corvusmem.mjs" import --json`
+- **Global** (`~/.config/corvusmem/cli/corvusmem.mjs` exists): `node "<that path>" import --json`
+- **Nothing installed** (fallback only): `npx corvusmem import --json`
+
+> **WSL:** if the project lives in WSL, run Claude Code (and Corvus) **inside WSL** so Node is Linux-native — mixing a Windows agent with a `\\wsl$\…` path is exactly what breaks `npx`.
 
 It returns the memory documents already in the repo in two tiers (`{ agent, docs, truncated, files: [{ tier, kind, rel, lines }] }`):
 
@@ -37,10 +40,10 @@ Keep every piece of **durable memory** — what should still be true next week:
 Leave out only the **noise**: install/run steps, step-by-step how-tos, API/parameter dumps you would re-read from the doc anyway, tool tutorials, generic boilerplate, anything obvious from the code, anything transient, and anything already covered by a fact you saved. **When in doubt whether something is durable, keep it** — storage is cheap and recall only ever surfaces the few relevant facts per message, so more good facts make memory richer, never noisier.
 
 ## 3. Save each item (deterministic sink)
-For every item worth keeping, run one command:
+For every item worth keeping, run one command — the **same local CLI as step 1** (`node "<…>/cli/corvusmem.mjs"`), with `npx corvusmem` only as the fallback:
 
 ```
-npx corvusmem --save --dimension <family.topic> --value "<self-contained statement>" --keys "<term-en>,<term-native>" --source agente
+node "<corvusmem cli>" --save --dimension <family.topic> --value "<self-contained statement>" --keys "<term-en>,<term-native>" --source agente
 ```
 
 - `family` is one of: `identity`, `preference`, `project`, `goal`, `pending`, `constraint`, `note`, `fact`, `learning`, `link`.

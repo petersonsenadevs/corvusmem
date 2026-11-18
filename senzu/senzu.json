@@ -1,0 +1,20 @@
+{
+  "stack": "node-api",
+  "tools": [
+    "claude",
+    "codex"
+  ],
+  "extraSkills": [],
+  "bundles": [],
+  "standardsRoot": "C:\\Users\\Black\\.senzu",
+  "seleccion": {
+    "modo": "categorias",
+    "grupos": [
+      "quality",
+      "security",
+      "ops"
+    ],
+    "perfil": "libreria"
+  },
+  "lang": "es"
+}

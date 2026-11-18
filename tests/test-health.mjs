@@ -4,12 +4,14 @@
 // JavaScript; las filas privadas (uso real, última sesión) van con `solo-dueno` y NO viajan al HTML/JSON del cliente.
 //   node tests/test-health.mjs
 
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const { datosSalud } = await import(pathToFileURL(path.join(ROOT, 'src', 'facts.mjs')).href);
+const { datosSalud, guardarHecho } = await import(pathToFileURL(path.join(ROOT, 'src', 'facts.mjs')).href);
 const { htmlCortex } = await import(pathToFileURL(path.join(ROOT, 'cortex', 'cortex.mjs')).href);
 let casos = 0, fallos = 0;
 const ok = (c, n, d = '') => { casos++; if (!c) { fallos++; process.stdout.write(`FAIL ${n}${d ? ' -> ' + d : ''}\n`); } };
@@ -51,6 +53,23 @@ const r = spawnSync(process.execPath, [path.join(ROOT, 'cli', 'corvusmem.mjs'), 
 ok(r.status === 0, 'corvusmem --health --json termina en 0', `status=${r.status}`);
 let parsed = null; try { parsed = JSON.parse(r.stdout); } catch {}
 ok(parsed && parsed.hechos && typeof parsed.hechos.activos === 'number', 'la salida de --health --json es JSON válido con hechos.activos');
+
+// 5. F17-T4: una dimensión con >=5 hechos activos aparece como pista saturada (efecto fan)
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'corvus-fan-'));
+const P = path.join(tmp, 'proj');
+fs.mkdirSync(path.join(P, 'senzu'), { recursive: true });
+fs.writeFileSync(path.join(P, 'senzu', 'senzu.json'), '{}');
+process.env.SENZU_MEMORIA_USUARIO = path.join(tmp, 'memoria.md');
+const T = n => new Date(Date.UTC(2026, 0, 1) + n * 1000).toISOString();
+for (let i = 0; i < 6; i++) guardarHecho(P, { dimension: 'nota.cliente', valor: `dato ${i} del cliente sobre el proyecto numero ${i}` }, { ahora: T(i) });
+guardarHecho(P, { dimension: 'preferencia.editor', valor: 'vim' }, { ahora: T(10) });   // pista NO saturada (1 hecho)
+const sf = datosSalud(P, { dias: 30 });
+ok(Array.isArray(sf.pistasSaturadas), 'datosSalud trae pistasSaturadas (array)');
+const sat = (sf.pistasSaturadas || []).find(p => p.dimension === 'nota.cliente');
+ok(sat && sat.hechos >= 5, 'nota.cliente (6 hechos) aparece como pista saturada', JSON.stringify(sf.pistasSaturadas));
+ok(sat && sat.interferencia > 0, 'la pista saturada trae su interferencia ln(fan) > 0');
+ok(!(sf.pistasSaturadas || []).some(p => p.dimension === 'preferencia.editor'), 'una pista con 1 hecho NO sale como saturada');
+fs.rmSync(tmp, { recursive: true, force: true });
 
 process.stdout.write(`\nhealth + panel (F15-T8) -> Casos: ${casos}  Fallos: ${fallos}\n`);
 process.exit(fallos ? 1 : 0);

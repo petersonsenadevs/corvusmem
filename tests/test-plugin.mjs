@@ -114,7 +114,13 @@ ok(fs.existsSync(path.join(dir, 'commands', 'corvus-install.md')), 'el plugin tr
     const lib = await import(pathToFileURL(path.join(ROOT, 'src', 'lib.mjs')).href);
     const tmp = path.join(base, 'sincli'); fs.mkdirSync(tmp, { recursive: true });
     delete process.env.CLAUDE_PLUGIN_ROOT;
+    // X-T1: aísla del Corvus GLOBAL del dev (~/.config/corvusmem/cli existe en la máquina del autor y gana a npx).
+    // Para medir el fallback REAL, apunta HOME/USERPROFILE a un temp vacío solo durante esta aserción, y restaura.
+    const homePrev = { HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE };
+    const homeVacio = path.join(base, 'home-vacio'); fs.mkdirSync(homeVacio, { recursive: true });
+    process.env.HOME = homeVacio; process.env.USERPROFILE = homeVacio;
     ok(lib.rutaCliMemoria(tmp) === 'npx corvusmem', 'rutaCliMemoria sin instalación -> npx (fallback)', lib.rutaCliMemoria(tmp));
+    for (const k of ['HOME', 'USERPROFILE']) { if (homePrev[k] === undefined) delete process.env[k]; else process.env[k] = homePrev[k]; }
     fs.mkdirSync(path.join(tmp, '.corvusmem', 'cli'), { recursive: true });
     fs.writeFileSync(path.join(tmp, '.corvusmem', 'cli', 'corvusmem.mjs'), '');
     ok(/\$\{CLAUDE_PROJECT_DIR\}\/\.corvusmem\/cli\/corvusmem\.mjs/.test(lib.rutaCliMemoria(tmp)), 'rutaCliMemoria con install de proyecto -> node .corvusmem/cli (portable)', lib.rutaCliMemoria(tmp));

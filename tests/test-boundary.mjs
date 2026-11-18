@@ -11,7 +11,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
 // El núcleo portable: motor + base + host + hooks de cerebro. Nada de método Senzu (guards, router, reminders…).
 const NUCLEO = ['facts', 'host', 'import', 'lib', 'messages', 'session-end',
-    'live-recall', 'session-start', 'session-state', 'live-memory', 'file-memory', 'facts-guard'];
+    'live-recall', 'session-start', 'session-state', 'live-memory', 'file-memory', 'facts-guard', 'extractor'];
 
 let casos = 0, fallos = 0;
 const ok = (c, n, d = '') => { casos++; if (!c) { fallos++; process.stdout.write(`FAIL ${n}${d ? ' -> ' + d : ''}\n`); } };

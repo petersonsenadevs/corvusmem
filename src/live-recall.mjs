@@ -9,12 +9,15 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { readHookInput, projectRoot, sessionFlag, outHookJson, esMensajeDelUsuario, localeUI, msg, rutaCliMemoria } from './lib.mjs';
 import { reclamarInyeccion } from './host.mjs';
-import { recuerdo, palabras, palabraConPeso, UMBRAL_RECUERDO, anotarUso, apuntarInyeccion, mapaMemoria, textoMapa, intencionTemporal } from './facts.mjs';
+import { recuerdo, palabras, palabraConPeso, UMBRAL_RECUERDO, anotarUso, apuntarInyeccion, mapaMemoria, textoMapa, intencionTemporal, pisoDiario } from './facts.mjs';
 
 // Umbrales (se afinan con la evaluación de F4). Hechos: BM25 del motor (IDF suavizado, escala estable). Memoria y
 // devlog: los puntos de search.mjs dependen del tamaño del devlog (0,7 en uno pequeño, 38 en uno grande), así que el
 // umbral es RELATIVO al mejor de su fuente; el buscador ya no devuelve nada si no hay relación.
 const UMBRAL_HECHO = UMBRAL_RECUERDO, RELATIVO = 0.5, MAXIMO = 5;   // el de hechos, compartido con la evaluación
+// F17-T9: suelo ABSOLUTO para diario+decisiones (0,25–0,35 × escala, escalado por confianza; `pisoDiario` en facts.mjs
+// es la única fuente). El relativo solo exige «ser el mejor de su fuente»; sin un suelo, el diario cuela entradas
+// flojas cuando no hay nada bueno. Auto-calibrado del historial; sin historial suficiente → 0 (sin suelo, como antes).
 
 const p = readHookInput();
 const texto = p && typeof p.prompt === 'string' ? p.prompt.trim() : '';
@@ -39,8 +42,9 @@ const clave = x => crypto.createHash('md5').update(`${x.fuente}|${x.id}|${x.text
 const intencion = intencionTemporal(consulta);
 const todos = recuerdo(root, consulta.slice(0, 600), { limite: 10, historico: intencion === 'historical' ? 'auto' : false, futuro: intencion === 'future' ? 'auto' : false });
 const mejor = f => Math.max(0, ...todos.filter(x => x.fuente === f).map(x => x.puntuacion));
+const PISO_DIARIO = pisoDiario(root);   // F17-T9: suelo absoluto para diario+decisiones (0 si no hay historial)
 const elegidos = todos
-    .filter(x => (x.fuente === 'hecho' ? x.puntuacion >= UMBRAL_HECHO : x.puntuacion > 0 && x.puntuacion >= RELATIVO * mejor(x.fuente)) && !ya.has(clave(x)))
+    .filter(x => (x.fuente === 'hecho' ? x.puntuacion >= UMBRAL_HECHO : x.puntuacion > 0 && x.puntuacion >= RELATIVO * mejor(x.fuente) && x.puntuacion >= PISO_DIARIO) && !ya.has(clave(x)))
     .sort((a, b) => (a.debil === true) - (b.debil === true))   // lo sólido delante; los roces de una palabra, detrás y marcados
     .slice(0, MAXIMO);
 // X-T4: se apunta lo que se inyecta (o el silencio) para medir el uso real; al cerrar se marca si sirvió

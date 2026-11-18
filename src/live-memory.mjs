@@ -13,6 +13,7 @@
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { readHookInput, sessionFlag, outHookJson, rutaMemoriaUsuario, projectRoot, rutaRel, esMensajeDelUsuario, localeUI, msg, rutaCliMemoria } from './lib.mjs';
+import { extraerHecho } from './extractor.mjs';   // F17-T8c: destila la dimensión/valor/claves cuando es inequívoco (ciclo seguro: solo se usa en funciones)
 
 // ---------------- Detectores (puros y exportables: los tests los llaman sin montar el hook) ----------------
 
@@ -50,6 +51,23 @@ export function esHechoGuardable(texto) {
     if (!t || PREGUNTA.test(t)) return null;
     for (const re of HECHOS) { const m = re.exec(t); if (m) return m[0].replace(/\s+/g, ' ').trim().slice(0, 120); }
     return null;
+}
+
+// F17-T8c: el comando de guardado que el nudge le ofrece al agente. Si el extractor determinista dimensiona el hecho
+// (ubicación, sede, herramienta), el comando va YA DESTILADO —dimensión/valor/claves rellenos, el agente solo revisa—;
+// si no, el placeholder de siempre y el agente destila a mano. Así la clave deja de depender de que el agente acierte.
+// Puro y exportable (el test lo llama sin montar el hook).
+export function comandoGuardado(texto, cli) {
+    const sug = extraerHecho(texto);
+    // `cli` (rutaCliMemoria) YA trae el ejecutable completo (`node "…/corvusmem.mjs"` o `npx corvusmem`): no se le
+    // antepone otro «node» (eso daba el comando roto «node node …», bug preexistente que el cableado destapó).
+    if (sug) {
+        return `Si va, el comando ya destilado (revísalo y ajusta la dimensión/valor si no encaja): `
+            + `${cli} --guardar --dimension ${sug.dimension} --valor "${sug.valor}" --claves "${sug.claves.join(', ')}".`;
+    }
+    return `Si va: ${cli} --guardar --dimension familia.tema --valor "…" --claves "…" `
+        + `(familia: identidad, preferencia, proyecto, objetivo, pendiente, restriccion, nota o aprendizaje; `
+        + `claves también en inglés y en su idioma; nombres y fechas absolutas).`;
 }
 
 // ---------------- Hook (solo al ejecutarse como script; al importarlo para los tests, no corre) ----------------
@@ -93,7 +111,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     const cli = rutaCliMemoria(root);
     outHookJson('UserPromptSubmit', {
         additionalContext: `[senzu] Esto suena a un dato que puede servir la próxima vez («${h}»). ${msg('save.criterios', lang)} `
-            + `Si va: node ${cli} --guardar --dimension familia.tema --valor "…" --claves "…" (familia: identidad, preferencia, proyecto, objetivo, pendiente, restriccion, nota o aprendizaje; claves también en inglés y en su idioma; nombres y fechas absolutas). `
+            + comandoGuardado(texto, cli) + ' '
             + 'Si era solo de este momento, sigue sin guardar.',
     });
     process.exit(0);

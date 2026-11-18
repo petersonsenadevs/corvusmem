@@ -4,14 +4,20 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.6.0] — 2026-11-18
 ### Added
 - **Head-to-head benchmark vs paid memory products (`tools/eval-productos/`).** Corvusmem's memory engine measured
   against **mem0** and **Zep/Graphiti** on the academic **LoCoMo** benchmark (1986 questions), under identical
   conditions (same local Qwen3 answerer + judge; only the memory differs). Corvusmem **beats mem0 globally**
-  (25.6 % vs 21.1 %) and **nearly triples it on temporal** questions (16.2 % vs 5.3 %), is **best at abstention**,
-  and sits level with the free embedding baseline — all while being deterministic, offline and $0. Honest caveat
-  documented: local Qwen3, not GPT-4o, so not comparable to their official leaderboards. Raw results + `comparar.mjs`
-  reproduce the tables offline (`BENCHMARK.md`). Dev tooling — not shipped in the npm package.
+  (25.6 % vs 21.1 %) and **nearly triples it on temporal** questions (16.2 % vs 5.3 %). And in its **native,
+  LLM-free mode** — indexing the raw turns, which is how the product actually works — Corvusmem reaches
+  **34.8 % global, the highest of every column measured**, above the free embedding baseline with LLM ingestion
+  (28.0 %) and its own LLM-ingestion variant (25.6 %): its retrieval pulls the answer-bearing turn **2–4× more
+  often** than a semantic embedding, deterministically and offline. Honest caveat documented: local Qwen3, not
+  GPT-4o, so not comparable to their official leaderboards; and with LLM-cleaned facts the embedding still wins
+  two single categories (cat1, cat3). Raw results + `comparar.mjs` reproduce the tables offline (`BENCHMARK.md`).
+  Dev tooling — not shipped in the npm package.
 - **`corvusmem --health` and a reliability panel in the Cortex.** One source (`datosSalud`) answers "is the memory
   working?": active facts (and by family), open goals/todos, real-world use (injected vs used, real precision from your
   own sessions), the deterministic battery result (`hit@5`, abstention, dedup, ms — shown only where the dev eval
@@ -23,8 +29,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   close if nothing was saved. A **question is never treated as a fact**, so `which package manager do we use` or
   `cuánto paga…` stay silent: 0 false positives across the whole adversarial battery. The detector is pure and tested
   (`tests/test-hecho-detector.mjs`, 34/0); the close nudge only ever emits `systemMessage`, never blocks.
+- **Deterministic fact extractor — the agent no longer has to invent the key.** When you state a fact-shaped
+  sentence, the live hook now **distills the save command itself** (`--dimension … --valor … --claves …`, already
+  canonical) and offers it for the agent to review, instead of leaving the agent to pick the key (the cause of saves
+  landing under the wrong dimension/store). Pure and canonical (`dimensionConvencional`/`clavesConvencionales`), tested
+  (`tests/test-extractor.mjs` 83/0; integration `tests/test-extractor-integracion.mjs` 12/0 proving extract → store →
+  recall and chronological substitution). De-risked on LongMemEval knowledge-update (n=21): the compressed fact régimen
+  beats raw turns on **both recall@5 and abstention**.
 
 ### Improved
+- **Less noise from the project diary (higher real-world precision).** Live recall now gives diary/decision hits an
+  **absolute floor** (`0.25–0.35 × the diary's own score scale`, auto-calibrated from your usage history and scaled by
+  confidence) on top of the relative threshold. The diary was ~70 % of injected noise — injected on weak overlap
+  because it only had to be "best of its source"; facts and standing preferences are untouched, and projects without
+  enough history get no floor (behavior unchanged). Measured on real usage logs: injection precision **23.7 % →
+  28.8 %** (new `npm run bench:precision`), ~6 noisy injections cut per useful one lost, with the battery's
+  **abstention held at 100 %**.
 - **Clearer bar for what to save (less agent variance).** The save prompt is now one concrete, positive checklist
   (`save.criterios`) — decision made, limit/constraint found, stable preference, external fact with a name/figure,
   a gotcha and its cause, a goal/pending — with the test "would you need it next time and it's not in the code?".
@@ -46,6 +66,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   (≥ threshold), **abstention precision**, **near-duplicate guard** and **ms/query**, and writes `resultados.json`.
   This is the baseline and, later, the regression gate for the F15 "reliable memory" work. First baseline
   (2026-11-09): hit@5 81.8 % · injected 63.6 % · abstention 100 % · dedup 100 % · ~2 ms/query.
+
+### Fixed
+- **The plugin test is now isolated from a globally-installed Corvusmem.** `test-plugin`'s "no install → npx
+  fallback" check read the real `~/.config/corvusmem`, so it failed on a machine that has Corvusmem installed
+  globally — which also blocked `npm version`/`npm publish`, since both run `test:core`. It now points `HOME` at
+  an empty temp dir for that one assertion. `test:core` is green end to end.
 
 ## [0.5.3] — 2026-11-09
 ### Added

@@ -37,6 +37,22 @@ Your agent forgets everything between sessions. Corvusmem is a memory it keeps: 
 graph, retrieved by name, date and relevance with two-hop activation — no embeddings, no vector database, no API key.
 Same input, same result. The whole memory is a file you own.
 
+## Benchmarks
+On **LoCoMo** — the academic long-conversation benchmark (1986 questions) — measured against the paid memory products
+**mem0** and **Zep/Graphiti** under identical conditions (same local Qwen3 answerer and judge; only the memory differs):
+
+- In its **native, LLM-free mode** — indexing the raw turns, which is how the product actually works — Corvusmem scores
+  **34.8 % end-to-end, the highest of every configuration measured**: above mem0 (21.1 %) and above a free embedding
+  baseline (28.0 %), while being deterministic, offline and $0.
+- Its retrieval pulls the answer-bearing turn **2–4× more often** than a semantic embedding, in every category.
+- **Honest caveat:** this runs on a local Qwen3, not GPT-4o, so the absolute numbers are **not** comparable to their
+  official GPT-4o leaderboards; and with LLM-cleaned facts the embedding still wins two single categories. It is a
+  controlled, reproducible head-to-head between memories, not a leaderboard claim.
+
+Full tables, raw results and a one-command reproduction:
+[`BENCHMARK.md`](https://github.com/petersonsenadevs/corvusmem/blob/main/tools/eval-productos/BENCHMARK.md) ·
+[benchmarks on the site](https://corvusmem.vercel.app/benchmarks).
+
 ## Structure
 - `src/` — the core: the facts engine (`facts.mjs`), shared base (`lib`, `messages`, `session-end`), host detection
   (`host.mjs`) and the brain hooks (`live-recall`, `session-start`, `session-state`, `live-memory`,

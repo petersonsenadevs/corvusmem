@@ -1,5 +1,5 @@
 {
-  "fecha": "2026-11-10",
+  "fecha": "2026-11-11",
   "umbral": 0.8,
   "global": {
     "consultas": 15,
@@ -9,7 +9,7 @@
     "hit5_inyectado": 100,
     "abstencion": 100,
     "duplicados_ok": 100,
-    "ms_por_consulta": 1.95
+    "ms_por_consulta": 0.78
   },
   "porCategoria": {
     "parafrasis": {

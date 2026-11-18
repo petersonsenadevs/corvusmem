@@ -4,14 +4,20 @@ All notable changes to **Corvusmem** are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow [SemVer](https://semver.org/).
 
 ## [Unreleased]
+
+## [0.6.0] — 2026-11-18
 ### Added
 - **Head-to-head benchmark vs paid memory products (`tools/eval-productos/`).** Corvusmem's memory engine measured
   against **mem0** and **Zep/Graphiti** on the academic **LoCoMo** benchmark (1986 questions), under identical
   conditions (same local Qwen3 answerer + judge; only the memory differs). Corvusmem **beats mem0 globally**
-  (25.6 % vs 21.1 %) and **nearly triples it on temporal** questions (16.2 % vs 5.3 %), is **best at abstention**,
-  and sits level with the free embedding baseline — all while being deterministic, offline and $0. Honest caveat
-  documented: local Qwen3, not GPT-4o, so not comparable to their official leaderboards. Raw results + `comparar.mjs`
-  reproduce the tables offline (`BENCHMARK.md`). Dev tooling — not shipped in the npm package.
+  (25.6 % vs 21.1 %) and **nearly triples it on temporal** questions (16.2 % vs 5.3 %). And in its **native,
+  LLM-free mode** — indexing the raw turns, which is how the product actually works — Corvusmem reaches
+  **34.8 % global, the highest of every column measured**, above the free embedding baseline with LLM ingestion
+  (28.0 %) and its own LLM-ingestion variant (25.6 %): its retrieval pulls the answer-bearing turn **2–4× more
+  often** than a semantic embedding, deterministically and offline. Honest caveat documented: local Qwen3, not
+  GPT-4o, so not comparable to their official leaderboards; and with LLM-cleaned facts the embedding still wins
+  two single categories (cat1, cat3). Raw results + `comparar.mjs` reproduce the tables offline (`BENCHMARK.md`).
+  Dev tooling — not shipped in the npm package.
 - **`corvusmem --health` and a reliability panel in the Cortex.** One source (`datosSalud`) answers "is the memory
   working?": active facts (and by family), open goals/todos, real-world use (injected vs used, real precision from your
   own sessions), the deterministic battery result (`hit@5`, abstention, dedup, ms — shown only where the dev eval
@@ -60,6 +66,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/); versions follow
   (≥ threshold), **abstention precision**, **near-duplicate guard** and **ms/query**, and writes `resultados.json`.
   This is the baseline and, later, the regression gate for the F15 "reliable memory" work. First baseline
   (2026-11-09): hit@5 81.8 % · injected 63.6 % · abstention 100 % · dedup 100 % · ~2 ms/query.
+
+### Fixed
+- **The plugin test is now isolated from a globally-installed Corvusmem.** `test-plugin`'s "no install → npx
+  fallback" check read the real `~/.config/corvusmem`, so it failed on a machine that has Corvusmem installed
+  globally — which also blocked `npm version`/`npm publish`, since both run `test:core`. It now points `HOME` at
+  an empty temp dir for that one assertion. `test:core` is green end to end.
 
 ## [0.5.3] — 2026-11-09
 ### Added

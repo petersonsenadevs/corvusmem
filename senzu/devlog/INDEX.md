@@ -30,3 +30,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 024 | 2026-11-17 | F17-T9: el suelo mira solo la historia reciente (14ms→2ms, y más exacto) | perf | 022 | F17-T9 |
 | 025 | 2026-11-18 | LoCoMo: la recuperación de Corvus domina (2-4× el embedding); el end-to-end no es problema de recuperación | decisión | — | benchmark |
 | 026 | 2026-11-18 | LoCoMo: Corvus en crudo (34,8%) gana a TODOS end-to-end — su modo más barato es el mejor | decisión | 025 | benchmark |
+| 027 | 2026-11-18 | Release 0.6.0: puerta de publish verde (X-T1 aísla test-plugin del Corvus global) + notas y bump | release | — | release-0.6.0 |

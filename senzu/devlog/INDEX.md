@@ -32,3 +32,4 @@ Registro correlativo de todas las entradas del proyecto.
 | 026 | 2026-11-18 | LoCoMo: Corvus en crudo (34,8%) gana a TODOS end-to-end — su modo más barato es el mejor | decisión | 025 | benchmark |
 | 027 | 2026-11-18 | Release 0.6.0: puerta de publish verde (X-T1 aísla test-plugin del Corvus global) + notas y bump | release | — | release-0.6.0 |
 | 028 | 2026-11-18 | F17-T11a: diagnóstico recuperación cat1/cat3 — no es vocabulario, es ranking por solape casi nulo | decisión | — | F17-T11a |
+| 029 | 2026-11-18 | F17-T11b/c: boost de entidad/hablante descartado — sube cat1/cat3 pero hunde la abstención (cat5) | decisión | 028 | F17-T11b |

@@ -193,7 +193,11 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
 - Aviso de dimensiones densas (pistas saturadas) en `--health`; **sin tocar el ranking**. Diagnóstico, no cambio de
   recuperación. ✅ devlog 010, commits 635e743 + 5774d96.
 
-### F17-T11 · Recuperación en las categorías flojas (cat1 single-hop, cat3 multi-hop)  [M] [todo · de-risk primero]
+### F17-T11 · Recuperación en las categorías flojas (cat1 single-hop, cat3 multi-hop)  [M] [cerrada con evidencia]
+- **Cierre (2026-11-18, devlog 029):** T11a diagnosticó (no es vocabulario, es ranking por solape ~0); T11b probó la
+  única palanca concentrada (boost de entidad/hablante) y **sube cat1 +4-7 pts y cat3 +2 SIN regresar cat2/cat4, pero
+  hunde la abstención (cat5 65,5→22,9)** → **descartada** (regla de oro, como T7). El motor ya está cerca de su techo
+  determinista en cat1/cat3; el hueco es el solape léxico casi nulo (duro hasta para el embedding). T11c no se lanza.
 - **Por qué:** el diagnóstico de hoy (devlog 025-026) mostró que la **recuperación es la fuerza del motor** (2-4× el
   embedding) y que el modo crudo ya **gana end-to-end (34,8 %)**. El techo que queda está en las dos categorías flojas:
   **cat1 single-hop (acierto@5 40,8 %)** y **cat3 multi-hop (34,8 %)**. Subir ahí empuja el 34,8 % más arriba. Reabre
@@ -218,8 +222,11 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
   (y cuál)** o si es disperso (→ descartar, como T10).
 - **Verificar:** script en `scratchpad/` reproducible, sin red; números por tipo de fallo.
 
-#### F17-T11b · Palanca determinista según el diagnóstico, medida offline  [M] [todo]  ← SIGUIENTE
-- **Skill:** code-quality. Depende de T11a. **Palanca elegida (de T11a):** boost del encaje entidad/hablante.
+#### F17-T11b · Palanca determinista según el diagnóstico, medida offline  [M] [discarded]
+- ❌ **(2026-11-18, devlog 029).** Boost de entidad/hablante (re-ranking posterior, sin tocar el motor): sube **cat1
+  acierto@10 56→60,6 (+4,2; @5 +7,1)** y **cat3 39→41,3**, sin regresar cat2/cat4. Pero **hunde cat5 (abstención):
+  65,5 → 44,6 (alpha 0,5) → 22,9 (alpha 1)** porque infla puntuaciones sobre el umbral y contesta trampas. Regla de
+  oro rota → descartado. No hay variante segura: traer el oro (score 0,48, rank 196) EXIGE subir su puntuación.
 - **Qué:** implementar la palanca MÁS concentrada que halle T11a tras un **flag/env** (sin tocar el camino por defecto):
   p. ej. ampliar el léxico de conceptos para las brechas, o un ajuste de ranking/normalización por longitud. Medir con
   `recuperar.mjs`: recall@5/@10 y acierto@5/@10 en **cat1/cat3 ARRIBA** y **el resto SIN regresar**.
@@ -228,7 +235,8 @@ ello, mejorar la CALIDAD de la clave/dimensión elegida (el margen que el de-ris
 - **Verificar:** `recuperar.mjs` antes/después por categoría; `eval-memoria --gate` verde (**abstención 100 %**, hit@5);
   test propio si se toca código del motor.
 
-#### F17-T11c · Confirmación end-to-end crudo (la lanza Peterson)  [S] [todo]
+#### F17-T11c · Confirmación end-to-end crudo (la lanza Peterson)  [S] [no se lanza]
+- El de-risk offline de T11b dio NO (rompe la abstención) → no se gasta el bench pesado. El método funcionó.
 - **Skill:** —. Si T11b mejora la recuperación offline sin regresar, correr el end-to-end **crudo** del motor y comparar
   global + por categoría contra el baseline de hoy (`resultados-e2e-locomo-motor-crudo.json`, 34,8 %).
 - **Hecho cuando:** el global crudo sube (o cat1/cat3 suben sin bajar el global). Si no, se descarta con evidencia.

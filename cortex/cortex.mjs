@@ -305,7 +305,7 @@ const APP = String.raw`
   var pensando = null, quietoP = matchMedia('(prefers-reduced-motion: reduce)').matches;
   function encender(zs) {
     chispa = {}; zs.forEach(function (z) { chispa[z] = 1; });
-    regiones(); if (tresD) { tresD.rafaga(zs); tresD.dibujar(); }
+    regiones(); if (tresD) tresD.pensarFormando(zs);   // CX-T3: el pensamiento se forma por fases (antes: ráfaga aleatoria)
   }
   function pararPensar() {
     clearTimeout(pensando); pensando = null; encender([]);
@@ -717,7 +717,27 @@ const APP = String.raw`
       if (!quieto) base.forEach(function (i) { enl.forEach(function (e, ei) { if (e[0] === i || e[1] === i) pulsos.push({ e: ei, t: 0, v: 0.02 + rnd() * 0.02 }); }); });
       dibujar();
     }
-    return { dibujar: dibujar, rafaga: rafaga, buscar: buscar, empezar: function () { vivo = true; paso(); }, parar: function () { vivo = false; } };
+    // CX-T3: "el pensamiento se forma" — la MISMA activacion real que buscar(), pero por FASES en el tiempo:
+    // candidatos -> propagacion por sus aristas (2 saltos reales) -> converge el cluster -> destello. Nada inventado.
+    // reduced-motion (quieto): foto final al instante, sin movimiento.
+    var coreoT = [];
+    function pensarFormando(zs) {
+      coreoT.forEach(clearTimeout); coreoT = [];
+      var base = [];
+      (zs || []).forEach(function (z) { var ns = nodosPorZona[z] || []; for (var i = 0; i < Math.min(4, ns.length); i++) base.push(ns[i]); });
+      if (!base.length) { foco = null; focoBase = []; dibujar(); return; }
+      var full = {}; base.forEach(function (i) { full[i] = 1; enl.forEach(function (e) { if (e[0] === i) full[e[1]] = 1; else if (e[1] === i) full[e[0]] = 1; }); });
+      focoBase = base;
+      if (quieto) { foco = full; dibujar(); return; }                 // reduced-motion: estado final, sin animación
+      var soloBase = {}; base.forEach(function (i) { soloBase[i] = 1; });
+      foco = soloBase; dibujar();                                      // Fase A: se activan los candidatos (resto atenuado)
+      coreoT.push(setTimeout(function () {                             // Fase B: impulsos por sus aristas reales (la propagación)
+        base.forEach(function (i) { enl.forEach(function (e, ei) { if (e[0] === i || e[1] === i) pulsos.push({ e: ei, t: 0, v: 0.02 + rnd() * 0.02 }); }); });
+      }, 350));
+      coreoT.push(setTimeout(function () { foco = full; }, 900));      // Fase C: converge el clúster (candidatos + vecinos)
+      coreoT.push(setTimeout(function () { base.forEach(function (i) { destellos.push({ n: i, v: 1 }); }); }, 1500));   // Fase D: destello = respuesta formada
+    }
+    return { dibujar: dibujar, rafaga: rafaga, buscar: buscar, pensarFormando: pensarFormando, empezar: function () { vivo = true; paso(); }, parar: function () { vivo = false; } };
   }
   var cv = $('#lienzo3d'), caja = $('[data-vista]');
   $$('[data-ir]').forEach(function (bt) {

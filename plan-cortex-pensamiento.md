@@ -28,27 +28,22 @@ mecanismo de verdad, no se anima. Y **no toca el motor de recuperación** (solo 
 
 ## Tarjetas
 
-### CX-T1 · Dirección visual del pensamiento  [S] [todo]  ← SIGUIENTE
-- **Skill:** ui-ux-pro-max. Decidir la **coreografía** y el estilo: las 4-5 fases (entrada de consulta →
-  activación de candidatos → propagación por conexiones → convergencia → destello de respuesta), timing, easing,
-  tokens/paleta del Cortex, y los estados (reposo, pensando, reduced-motion). Storyboard antes de codificar.
-- **Hecho cuando:** hay un storyboard aprobado de las fases (una maqueta o descripción visual por fase).
-- **Verificar:** el usuario valida la dirección antes de tocar código.
+### CX-T1 · Dirección visual del pensamiento  [S] [done]
+- ✅ **(2026-11-19, devlog 032).** Storyboard de 5 fases aprobado: reposo → entra la consulta (tiñe zonas) →
+  se activan los candidatos → propagación por conexiones (2 saltos) → converge + destello. ~3 s, ease-in-out,
+  paleta actual del Cortex, reduced-motion = foto final. Honestidad: todo lo que se enciende es real.
 
-### CX-T2 · Exponer la activación real a la animación  [M] [todo]
-- **Skill:** code-quality. El motor ya conoce el foco y los vecinos de 2 saltos (lo usa `buscar`/`focoBusqueda`).
-  Asegurar que la **secuencia de activación** (candidatos → saltos → convergencia) sale del cálculo REAL y en
-  orden, lista para animar — sin inventar nada.
-- **Hecho cuando:** dada una consulta, la secuencia de nodos a encender proviene del grafo real (verificable).
-- **Verificar:** test que compruebe que la secuencia coincide con los vecinos reales del dato.
+### CX-T2 · Exponer la activación real a la animación  [M] [done]
+- ✅ **(2026-11-19, devlog 032).** No hizo falta cálculo nuevo: la secuencia sale de los datos que el grafo ya
+  tiene — `nodosPorZona` (candidatos reales por zona) y `enl` (aristas reales de 2 saltos), los mismos que usa
+  `buscar()`/F11. La animación los lee, no inventa.
 
-### CX-T3 · Coreografía en `cerebro3D`  [L] [todo]
-- **Skill:** ui-ux-pro-max + threejs/canvas. Implementar la animación **dirigida** sobre `pulsos`/`destellos`/
-  `foco` existentes: una `pensarFormando(secuencia)` que reproduce las fases EN ORDEN (no la ráfaga aleatoria de
-  `rafaga`). Reutiliza el canvas 2D. Respeta `prefers-reduced-motion` (estado final estático, sin movimiento).
-- **Hecho cuando:** al pulsar «pensar» o al buscar, se ve el pensamiento **formarse** de verdad, suave y sin
-  bajar el rendimiento.
-- **Verificar:** `test-cortex-visual` verde; `node --check`.
+### CX-T3 · Coreografía en `cerebro3D`  [L] [done]
+- ✅ **(2026-11-19, devlog 032).** `pensarFormando(zs)` en `cerebro3D` reproduce las fases EN ORDEN reutilizando
+  `foco`/`pulsos`/`destellos`: Fase A candidatos (resto atenuado) → B impulsos por sus aristas (350 ms) →
+  C converge el clúster (900 ms) → D destello (1500 ms). `encender()` (botón «cómo piensa») lo llama en vez de
+  la ráfaga aleatoria. `prefers-reduced-motion` → estado final al instante. Verificado: `node --check` +
+  `test-cortex-visual` **40/0**.
 
 ### CX-T4 · Grabable para marketing  [S] [todo]
 - **Skill:** ui-ux-pro-max. Un modo/param para capturar la animación **limpia** (sin panel, en bucle, fondo apto)

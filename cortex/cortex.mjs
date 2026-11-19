@@ -750,6 +750,21 @@ const APP = String.raw`
   traducir();
   todo();
   var _b3 = $('[data-ir="3d"]'); if (_b3) _b3.click();   // arranca SIEMPRE en 3D (es la vista por defecto), no solo incrustado
+  // CX-T4/B: en el embed (solo-cerebro) el cerebro PIENSA EN BUCLE — reproduce la coreografia consulta tras consulta
+  // (hero vivo y grabable para el GIF). reduced-motion: una sola vez, sin bucle.
+  function autoPensarBucle() {
+    var pts = (A.pensamientos || []).filter(function (p) { return (p.zonas || []).filter(zonaVisible).length; });
+    var act = ZONAS.filter(function (z) { return zonaVisible(z) && usoDe(z) > 0; });
+    var i = 0;
+    function uno() {
+      var zs = pts.length ? (pts[i % pts.length].zonas || []).filter(zonaVisible) : (act.length ? [act[i % act.length]] : null);
+      if (!zs || !zs.length) return;
+      i++; if (tresD) tresD.pensarFormando(zs);
+      if (!quietoP) setTimeout(uno, 3500);
+    }
+    uno();
+  }
+  if (raiz.hasAttribute('data-solo')) autoPensarBucle();
 })();
 `;
 

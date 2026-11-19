@@ -45,16 +45,17 @@ mecanismo de verdad, no se anima. Y **no toca el motor de recuperación** (solo 
   la ráfaga aleatoria. `prefers-reduced-motion` → estado final al instante. Verificado: `node --check` +
   `test-cortex-visual` **40/0**.
 
-### CX-T4 · Grabable para marketing  [S] [todo]
-- **Skill:** ui-ux-pro-max. Un modo/param para capturar la animación **limpia** (sin panel, en bucle, fondo apto)
-  reutilizando el modo solo-cerebro → GIF/vídeo para dev.to/LinkedIn.
-- **Hecho cuando:** sale un GIF compartible del pensamiento formándose, en las tres anchuras.
-- **Verificar:** captura revisada por el usuario.
+### CX-T4 · Grabable para marketing + hero vivo de la web  [S] [done]
+- ✅ **(2026-11-19, devlog 033).** En el modo **solo-cerebro** (`data-solo`) el cerebro **piensa EN BUCLE**
+  (`autoPensarBucle`): reproduce la coreografía consulta tras consulta (cada ~3,5 s), `prefers-reduced-motion` →
+  una vez. Sirve para grabar el GIF **y** para el hero. **B también hecho:** regenerados
+  `D:/hemi-web/public/cortex-hero.html` y `cortex-demo.html` con el `cortex.mjs` nuevo (datos de demo Aurora
+  Coffee extraídos del HTML viejo) → el hero de la web animará solo. Falta: el usuario graba el GIF y despliega.
 
-### CX-T5 · Verificación UI  [S] [todo]
-- **Skill:** ui-verify. `test-cortex-visual` verde; 375/768/1440 móvil primero; dark; consola limpia;
-  `prefers-reduced-motion` respetado.
-- **Hecho cuando:** todo verde + captura anotada.
+### CX-T5 · Verificación UI  [S] [done]
+- ✅ **(2026-11-19).** `node --check` + `test-cortex-visual` **40/0** tras cada cambio. Verificación en vivo:
+  el usuario abrió el Cortex en su navegador y validó la animación («me gusta»). Hero regenerado con `data-solo`
+  + `autoPensarBucle` confirmados.
 
 ---
 
